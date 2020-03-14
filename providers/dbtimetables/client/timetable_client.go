@@ -9,7 +9,7 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	"traines.eu/time-space-train-planner/client/operations"
+	"traines.eu/time-space-train-planner/providers/dbtimetables/client/operations"
 )
 
 // Default timetable HTTP client.
@@ -21,7 +21,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/test.xml?"
+	DefaultBasePath string = "test.xml?"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file

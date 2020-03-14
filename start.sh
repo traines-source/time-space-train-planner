@@ -1,1 +1,1 @@
-PORT=8080 go run ./deployments/main.go 
+eval $(cat deployments/conf.env | xargs) PORT=8080 go run ./cmd/main.go 

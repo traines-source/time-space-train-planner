@@ -8,8 +8,8 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	apiclient "traines.eu/time-space-train-planner/client"
-	"traines.eu/time-space-train-planner/client/operations"
+	apiclient "traines.eu/time-space-train-planner/providers/dbtimetables/client"
+	"traines.eu/time-space-train-planner/providers/dbtimetables/client/operations"
 )
 
 func main() {

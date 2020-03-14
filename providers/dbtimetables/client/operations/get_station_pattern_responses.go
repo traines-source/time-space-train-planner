@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"traines.eu/time-space-train-planner/models"
+	"traines.eu/time-space-train-planner/providers/dbtimetables/models"
 )
 
 // GetStationPatternReader is a Reader for the GetStationPattern structure.
