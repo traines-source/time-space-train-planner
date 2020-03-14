@@ -20,14 +20,14 @@ import (
 type StopDetails struct {
 
 	// Message.
-	Conn []*Connection `json:"conn"`
+	Conn []*Connection `json:"conn" xml:"conn"`
 
 	// Stop id.
 	// Required: true
-	ID *string `json:"id" xml:"id"`
+	ID *string `json:"id" xml:"id,attr"`
 
 	// Message.
-	M []*Message `json:"m"`
+	M []*Message `json:"m" xml:"m"`
 }
 
 // Validate validates this stop details

@@ -17,16 +17,16 @@ import (
 type DistributorMessage struct {
 
 	// Internal text.
-	Int string `json:"int,omitempty" xml:"int"`
+	Int string `json:"int,omitempty" xml:"int,attr,omitempty"`
 
 	// Distributor name.
-	N string `json:"n,omitempty" xml:"n"`
+	N string `json:"n,omitempty" xml:"n,attr,omitempty"`
 
 	// Distributor type.
-	T DistributorType `json:"t,omitempty" xml:"t"`
+	T DistributorType `json:"t,omitempty" xml:"t,attr,omitempty"`
 
 	// Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Ts string `json:"ts,omitempty" xml:"ts"`
+	Ts string `json:"ts,omitempty" xml:"ts,attr,omitempty"`
 }
 
 // Validate validates this distributor message

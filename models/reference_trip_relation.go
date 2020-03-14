@@ -19,11 +19,11 @@ type ReferenceTripRelation struct {
 
 	// Reference trip element.
 	// Required: true
-	Rt *ReferenceTrip `json:"rt"`
+	Rt *ReferenceTrip `json:"rt" xml:"rt"`
 
 	// Relation to stop element.
 	// Required: true
-	Rts ReferenceTripRelationToStop `json:"rts"`
+	Rts ReferenceTripRelationToStop `json:"rts" xml:"rts"`
 }
 
 // Validate validates this reference trip relation

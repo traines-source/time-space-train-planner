@@ -1,1 +1,1 @@
-PORT=8080 go run ./cmd/ars-server/main.go 
+PORT=8080 go run ./deployments/main.go 

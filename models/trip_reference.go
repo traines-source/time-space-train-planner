@@ -20,11 +20,11 @@ import (
 type TripReference struct {
 
 	// The referred trips reference trip elements.
-	Rt []*TripLabel `json:"rt"`
+	Rt []*TripLabel `json:"rt" xml:"rt"`
 
 	// The referred trips label.
 	// Required: true
-	Tl *TripLabel `json:"tl"`
+	Tl *TripLabel `json:"tl" xml:"tl"`
 }
 
 // Validate validates this trip reference

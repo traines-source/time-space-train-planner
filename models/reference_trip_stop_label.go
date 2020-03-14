@@ -19,19 +19,19 @@ type ReferenceTripStopLabel struct {
 
 	// The eva number of the correspondent stop of the regular trip.
 	// Required: true
-	Eva *int64 `json:"eva" xml:"eva"`
+	Eva *int64 `json:"eva" xml:"eva,attr"`
 
 	// The index of the correspondent stop of the regu-lar trip.
 	// Required: true
-	I *int64 `json:"i" xml:"i"`
+	I *int64 `json:"i" xml:"i,attr"`
 
 	// The (long) name of the correspondent stop of the regular trip.
 	// Required: true
-	N *string `json:"n" xml:"n"`
+	N *string `json:"n" xml:"n,attr"`
 
 	// The planned time of the correspondent stop of the regular trip.
 	// Required: true
-	Pt *string `json:"pt" xml:"pt"`
+	Pt *string `json:"pt" xml:"pt,attr"`
 }
 
 // Validate validates this reference trip stop label

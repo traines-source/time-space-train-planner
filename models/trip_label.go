@@ -19,21 +19,21 @@ type TripLabel struct {
 
 	// Category. Trip category, e.g. "ICE" or "RE".
 	// Required: true
-	C *string `json:"c" xml:"c"`
+	C *string `json:"c" xml:"c,attr"`
 
 	// Filter flags.
-	F string `json:"f,omitempty" xml:"f"`
+	F string `json:"f,omitempty" xml:"f,attr,omitempty"`
 
 	// Trip/train number, e.g. "4523".
 	// Required: true
-	N *string `json:"n" xml:"n"`
+	N *string `json:"n" xml:"n,attr"`
 
 	// Owner. A unique short-form and only intended to map a trip to specific evu.
 	// Required: true
-	O *string `json:"o" xml:"o"`
+	O *string `json:"o" xml:"o,attr"`
 
 	// Trip type.
-	T TripType `json:"t,omitempty" xml:"t"`
+	T TripType `json:"t,omitempty" xml:"t,attr,omitempty"`
 }
 
 // Validate validates this trip label

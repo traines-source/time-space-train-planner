@@ -16,16 +16,16 @@ import (
 type HistoricPlatformChange struct {
 
 	// Arrival platform.
-	Ar string `json:"ar,omitempty" xml:"ar"`
+	Ar string `json:"ar,omitempty" xml:"ar,attr,omitempty"`
 
 	// Detailed cause of track change.
-	Cot string `json:"cot,omitempty" xml:"cot"`
+	Cot string `json:"cot,omitempty" xml:"cot,attr,omitempty"`
 
 	// Departure platform.
-	Dp string `json:"dp,omitempty" xml:"dp"`
+	Dp string `json:"dp,omitempty" xml:"dp,attr,omitempty"`
 
 	// Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Ts string `json:"ts,omitempty" xml:"ts"`
+	Ts string `json:"ts,omitempty" xml:"ts,attr,omitempty"`
 }
 
 // Validate validates this historic platform change

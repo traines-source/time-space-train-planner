@@ -21,7 +21,7 @@ type MultipleStationData struct {
 
 	// List of stations with additional data.
 	// Required: true
-	Station []*StationData `json:"station"`
+	Station []*StationData `json:"station" xml:"station"`
 }
 
 // Validate validates this multiple station data

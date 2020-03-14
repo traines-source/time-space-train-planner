@@ -19,21 +19,21 @@ type StationData struct {
 
 	// DS100 station code.
 	// Required: true
-	Ds100 *string `json:"ds100" xml:"ds100"`
+	Ds100 *string `json:"ds100" xml:"ds100,attr"`
 
 	// EVA station number.
 	// Required: true
-	Eva *int64 `json:"eva" xml:"eva"`
+	Eva *int64 `json:"eva" xml:"eva,attr"`
 
 	// List of meta stations. A sequence of station names separated by the pipe symbols ("|").
-	Meta string `json:"meta,omitempty" xml:"meta"`
+	Meta string `json:"meta,omitempty" xml:"meta,attr,omitempty"`
 
 	// Station name.
 	// Required: true
-	Name *string `json:"name" xml:"name"`
+	Name *string `json:"name" xml:"name,attr"`
 
 	// List of platforms. A sequence of platforms separated by the pipe symbols ("|").
-	P string `json:"p,omitempty" xml:"p"`
+	P string `json:"p,omitempty" xml:"p,attr,omitempty"`
 }
 
 // Validate validates this station data

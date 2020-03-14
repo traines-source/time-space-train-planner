@@ -21,10 +21,10 @@ type StationDetails struct {
 
 	// EVA station number.
 	// Required: true
-	Eva *int64 `json:"eva" xml:"eva"`
+	Eva *int64 `json:"eva" xml:"eva,attr"`
 
 	// List of station based messages.
-	M []*Message `json:"m"`
+	M []*Message `json:"m" xml:"m"`
 }
 
 // Validate validates this station details

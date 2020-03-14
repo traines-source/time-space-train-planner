@@ -19,11 +19,11 @@ type ReferenceTripLabel struct {
 
 	// Category. Trip category, e.g. "ICE" or "RE".
 	// Required: true
-	C *string `json:"c" xml:"c"`
+	C *string `json:"c" xml:"c,attr"`
 
 	// Trip/train number, e.g. "4523".
 	// Required: true
-	N *string `json:"n" xml:"n"`
+	N *string `json:"n" xml:"n,attr"`
 }
 
 // Validate validates this reference trip label

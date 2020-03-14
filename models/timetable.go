@@ -19,16 +19,16 @@ import (
 type Timetable struct {
 
 	// EVA station number.
-	Eva int64 `json:"eva,omitempty" xml:"eva"`
+	Eva int64 `json:"eva,omitempty" xml:"eva,attr,omitempty"`
 
 	// List of Message.
-	M []*Message `json:"m"`
+	M []*Message `json:"m" xml:"m"`
 
 	// List of TimetableStop.
-	S []*TimetableStop `json:"s"`
+	S []*TimetableStop `json:"s" xml:"s"`
 
 	// Station name.
-	Station string `json:"station,omitempty" xml:"station"`
+	Station string `json:"station,omitempty" xml:"station,attr,omitempty"`
 }
 
 // Validate validates this timetable

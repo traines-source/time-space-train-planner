@@ -19,25 +19,25 @@ type Connection struct {
 
 	// Connection status.
 	// Required: true
-	Cs ConnectionStatus `json:"cs" xml:"cs"`
+	Cs ConnectionStatus `json:"cs" xml:"cs,attr"`
 
 	// EVA station number.
-	Eva int64 `json:"eva,omitempty" xml:"eva"`
+	Eva int64 `json:"eva,omitempty" xml:"eva,attr,omitempty"`
 
 	// Id.
 	// Required: true
-	ID *string `json:"id" xml:"id"`
+	ID *string `json:"id" xml:"id,attr"`
 
 	// Timetable stop of missed trip.
-	Ref *TimetableStop `json:"ref,omitempty"`
+	Ref *TimetableStop `json:"ref,omitempty" xml:"ref,omitempty"`
 
 	// Timetable stop.
 	// Required: true
-	S *TimetableStop `json:"s"`
+	S *TimetableStop `json:"s" xml:"s"`
 
 	// Time stamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
 	// Required: true
-	Ts *string `json:"ts" xml:"ts"`
+	Ts *string `json:"ts" xml:"ts,attr"`
 }
 
 // Validate validates this connection

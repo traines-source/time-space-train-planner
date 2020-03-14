@@ -20,36 +20,36 @@ import (
 type TripStop struct {
 
 	// Arrival element. This element does not have child elements. All information about the arrival is stored in attributes (see the next table).
-	Ar *Event `json:"ar,omitempty"`
+	Ar *Event `json:"ar,omitempty" xml:"ar,omitempty"`
 
 	// Connection element.
-	Conn []*Connection `json:"conn"`
+	Conn []*Connection `json:"conn" xml:"conn"`
 
 	// Departure element. This element does not have child elements. All information about the departure is stored in attributes (see the next table).
-	Dp *Event `json:"dp,omitempty"`
+	Dp *Event `json:"dp,omitempty" xml:"dp,omitempty"`
 
 	// EVA station number.
 	// Required: true
-	Eva *int64 `json:"eva" xml:"eva"`
+	Eva *int64 `json:"eva" xml:"eva,attr"`
 
 	// Historic delay element.
-	Hd []*HistoricDelay `json:"hd"`
+	Hd []*HistoricDelay `json:"hd" xml:"hd"`
 
 	// Historic platform change element.
-	Hpc []*HistoricPlatformChange `json:"hpc"`
+	Hpc []*HistoricPlatformChange `json:"hpc" xml:"hpc"`
 
 	// Stop index.
 	// Required: true
-	I *int64 `json:"i" xml:"i"`
+	I *int64 `json:"i" xml:"i,attr"`
 
 	// Junction type.
-	Jt JunctionType `json:"jt,omitempty" xml:"jt"`
+	Jt JunctionType `json:"jt,omitempty" xml:"jt,attr,omitempty"`
 
 	// Message element.
-	M []*Message `json:"m"`
+	M []*Message `json:"m" xml:"m"`
 
 	// Reference trip relation element.
-	Rtr []*ReferenceTripRelation `json:"rtr"`
+	Rtr []*ReferenceTripRelation `json:"rtr" xml:"rtr"`
 }
 
 // Validate validates this trip stop

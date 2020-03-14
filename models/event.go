@@ -19,16 +19,16 @@ import (
 type Event struct {
 
 	// Changed distant endpoint.
-	Cde string `json:"cde,omitempty" xml:"cde"`
+	Cde string `json:"cde,omitempty" xml:"cde,attr,omitempty"`
 
 	// Cancellation time. Time when the cancellation of this stop was created. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Clt string `json:"clt,omitempty" xml:"clt"`
+	Clt string `json:"clt,omitempty" xml:"clt,attr,omitempty"`
 
 	// Changed platform.
-	Cp string `json:"cp,omitempty" xml:"cp"`
+	Cp string `json:"cp,omitempty" xml:"cp,attr,omitempty"`
 
 	// Changed path.
-	Cpth string `json:"cpth,omitempty" xml:"cpth"`
+	Cpth string `json:"cpth,omitempty" xml:"cpth,attr,omitempty"`
 
 	// Changed status. The status of this event, a one-character indicator that is one of:
 	// * 'a' = this event was added
@@ -36,28 +36,28 @@ type Event struct {
 	// * 'p' = this event was planned (also used when the cancellation of an event has been revoked)
 	// The status applies to the event, not to the trip as a whole. Insertion or removal of a single stop will usually affect two events at once: one arrival and one departure event. Note that these two events do not have to belong to the same stop. For example, removing the last stop of a trip will result in arrival cancellation for the last stop and of departure cancellation for the stop before the last. So asymmetric cancellations of just arrival or departure for a stop can occur.
 	//
-	Cs EventStatus `json:"cs,omitempty" xml:"cs"`
+	Cs EventStatus `json:"cs,omitempty" xml:"cs,attr,omitempty"`
 
 	// Changed time. New estimated or actual departure or arrival time. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Ct string `json:"ct,omitempty" xml:"ct"`
+	Ct string `json:"ct,omitempty" xml:"ct,attr,omitempty"`
 
 	// Distant change.
-	Dc int64 `json:"dc,omitempty" xml:"dc"`
+	Dc int64 `json:"dc,omitempty" xml:"dc,attr,omitempty"`
 
 	// Hidden. 1 if the event should not be shown on WBT because travellers are not supposed to enter or exit the train at this stop.
-	Hi int64 `json:"hi,omitempty" xml:"hi"`
+	Hi int64 `json:"hi,omitempty" xml:"hi,attr,omitempty"`
 
 	// Line. The line indicator (e.g. "3" for an S-Bahn or "45S" for a bus).
-	L string `json:"l,omitempty" xml:"l"`
+	L string `json:"l,omitempty" xml:"l,attr,omitempty"`
 
 	// List of messages.
-	M []*Message `json:"m"`
+	M []*Message `json:"m" xml:"m"`
 
 	// Planned distant endpoint.
-	Pde string `json:"pde,omitempty" xml:"pde"`
+	Pde string `json:"pde,omitempty" xml:"pde,attr,omitempty"`
 
 	// Planned platform.
-	Pp string `json:"pp,omitempty" xml:"pp"`
+	Pp string `json:"pp,omitempty" xml:"pp,attr,omitempty"`
 
 	// Planned Path. A sequence of station names separated by the pipe symbols ('|').
 	// E.g.: 'Mainz Hbf|R�sselsheim|Frankfrt(M) Flughafen'.
@@ -65,19 +65,19 @@ type Event struct {
 	// For departure, the path indicates the stations that come after the current station. The last element in the path then is the trip's destination station.
 	// Note that the current station is never included in the path (neither for arrival nor for departure).
 	//
-	Ppth string `json:"ppth,omitempty" xml:"ppth"`
+	Ppth string `json:"ppth,omitempty" xml:"ppth,attr,omitempty"`
 
 	// Planned status.
-	Ps EventStatus `json:"ps,omitempty" xml:"ps"`
+	Ps EventStatus `json:"ps,omitempty" xml:"ps,attr,omitempty"`
 
 	// Planned time. Planned departure or arrival time. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Pt string `json:"pt,omitempty" xml:"pt"`
+	Pt string `json:"pt,omitempty" xml:"pt,attr,omitempty"`
 
 	// Transition. Trip id of the next or previous train of a shared train. At the start stop this references the previous trip, at the last stop it references the next trip. E.g. '2016448009055686515-1403311438-1'
-	Tra string `json:"tra,omitempty"`
+	Tra string `json:"tra,omitempty" xml:"tra,omitempty"`
 
 	// Wing. A sequence of trip id separated by the pipe symbols ('|'). E.g. '-906407760000782942-1403311431'.
-	Wings string `json:"wings,omitempty" xml:"wings"`
+	Wings string `json:"wings,omitempty" xml:"wings,attr,omitempty"`
 }
 
 // Validate validates this event

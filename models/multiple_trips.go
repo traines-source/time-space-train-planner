@@ -19,7 +19,7 @@ import (
 type MultipleTrips struct {
 
 	// List of trip elements.
-	Trip []*Trip `json:"trip"`
+	Trip []*Trip `json:"trip" xml:"trip"`
 }
 
 // Validate validates this multiple trips

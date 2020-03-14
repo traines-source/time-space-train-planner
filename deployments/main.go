@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	apiclient "traines.eu/time-space-train-planner/client"
+	"traines.eu/time-space-train-planner/client/operations"
 )
 
 func main() {
@@ -20,5 +23,10 @@ func main() {
 		"application/xhtml+xml": runtime.XMLProducer(),
 	}
 	client := apiclient.New(r, strfmt.Default)
-	res, err := client.Operations.MyGreatEndpoint()
+	var params = operations.NewGetTimetableFchgEvaNoParams()
+	params.EvaNo = "8000240"
+	res, err := client.Operations.GetTimetableFchgEvaNo(params)
+
+	log.Print(err)
+	fmt.Print(*res.Payload.S[0].Tl.C)
 }

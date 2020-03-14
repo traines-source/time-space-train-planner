@@ -19,11 +19,11 @@ type ReferenceTrip struct {
 
 	// The cancellation flag. True means, the reference trip is cancelled.
 	// Required: true
-	C *bool `json:"c" xml:"c"`
+	C *bool `json:"c" xml:"c,attr"`
 
 	// Reference trip stop label of the end arrival event.
 	// Required: true
-	Ea *ReferenceTripStopLabel `json:"ea"`
+	Ea *ReferenceTripStopLabel `json:"ea" xml:"ea"`
 
 	// An id that uniquely identifies the reference trip. It consists of the following two elements separated by dashes:
 	//
@@ -35,15 +35,15 @@ type ReferenceTrip struct {
 	// '-7874571842864554321-1403311221' would be used for a trip with daily trip id '-7874571842864554321' that starts on march the 31th 2014.
 	//
 	// Required: true
-	ID *string `json:"id" xml:"id"`
+	ID *string `json:"id" xml:"id,attr"`
 
 	// Reference trip label.
 	// Required: true
-	Rtl *ReferenceTripLabel `json:"rtl"`
+	Rtl *ReferenceTripLabel `json:"rtl" xml:"rtl"`
 
 	// Reference trip stop label of the start departure event.
 	// Required: true
-	Sd *ReferenceTripStopLabel `json:"sd"`
+	Sd *ReferenceTripStopLabel `json:"sd" xml:"sd"`
 }
 
 // Validate validates this reference trip

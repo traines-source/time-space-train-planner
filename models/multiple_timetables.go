@@ -21,7 +21,7 @@ type MultipleTimetables struct {
 
 	// List of timetables
 	// Required: true
-	Timetable []*Timetable `json:"timetable"`
+	Timetable []*Timetable `json:"timetable" xml:"timetable"`
 }
 
 // Validate validates this multiple timetables

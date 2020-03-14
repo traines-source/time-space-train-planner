@@ -16,7 +16,7 @@ import (
 type HistoricChange struct {
 
 	// Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Ts string `json:"ts,omitempty" xml:"ts"`
+	Ts string `json:"ts,omitempty" xml:"ts,attr,omitempty"`
 }
 
 // Validate validates this historic change

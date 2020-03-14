@@ -21,14 +21,14 @@ type Trip struct {
 
 	// Trip ID.
 	// Required: true
-	ID *string `json:"id" xml:"id"`
+	ID *string `json:"id" xml:"id,attr"`
 
 	// Trip stop.
-	S []*TripStop `json:"s"`
+	S []*TripStop `json:"s" xml:"s"`
 
 	// Trip label.
 	// Required: true
-	Tl *TripLabel `json:"tl"`
+	Tl *TripLabel `json:"tl" xml:"tl"`
 }
 
 // Validate validates this trip

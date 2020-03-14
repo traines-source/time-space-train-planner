@@ -1,1 +1,1 @@
-swagger generate client -A timetable -f deployments/swagger.json 
+swagger generate client -A timetable --default-produces application/xml -f deployments/swagger.json 

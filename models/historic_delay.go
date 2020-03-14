@@ -17,19 +17,19 @@ import (
 type HistoricDelay struct {
 
 	// The arrival event. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Ar string `json:"ar,omitempty" xml:"ar"`
+	Ar string `json:"ar,omitempty" xml:"ar,attr,omitempty"`
 
 	// Detailed description of delay cause.
-	Cod string `json:"cod,omitempty" xml:"cod"`
+	Cod string `json:"cod,omitempty" xml:"cod,attr,omitempty"`
 
 	// The departure event. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Dp string `json:"dp,omitempty" xml:"dp"`
+	Dp string `json:"dp,omitempty" xml:"dp,attr,omitempty"`
 
 	// Source of the message.
-	Src DelaySource `json:"src,omitempty" xml:"src"`
+	Src DelaySource `json:"src,omitempty" xml:"src,attr,omitempty"`
 
 	// Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	Ts string `json:"ts,omitempty" xml:"ts"`
+	Ts string `json:"ts,omitempty" xml:"ts,attr,omitempty"`
 }
 
 // Validate validates this historic delay

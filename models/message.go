@@ -20,55 +20,55 @@ import (
 type Message struct {
 
 	// Code.
-	C int64 `json:"c,omitempty" xml:"c"`
+	C int64 `json:"c,omitempty" xml:"c,attr,omitempty"`
 
 	// Category.
-	Cat string `json:"cat,omitempty" xml:"cat"`
+	Cat string `json:"cat,omitempty" xml:"cat,attr,omitempty"`
 
 	// Deleted.
-	Del int64 `json:"del,omitempty" xml:"del"`
+	Del int64 `json:"del,omitempty" xml:"del,attr,omitempty"`
 
 	// Distributor message.
-	Dm []*DistributorMessage `json:"dm"`
+	Dm []*DistributorMessage `json:"dm" xml:"dm"`
 
 	// External category.
-	Ec string `json:"ec,omitempty" xml:"ec"`
+	Ec string `json:"ec,omitempty" xml:"ec,attr,omitempty"`
 
 	// External link associated with the message.
-	Elnk string `json:"elnk,omitempty" xml:"elnk"`
+	Elnk string `json:"elnk,omitempty" xml:"elnk,attr,omitempty"`
 
 	// External text.
-	Ext string `json:"ext,omitempty" xml:"ext"`
+	Ext string `json:"ext,omitempty" xml:"ext,attr,omitempty"`
 
 	// Valid from. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	From string `json:"from,omitempty" xml:"from"`
+	From string `json:"from,omitempty" xml:"from,attr,omitempty"`
 
 	// Message id.
 	// Required: true
-	ID *string `json:"id" xml:"id"`
+	ID *string `json:"id" xml:"id,attr"`
 
 	// Internal text.
-	Int string `json:"int,omitempty" xml:"int"`
+	Int string `json:"int,omitempty" xml:"int,attr,omitempty"`
 
 	// Owner.
-	O string `json:"o,omitempty" xml:"o"`
+	O string `json:"o,omitempty" xml:"o,attr,omitempty"`
 
 	// Priority.
-	Pr Priority `json:"pr,omitempty" xml:"pr"`
+	Pr Priority `json:"pr,omitempty" xml:"pr,attr,omitempty"`
 
 	// Message type.
 	// Required: true
-	T MessageType `json:"t" xml:"t"`
+	T MessageType `json:"t" xml:"t,attr"`
 
 	// Trip label.
-	Tl []*TripLabel `json:"tl"`
+	Tl []*TripLabel `json:"tl" xml:"tl"`
 
 	// Valid to. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
-	To string `json:"to,omitempty" xml:"to"`
+	To string `json:"to,omitempty" xml:"to,attr,omitempty"`
 
 	// Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. "1404011437" for 14:37 on April the 1st of 2014.
 	// Required: true
-	Ts *string `json:"ts" xml:"ts"`
+	Ts *string `json:"ts" xml:"ts,attr"`
 }
 
 // Validate validates this message
