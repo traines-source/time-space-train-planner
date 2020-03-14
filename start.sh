@@ -1,0 +1,1 @@
+PORT=8080 go run ./cmd/ars-server/main.go 

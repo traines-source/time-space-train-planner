@@ -1,0 +1,1039 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Timetables
+  description: API for passenger information for train stations operated by DB Station&Service AG
+  termsOfService: https://data.deutschebahn.com/nutzungsbedingungen.html
+  contact:
+    email: dbopendata@deutschebahn.com
+schemes:
+- http
+- https
+consumes:
+- application/xhtml+xml
+- application/xml
+- text/html
+produces:
+- application/xml
+paths:
+  /station/{pattern}:
+    get:
+      description: This public interface allows access to information about a station.
+      parameters:
+      - name: pattern
+        in: path
+        type: string
+        required: true
+        description: can be a station name (prefix), eva number, ds100/rl100 code, wildcard (*); doesn't seem to work with Umlauten in station name (prefix)
+        default: BLS
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/multipleStationData'
+        404:
+          description: resource not found
+  /timetable/plan/{evaNo}/{date}{hour}:
+    get:
+      description: |
+        Returns a Timetable object (see Timetable) that contains planned data for the specified station (evaNo) within the hourly time slice given by date (format YYMMDD) and hour (format HH). The data includes stops for all trips that arrive or depart within that slice. There is a small overlap between slices since some trips arrive in one slice and depart in another.
+        
+        Planned data does never contain messages. On event level, planned data contains the 'plannned' attributes pt, pp, ps and ppth while the 'changed' attributes ct, cp, cs and cpth are absent.
+        
+        Planned data is generated many hours in advance and is static, i.e. it does never change. It should be cached by web caches.public interface allows access to information about a station.
+      parameters:
+      - name: evaNo
+        in: path
+        type: string
+        required: true
+        description: Station EVA-number.
+      - name: date
+        in: path
+        type: string
+        required: true
+        description: Date in format YYMMDD.
+      - name: hour
+        in: path
+        type: string
+        required: true
+        description: Hour in format HH.
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/timetable'
+        404:
+          description: resource not found          
+  /timetable/fchg/{evaNo}:
+    get:
+      description: |
+        Returns a Timetable object (see Timetable) that contains all known changes for the station given by evaNo.
+        
+        The data includes all known changes from now on until ndefinitely into the future. Once changes become obsolete (because their trip departs from the station) they are removed from this resource.
+        
+        Changes may include messages. On event level, they usually contain one or more of the 'changed' attributes ct, cp, cs or cpth. Changes may also include 'planned' attributes if there is no associated planned data for the change (e.g. an unplanned stop or trip).
+        
+        Full changes are updated every 30s and should be cached for that period by web caches.
+      parameters:
+      - name: evaNo
+        in: path
+        type: string
+        required: true
+        description: Station EVA-number.
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/timetable'
+        404:
+          description: resource not found
+  /timetable/rchg/{evaNo}:
+    get:
+      description: |
+        Returns a Timetable object (see Timetable) that contains all recent changes for the station given by evaNo. Recent changes are always a subset of the full changes. They may equal full changes but are typically much smaller. Data includes only those changes that became known within the last 2 minutes.
+        
+        A client that updates its state in intervals of less than 2 minutes should load full changes initially and then proceed to periodically load only the recent changes in order to save bandwidth.
+        
+        Recent changes are updated every 30s as well and should be cached for that period by web caches.
+      parameters:
+      - name: evaNo
+        in: path
+        type: string
+        required: true
+        description: Station EVA-number.
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/timetable'
+        404:
+          description: resource not found
+definitions:
+  multipleStationData:
+    description: A wrapper that represents multiple StationData objects.
+    type: object
+    required:
+    - station
+    properties:
+      station:
+        description: List of stations with additional data.
+        type: array
+        items:
+          $ref: '#/definitions/stationData'
+  stationData:
+    description: A transport object which keep data for a station.
+    type: object
+    required:
+    - eva
+    - ds100
+    - name
+    properties:
+      p:
+        type: string
+        description: List of platforms. A sequence of platforms separated by the pipe symbols ("|").
+        xml:
+          attribute: true
+      meta:
+        type: string
+        description: List of meta stations. A sequence of station names separated by the pipe symbols ("|").
+        xml:
+          attribute: true
+      name:
+        type: string
+        description: Station name.
+        xml:
+          attribute: true
+      eva:
+        type: integer
+        format: int64
+        description: EVA station number.
+        xml:
+          attribute: true
+      ds100:
+        type: string
+        description: DS100 station code.
+        xml:
+          attribute: true
+  multipleTimetables:
+    description: A wrapper that represents multiple Timetable objects.
+    type: object
+    required:
+      - timetable
+    properties:
+      timetable:
+        type: array
+        items:
+          $ref: '#/definitions/timetable'
+        description: List of timetables
+  timetable:
+    description: A timetable is made of a set of TimetableStops and a potential Disruption.
+    type: object
+    properties:
+      station:
+        type: string
+        description: Station name.
+        xml:
+          attribute: true
+      eva:
+        type: integer
+        format: int64
+        description: EVA station number.
+        xml:
+          attribute: true
+      s:
+        description: List of TimetableStop.
+        type: array
+        items:
+          $ref: '#/definitions/timetableStop'
+      m:
+        description: List of Message.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+  timetableStop:
+    description: A stop is a part of a Timetable.
+    type: object
+    required:
+      - id
+      - eva
+    properties:
+      id:
+        type: string
+        description: |
+          An id that uniquely identifies the stop. It consists of the following three elements separated by dashes
+          * a 'daily trip id' that uniquely identifies a trip within one day. This id is typically reused on subsequent days. This could be negative.
+          * a 6-digit date specifier (YYMMdd) that indicates the planned departure date of the trip from its start station.
+          * an index that indicates the position of the stop within the trip (in rare cases, one trip may arrive multiple times at one station). Added trips get indices above 100. 
+          Example '-7874571842864554321-1403311221-11' would be used for a trip with daily trip id '-7874571842864554321' that starts on march the 31th 2014 and where the current station is the 11th stop.
+        xml:
+          attribute: true
+      eva:
+        type: integer
+        format: int64
+        description: The eva code of the station of this stop. Example '8000105' for Frankfurt(Main)Hbf.
+        xml:
+          attribute: true
+      tl:
+        description: Trip label.
+        $ref: '#/definitions/tripLabel'
+      ref:
+        description: Reference to an referenced trip. The substitution or additional trip references the originally planned trip. Note, referenced trip != reference trip
+        $ref: '#/definitions/tripReference'
+      ar:
+        description: Arrival element. This element does not have child elements. All information about the arrival is stored in attributes (see the next table).
+        $ref: '#/definitions/event'
+      dp:
+        description: Departure element. This element does not have child elements. All information about the departure is stored in attributes (see the next table).
+        $ref: '#/definitions/event'
+      m:
+        description: Message element.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+      hd:
+        description: Historic delay element.
+        type: array
+        items:
+          $ref: '#/definitions/historicDelay'
+      hpc:
+        description: Historic platform change element.
+        type: array
+        items:
+          $ref: '#/definitions/historicPlatformChange'
+      conn:
+        description: Connection element.
+        type: array
+        items:
+          $ref: '#/definitions/connection'
+      rtr:
+        description: Reference trip relation element.
+        type: array
+        items:
+          $ref: '#/definitions/referenceTripRelation'
+  stop:
+    description: Stop.
+    type: object
+    properties:
+      ar:
+        description: Arrival element. This element does not have child elements. All information about the arrival is stored in attributes (see the next table).
+        $ref: '#/definitions/event'
+      dp:
+        description: Departure element. This element does not have child elements. All information about the departure is stored in attributes (see the next table).
+        $ref: '#/definitions/event'
+      m:
+        description: Message element.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+      hd:
+        description: Historic delay element.
+        type: array
+        items:
+          $ref: '#/definitions/historicDelay'
+      hpc:
+        description: Historic platform change element.
+        type: array
+        items:
+          $ref: '#/definitions/historicPlatformChange'
+      conn:
+        description: Connection element.
+        type: array
+        items:
+          $ref: '#/definitions/connection'
+      rtr:
+        description: Reference trip relation element.
+        type: array
+        items:
+          $ref: '#/definitions/referenceTripRelation'
+  tripLabel:
+    description: It's a compound data type that contains common data items that characterize a Trip. The contents is represented as a compact 6-tuple in XML.
+    type: object
+    required:
+      - o
+      - n
+      - c
+    properties:
+      f:
+        description: Filter flags.
+        type: string
+        xml:
+          attribute: true
+      t:
+        description: Trip type.
+        $ref: '#/definitions/tripType'
+        xml:
+          attribute: true
+      o:
+        description: Owner. A unique short-form and only intended to map a trip to specific evu.
+        type: string
+        xml:
+          attribute: true
+      n:
+        description: Trip/train number, e.g. "4523".
+        type: string
+        xml:
+          attribute: true
+      c:
+        description: Category. Trip category, e.g. "ICE" or "RE".
+        type: string
+        xml:
+          attribute: true
+  connection:
+    description: It's information about a connected train at a particular stop.
+    type: object
+    required:
+      - s
+      - id
+      - ts
+      - cs
+    properties:
+      id:
+        description: Id.
+        type: string
+        xml:
+          attribute: true
+      ts:
+        description: Time stamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      eva:
+        type: integer
+        format: int64
+        description: EVA station number.
+        xml:
+          attribute: true
+      cs:
+        description: Connection status.
+        $ref: '#/definitions/connectionStatus'
+        xml:
+          attribute: true
+      ref:
+        description: Timetable stop of missed trip.
+        $ref: '#/definitions/timetableStop'
+      s:
+        description: Timetable stop.
+        $ref: '#/definitions/timetableStop'
+  message:
+    description: A message that is associated with an event, a stop or a trip.
+    type: object
+    required:
+      - id
+      - t
+      - ts
+    properties:
+      id:
+        description: Message id.
+        type: string
+        xml:
+          attribute: true
+      t:
+        description: Message type.
+        $ref: '#/definitions/messageType'
+        xml:
+          attribute: true
+      from:
+        description: Valid from. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      to:
+        description: Valid to. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      c:
+        description: Code.
+        type: integer
+        xml:
+          attribute: true
+      int:
+        description: Internal text.
+        type: string
+        xml:
+          attribute: true
+      ext:
+        description: External text.
+        type: string
+        xml:
+          attribute: true
+      cat:
+        description: Category.
+        type: string
+        xml:
+          attribute: true
+      ec:
+        description: External category.
+        type: string
+        xml:
+          attribute: true
+      ts:
+        description: Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. "1404011437" for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      pr:
+        description: Priority.
+        $ref: '#/definitions/priority'
+        xml:
+          attribute: true
+      o:
+        description: Owner.
+        type: string
+        xml:
+          attribute: true
+      elnk:
+        description: External link associated with the message.
+        type: string
+        xml:
+          attribute: true
+      del:
+        description: Deleted.
+        type: integer
+        xml:
+          attribute: true
+      dm:
+        description: Distributor message.
+        type: array
+        items:
+          $ref: '#/definitions/distributorMessage'
+      tl:
+        description: Trip label.
+        type: array
+        items:
+          $ref: '#/definitions/tripLabel'
+  distributorMessage:
+    description: An additional message to a given station-based disruption by a specific distributor.
+    type: object
+    properties:
+      t:
+        description: Distributor type.
+        $ref: '#/definitions/distributorType'
+        xml:
+          attribute: true
+      n:
+        description: Distributor name.
+        type: string
+        xml:
+          attribute: true
+      int:
+        description: Internal text.
+        type: string
+        xml:
+          attribute: true
+      ts:
+        description: Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+  event:
+    description: An event (arrival or departure) that is part of a stop.
+    type: object
+    properties:
+      ppth:
+        description: |
+          Planned Path. A sequence of station names separated by the pipe symbols ('|').
+          E.g.: 'Mainz Hbf|R�sselsheim|Frankfrt(M) Flughafen'.
+          For arrival, the path indicates the stations that come before the current station. The first element then is the trip's start station.
+          For departure, the path indicates the stations that come after the current station. The last element in the path then is the trip's destination station.
+          Note that the current station is never included in the path (neither for arrival nor for departure).
+        type: string
+        xml:
+          attribute: true
+      cpth:
+        description: Changed path.
+        type: string
+        xml:
+          attribute: true
+      pp:
+        description: Planned platform.
+        type: string
+        xml:
+          attribute: true
+      cp:
+        description: Changed platform.
+        type: string
+        xml:
+          attribute: true
+      pt:
+        description: Planned time. Planned departure or arrival time. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      ct:
+        description: Changed time. New estimated or actual departure or arrival time. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      ps:
+        description: Planned status.
+        $ref: '#/definitions/eventStatus'
+        xml:
+          attribute: true
+      cs:
+        description: |
+          Changed status. The status of this event, a one-character indicator that is one of:
+          * 'a' = this event was added
+          * 'c' = this event was cancelled
+          * 'p' = this event was planned (also used when the cancellation of an event has been revoked)
+          The status applies to the event, not to the trip as a whole. Insertion or removal of a single stop will usually affect two events at once: one arrival and one departure event. Note that these two events do not have to belong to the same stop. For example, removing the last stop of a trip will result in arrival cancellation for the last stop and of departure cancellation for the stop before the last. So asymmetric cancellations of just arrival or departure for a stop can occur.
+        $ref: '#/definitions/eventStatus'
+        xml:
+          attribute: true
+      hi:
+        description: Hidden. 1 if the event should not be shown on WBT because travellers are not supposed to enter or exit the train at this stop.
+        type: integer
+        xml:
+          attribute: true
+      clt:
+        description: Cancellation time. Time when the cancellation of this stop was created. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      wings:
+        description: Wing. A sequence of trip id separated by the pipe symbols ('|'). E.g. '-906407760000782942-1403311431'.
+        type: string
+        xml:
+          attribute: true
+      tra:
+        description: Transition. Trip id of the next or previous train of a shared train. At the start stop this references the previous trip, at the last stop it references the next trip. E.g. '2016448009055686515-1403311438-1'
+        type: string
+      pde:
+        description: Planned distant endpoint.
+        type: string
+        xml:
+          attribute: true
+      cde:
+        description: Changed distant endpoint.
+        type: string
+        xml:
+          attribute: true
+      dc:
+        description: Distant change.
+        type: integer
+        xml:
+          attribute: true
+      l:
+        description: Line. The line indicator (e.g. "3" for an S-Bahn or "45S" for a bus).
+        type: string
+        xml:
+          attribute: true
+      m:
+        description: List of messages.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+  historicChange:
+    description: Historic change.
+    type: object
+    properties:
+      ts:
+        description: Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+  historicDelay:
+    description: It's the history of all delay-messages for a stop. This element extends HistoricChange.
+    type: object
+    properties:
+      ts:
+        description: Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string        
+        xml:
+          attribute: true
+      ar:
+        description: The arrival event. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      dp:
+        description: The departure event. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      src:
+        description: Source of the message.
+        $ref: '#/definitions/delaySource'
+        xml:
+          attribute: true
+      cod:
+        description: Detailed description of delay cause.
+        type: string
+        xml:
+          attribute: true
+  historicPlatformChange:
+    description: It's the history of all platform-changes for a stop. This element extends HistoricChange.
+    type: object
+    properties:
+      ts:
+        description: Timestamp. The time, in ten digit 'YYMMddHHmm' format, e.g. '1404011437' for 14:37 on April the 1st of 2014.
+        type: string
+        xml:
+          attribute: true
+      ar:
+        description: Arrival platform.
+        type: string
+        xml:
+          attribute: true
+      dp:
+        description: Departure platform.
+        type: string
+        xml:
+          attribute: true
+      cot:
+        description: Detailed cause of track change.
+        type: string
+        xml:
+          attribute: true
+  stationDetails:
+    description: Additional details for a station that go beyond what is present in StationData or in a Timetable. The details include all station based messages.
+    type: object
+    required:
+      - eva
+    properties:
+      eva:
+        description: EVA station number.
+        type: integer
+        format: int64
+        xml:
+          attribute: true
+      m:
+        description: List of station based messages.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+  multipleTrips:
+    description: A wrapper that represents multiple Trip objects.
+    type: object
+    properties:
+      trip:
+        description: List of trip elements.
+        type: array
+        items:
+          $ref: '#/definitions/trip'
+  trip:
+    description: A trip (i.e. a train/bus/tram etc.) moves from s start station to a destination station.
+    required:
+      - id
+      - tl
+    properties:
+      id:
+        description: Trip ID.
+        type: string
+        xml:
+          attribute: true
+      tl:
+        description: Trip label.
+        $ref: '#/definitions/tripLabel'
+      s:
+        description: Trip stop.
+        type: array
+        items:
+          $ref: '#/definitions/tripStop'
+  tripStop:
+    description: This element extends Stop.
+    type: object
+    required:
+      - i
+      - eva
+    properties:
+      i:
+        description: Stop index.
+        type: integer
+        xml:
+          attribute: true
+      eva:
+        description: EVA station number.
+        type: integer
+        format: int64
+        xml:
+          attribute: true
+      jt:
+        description: Junction type.
+        $ref: '#/definitions/junctionType'
+        xml:
+          attribute: true
+      ar:
+        description: Arrival element. This element does not have child elements. All information about the arrival is stored in attributes (see the next table).
+        $ref: '#/definitions/event'
+      dp:
+        description: Departure element. This element does not have child elements. All information about the departure is stored in attributes (see the next table).
+        $ref: '#/definitions/event'
+      m:
+        description: Message element.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+      hd:
+        description: Historic delay element.
+        type: array
+        items:
+          $ref: '#/definitions/historicDelay'
+      hpc:
+        description: Historic platform change element.
+        type: array
+        items:
+          $ref: '#/definitions/historicPlatformChange'
+      conn:
+        description: Connection element.
+        type: array
+        items:
+          $ref: '#/definitions/connection'
+      rtr:
+        description: Reference trip relation element.
+        type: array
+        items:
+          $ref: '#/definitions/referenceTripRelation'
+  stopDetails:
+    description: Stop details.
+    required:
+      - id
+    properties:
+      id:
+        description: Stop id.
+        type: string
+        xml:
+          attribute: true
+      m:
+        description: Message.
+        type: array
+        items:
+          $ref: '#/definitions/message'
+      conn:
+        description: Message.
+        type: array
+        items:
+          $ref: '#/definitions/connection'
+  connectionStatus:
+    description: |
+      Connection status.
+      
+      * w - WAITING
+        This (regular) connection is waiting.
+      * n - TRANSITION
+        This (regular) connection CANNOT wait.
+      * a - ALTERNATIVE
+        This is an alternative (unplanned) connection that has been introduced as a replacement for one regular connection that cannot wait. The connections "tl" (triplabel) attribute might in this case refer to the replaced connection (or more specifi-cally the trip from that connection). Alternative connections are always waiting (they are re-moved otherwise).
+    type: string
+    enum:
+      - w
+      - n
+      - a
+  messageType:
+    description: |
+      Message status
+      
+      * h - HIM
+        A HIM message (generated through the Hafas Information Manager).
+      * q - QUALITY CHANGE
+        A message about a quality change.
+      * f - FREE
+        A free text message.
+      * d - CAUSE OF DELAY
+        A message about the cause of a delay.
+      * i - IBIS
+        An IBIS message (generated from IRIS-AP).
+      * u - UNASSIGNED IBIS MESSAGE
+        An IBIS message (generated from IRIS-AP) not yet assigned to a train.
+      * r - DISRUPTION
+        A major disruption.
+      * c - CONNECTION
+        A connection.
+    type: string
+    enum:
+      - h
+      - q
+      - f
+      - d
+      - i
+      - u
+      - r
+      - c
+  priority:
+    description: |
+      Priority.
+      
+      * 1 - HIGH
+      * 2 - MEDIUM
+      * 3 - LOW
+      * 4 - DONE
+    type: integer
+    enum:
+      - 1
+      - 2
+      - 3
+      - 4
+  distributorType:
+    description: |
+      Distributor type.
+      
+      * s - CITY
+      * r - REGION
+      * f - LONG DISTANCE
+      * x - OTHER
+    type: string
+    enum:
+      - s
+      - r
+      - f
+      - x
+  eventStatus:
+    description: |
+      Event status. 
+      
+      * p - PLANNED
+        The event was planned. This status is also used when the cancellation of an event has been revoked.
+      * a - ADDED
+        The event was added to the planned data (new stop).
+      * c - CANCELLED
+        The event was canceled (as changedstatus, can apply to planned and added stops).
+    type: string
+    enum:
+      - p
+      - a
+      - c
+  delaySource:
+    description: |
+      Delay source.
+      
+      * L - LEIBIT
+        LeiBit/LeiDis.
+      * NA - RISNE AUT
+        IRIS-NE (automatisch).
+      * NM - RISNE MAN
+        IRIS-NE (manuell).
+      * V - VDV
+        Prognosen durch dritte EVU �ber VDVin.
+      * IA - ISTP AUT
+        ISTP automatisch.
+      * IM - ISTP MAN
+        ISTP manuell.
+      * A - AUTOMATIC PROGNOSIS
+        Automatische Prognose durch Prognoseautomat.
+    type: string
+    enum:
+      - L
+      - NA
+      - NM
+      - V
+      - IA
+      - IM
+      - A
+  filterFlag:
+    description: |
+      Filter flag.
+      
+      * D - EXTERNAL.
+      * F - LONG_DISTANCE.
+      * N - REGIONAL.
+      * S - SBAHN.
+    type: string
+    enum:
+      - D
+      - F
+      - N
+      - S
+  junctionType:
+    description: |
+      The enumeration describes the junction type of a stop.
+      
+      Regular trains don't have any special junctions so all their stops have JunctionType.NONE. However, wing trains have SPLITs and JOINs at certain locations within their paths. And "Durchbindung" trains have TRANSITIONs, i.e. locations where the train changes its train number and/or category.
+      
+      Example for a wing train:
+      
+      Train ICE 123 starts at Munich towards Frankfurt. Train ICE 456 starts at Stuttgart towards Frankfurt. Both trains arrive at the same platform in Frankfurt and are joined (coupled together). The joined train departs from Frankfurt and proceeds to Hannover. In Hannover the trains get split up again into its two constituent parts: ICE 123 and ICE 456. Train ICE 123 departs from Hannover towards its destination Hamburg. Train ICE 456 departs from Hannover towards its destination Berlin. In this case, the stop at Frankfurt would have JunctionType.JOIN and Hannover would have JunctionType.SPLIT.
+      
+      Example for a "Durchbindung" train:
+      
+      Train "RE 98765" departs from Mannheim towards Frankfurt. The train arrives as "RE 98765" in Franfurt but departs under the new name "RB 77665" towards Fulda. In this case, the stop at Frankfurt would have JunctionType.TRANSITION.
+      
+      * t - TRANSITION
+        This stop is a transition station of a 'Durchbindung' train, i.e. the same physical train arrives under one train number/cetegory and departs from this stop under a different train number/category. A transition is represented graphically by a horizontal line with a dot in the middle.
+      * s - SPLIT
+        The wing train is split at this stop, i.e. two (or more) trains arrive coupled together as a single train, are split at this stop and depart as separate independent trains on different routes. Those independent trains might or might not be joined again later. A split is represented graphically by one line that is split into two (when viewed from left to right).
+      * j - JOIN
+        The wing train is joined at this stop, i.e. two (or more) trains arrive independently on different routes,  get coupled together and depart from this stop as a single train. That joined train might or might not be split again later. A join is represented graphically by two lines that are joined into one (when viewed from left to right).
+    type: string
+    enum:
+      - t
+      - s
+      - j
+  referenceTripRelation:
+    description: A reference trip relation holds how a reference trip is related to a stop, for instance the reference trip starts after the stop. Stop contains a collection of that type, only if reference trips are available.
+    type: object
+    required:
+      - rt
+      - rts
+    properties:
+      rt:
+        description: Reference trip element.
+        $ref: '#/definitions/referenceTrip'
+      rts:
+        description: Relation to stop element.
+        $ref: '#/definitions/referenceTripRelationToStop'
+  referenceTrip:
+    description: A reference trip is another real trip, but it doesn't have its own stops and events. It refers only to its ref-erenced regular trip. The reference trip collects mainly all different attributes of the referenced regular trip.
+    required:
+      - id
+      - c
+      - rtl
+      - sd
+      - ea
+    properties:
+      id:
+        description: |
+          An id that uniquely identifies the reference trip. It consists of the following two elements separated by dashes:
+          
+          * A 'daily trip id' that uniquely identifies a reference trip within one day. This id is typically reused on subsequent days. This could be negative.
+          * A 10-digit date specifier (YYMMddHHmm) that indicates the planned departure date of the referenced regular trip from its start station.
+          
+          Example:
+          
+          '-7874571842864554321-1403311221' would be used for a trip with daily trip id '-7874571842864554321' that starts on march the 31th 2014.
+
+        type: string
+        xml:
+          attribute: true
+      c:
+        description: The cancellation flag. True means, the reference trip is cancelled.
+        type: boolean
+        xml:
+          attribute: true
+      rtl:
+        description: Reference trip label.
+        $ref: '#/definitions/referenceTripLabel'
+      sd:
+        description: Reference trip stop label of the start departure event.
+        $ref: '#/definitions/referenceTripStopLabel'
+      ea:
+        description: Reference trip stop label of the end arrival event.
+        $ref: '#/definitions/referenceTripStopLabel'
+  referenceTripLabel:
+    description: It's a compound data type that contains common data items that characterize a reference trip. The con-tents is represented as a compact 3-tuple in XML.
+    required:
+      - n
+      - c
+    properties:
+      n:
+        description: Trip/train number, e.g. "4523".
+        type: string
+        xml:
+          attribute: true
+      c:
+        description: Category. Trip category, e.g. "ICE" or "RE".
+        type: string
+        xml:
+          attribute: true
+  referenceTripStopLabel:
+    description: It's a compound data type that contains common data items that characterize a reference trip stop. The contents is represented as a compact 4-tuple in XML.
+    required:
+      - i
+      - pt
+      - eva
+      - n
+    properties:
+      i:
+        description: The index of the correspondent stop of the regu-lar trip.
+        type: integer
+        xml:
+          attribute: true
+      pt:
+        description: The planned time of the correspondent stop of the regular trip.
+        type: string
+        xml:
+          attribute: true
+      eva:
+        description: The eva number of the correspondent stop of the regular trip.
+        type: integer
+        format: int64
+        xml:
+          attribute: true
+      n:
+        description: The (long) name of the correspondent stop of the regular trip.
+        type: string
+        xml:
+          attribute: true
+  referenceTripRelationToStop:
+    description: |
+      The reference trips relation to the stop, which contains it.
+      
+      * b - BEFORE
+        The reference trip ends before that stop.
+      * e - END
+        The reference trips ends at that stop.
+      * c - BETWEEN
+        The stop is between reference trips start and end, in other words, the stop is contained within its travel path.
+      * s - START
+        The reference trip starts at that stop.
+      * a - AFTER
+        The reference trip starts after that stop.
+    type: string
+    enum:
+      - b
+      - e
+      - c
+      - s
+      - a
+  tripReference:
+    description: It's a reference to another trip, which holds its label and reference trips, if available.
+    required:
+      - tl
+    properties:
+      tl:
+        description: The referred trips label.
+        $ref: '#/definitions/tripLabel'
+      rt:
+        description: The referred trips reference trip elements.
+        type: array
+        items:
+          $ref: '#/definitions/tripLabel'
+  tripType:
+    description: Trip type
+    type: string
+    enum:
+      - p
+      - e
+      - z
+      - s
+      - h
+      - n

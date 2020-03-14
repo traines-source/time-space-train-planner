@@ -1,0 +1,1 @@
+swagger generate client -A timetable -f deployments/swagger.json 
