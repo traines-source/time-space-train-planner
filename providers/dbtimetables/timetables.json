@@ -1,17 +1,19 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0",
+    "version": "v1",
     "title": "Timetables",
-    "description": "API for passenger information for train stations operated by DB Station&Service AG",
+    "description": "NUTZUNGSBEDINGUNGEN:\nEs gelten die gleichen Nutzungsbedingungen wie für die Web Bahnhofstafel: http://www.bahnhof.de/bahnhof-de/nutzungsbedingungen_wbt.html\n\nBETA-TEST: A RESTful web service for timetable information for train stations operated by DB Station&Service AG.\n",
     "termsOfService": "https://data.deutschebahn.com/nutzungsbedingungen.html",
     "contact": {
       "email": "dbopendata@deutschebahn.com"
     }
   },
+  "host": "apicache",
+  "basePath": "/timetables/v1",
   "schemes": [
-    "http",
-    "https"
+    "https",
+    "http"
   ],
   "consumes": [
     "application/xhtml+xml",
@@ -24,7 +26,7 @@
   "paths": {
     "/station/{pattern}": {
       "get": {
-        "description": "This public interface allows access to information about a station.",
+        "description": "This public interface allows access to information about a station.\n\nSee the document \"Types and XML Schema Definition\" in the documentation tab for information about the resulting data structure.",
         "parameters": [
           {
             "name": "pattern",
@@ -45,10 +47,16 @@
           "404": {
             "description": "resource not found"
           }
-        }
+        },
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "summary": "Returns information about stations matching the given pattern",
+        "produces": [
+          "application/xml"
+        ]
       }
     },
-    "/timetable/plan/{evaNo}/{date}{hour}": {
+    "/plan/{evaNo}/{date}/{hour}": {
       "get": {
         "description": "Returns a Timetable object (see Timetable) that contains planned data for the specified station (evaNo) within the hourly time slice given by date (format YYMMDD) and hour (format HH). The data includes stops for all trips that arrive or depart within that slice. There is a small overlap between slices since some trips arrive in one slice and depart in another.\n\nPlanned data does never contain messages. On event level, planned data contains the 'plannned' attributes pt, pp, ps and ppth while the 'changed' attributes ct, cp, cs and cpth are absent.\n\nPlanned data is generated many hours in advance and is static, i.e. it does never change. It should be cached by web caches.public interface allows access to information about a station.\n",
         "parameters": [
@@ -81,13 +89,25 @@
               "$ref": "#/definitions/timetable"
             }
           },
+          "400": {
+            "description": "incorrect syntax"
+          },
           "404": {
             "description": "resource not found"
+          },
+          "410": {
+            "description": "resource no longer available"
           }
-        }
+        },
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "summary": "Returns planned data for the specified station within an hourly time slice ",
+        "produces": [
+          "application/xml"
+        ]
       }
     },
-    "/timetable/fchg/{evaNo}": {
+    "/fchg/{evaNo}": {
       "get": {
         "description": "Returns a Timetable object (see Timetable) that contains all known changes for the station given by evaNo.\n\nThe data includes all known changes from now on until ndefinitely into the future. Once changes become obsolete (because their trip departs from the station) they are removed from this resource.\n\nChanges may include messages. On event level, they usually contain one or more of the 'changed' attributes ct, cp, cs or cpth. Changes may also include 'planned' attributes if there is no associated planned data for the change (e.g. an unplanned stop or trip).\n\nFull changes are updated every 30s and should be cached for that period by web caches.\n",
         "parameters": [
@@ -106,13 +126,22 @@
               "$ref": "#/definitions/timetable"
             }
           },
+          "400": {
+            "description": "incorrect syntax"
+          },
           "404": {
             "description": "resource not found"
           }
-        }
+        },
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "summary": "Returns all known changes for a station",
+        "produces": [
+          "application/xml"
+        ]
       }
     },
-    "/timetable/rchg/{evaNo}": {
+    "/rchg/{evaNo}": {
       "get": {
         "description": "Returns a Timetable object (see Timetable) that contains all recent changes for the station given by evaNo. Recent changes are always a subset of the full changes. They may equal full changes but are typically much smaller. Data includes only those changes that became known within the last 2 minutes.\n\nA client that updates its state in intervals of less than 2 minutes should load full changes initially and then proceed to periodically load only the recent changes in order to save bandwidth.\n\nRecent changes are updated every 30s as well and should be cached for that period by web caches.\n",
         "parameters": [
@@ -131,10 +160,19 @@
               "$ref": "#/definitions/timetable"
             }
           },
+          "400": {
+            "description": "incorrect syntax"
+          },
           "404": {
             "description": "resource not found"
           }
-        }
+        },
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited",
+        "summary": "Returns all recent changes for a station ",
+        "produces": [
+          "application/xml"
+        ]
       }
     }
   },
@@ -635,7 +673,7 @@
       "type": "object",
       "properties": {
         "ppth": {
-          "description": "Planned Path. A sequence of station names separated by the pipe symbols ('|').\nE.g.: 'Mainz Hbf|R\ufffdsselsheim|Frankfrt(M) Flughafen'.\nFor arrival, the path indicates the stations that come before the current station. The first element then is the trip's start station.\nFor departure, the path indicates the stations that come after the current station. The last element in the path then is the trip's destination station.\nNote that the current station is never included in the path (neither for arrival nor for departure).\n",
+          "description": "Planned Path. A sequence of station names separated by the pipe symbols ('|').\nE.g.: 'Mainz Hbf|Rüsselsheim|Frankfrt(M) Flughafen'.\nFor arrival, the path indicates the stations that come before the current station. The first element then is the trip's start station.\nFor departure, the path indicates the stations that come after the current station. The last element in the path then is the trip's destination station.\nNote that the current station is never included in the path (neither for arrival nor for departure).\n",
           "type": "string",
           "xml": {
             "attribute": true
@@ -1061,7 +1099,7 @@
       ]
     },
     "delaySource": {
-      "description": "Delay source.\n\n* L - LEIBIT\n  LeiBit/LeiDis.\n* NA - RISNE AUT\n  IRIS-NE (automatisch).\n* NM - RISNE MAN\n  IRIS-NE (manuell).\n* V - VDV\n  Prognosen durch dritte EVU \ufffdber VDVin.\n* IA - ISTP AUT\n  ISTP automatisch.\n* IM - ISTP MAN\n  ISTP manuell.\n* A - AUTOMATIC PROGNOSIS\n  Automatische Prognose durch Prognoseautomat.\n",
+      "description": "Delay source.\n\n* L - LEIBIT\n  LeiBit/LeiDis.\n* NA - RISNE AUT\n  IRIS-NE (automatisch).\n* NM - RISNE MAN\n  IRIS-NE (manuell).\n* V - VDV\n  Prognosen durch dritte EVU über VDVin.\n* IA - ISTP AUT\n  ISTP automatisch.\n* IM - ISTP MAN\n  ISTP manuell.\n* A - AUTOMATIC PROGNOSIS\n  Automatische Prognose durch Prognoseautomat.\n",
       "type": "string",
       "enum": [
         "L",
@@ -1242,7 +1280,7 @@
       }
     },
     "tripType": {
-      "description": "Trip type",
+      "description": "K.A.",
       "type": "string",
       "enum": [
         "p",

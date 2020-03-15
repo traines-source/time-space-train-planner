@@ -18,10 +18,10 @@ var Default = NewHTTPClient(nil)
 const (
 	// DefaultHost is the default Host
 	// found in Meta (info) section of spec file
-	DefaultHost string = "localhost"
+	DefaultHost string = "apicache"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "test.xml?"
+	DefaultBasePath string = "/timetables/v1"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file

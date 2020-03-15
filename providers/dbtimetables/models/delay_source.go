@@ -22,7 +22,7 @@ import (
 // * NM - RISNE MAN
 //   IRIS-NE (manuell).
 // * V - VDV
-//   Prognosen durch dritte EVU �ber VDVin.
+//   Prognosen durch dritte EVU über VDVin.
 // * IA - ISTP AUT
 //   ISTP automatisch.
 // * IM - ISTP MAN

@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// TripType Trip type
+// TripType K.A.
 //
 // swagger:model tripType
 type TripType string
