@@ -11,23 +11,23 @@ import (
 	"traines.eu/time-space-train-planner/providers/dbtimetables"
 )
 
-type Consumer struct {
+type consumer struct {
 	providers        []providers.Provider
 	providerStations []providers.ProviderStation
 	stations         map[int]*Station
 	lines            map[int]*Line
 }
 
-func (c *Consumer) RequestStationDataUntil(station providers.ProviderStation) time.Time {
+func (c *consumer) RequestStationDataUntil(station providers.ProviderStation) time.Time {
 	d, _ := time.ParseDuration("1h")
 	return time.Now().Add(d)
 }
 
-func (c *Consumer) Stations() []providers.ProviderStation {
+func (c *consumer) Stations() []providers.ProviderStation {
 	return c.providerStations
 }
 
-func (c *Consumer) StationByName(name string) (providers.ProviderStation, error) {
+func (c *consumer) StationByName(name string) (providers.ProviderStation, error) {
 	for _, v := range c.providerStations {
 		if name == v.Name {
 			return v, nil
@@ -36,7 +36,7 @@ func (c *Consumer) StationByName(name string) (providers.ProviderStation, error)
 	return providers.ProviderStation{}, errors.New("not found")
 }
 
-func (c *Consumer) StationByEva(evaNumber int) (providers.ProviderStation, error) {
+func (c *consumer) StationByEva(evaNumber int) (providers.ProviderStation, error) {
 	for _, v := range c.providerStations {
 		if evaNumber == v.EvaNumber {
 			return v, nil
@@ -45,7 +45,7 @@ func (c *Consumer) StationByEva(evaNumber int) (providers.ProviderStation, error
 	return providers.ProviderStation{}, errors.New("not found")
 }
 
-func (c *Consumer) UpsertStation(e providers.ProviderStation) {
+func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	var station *providers.ProviderStation
 	for _, s := range c.providerStations {
 		if s.EvaNumber == e.EvaNumber {
@@ -69,7 +69,7 @@ func (c *Consumer) UpsertStation(e providers.ProviderStation) {
 	val.Lon = e.Lon
 }
 
-func (c *Consumer) UpsertLine(e providers.ProviderLine) {
+func (c *consumer) UpsertLine(e providers.ProviderLine) {
 	val, ok := c.lines[e.ID]
 	if !ok {
 		val = &Line{ID: e.ID, Stops: map[*Station]*LineStop{}}
@@ -80,7 +80,7 @@ func (c *Consumer) UpsertLine(e providers.ProviderLine) {
 	val.Message = e.Message
 }
 
-func (c *Consumer) UpsertLineStop(e providers.ProviderLineStop) {
+func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	station, ok := c.stations[e.EvaNumber]
 	if !ok {
 		log.Panicf("Non-existant Station %d for stop of Line %d", e.EvaNumber, e.LineID)
@@ -97,7 +97,7 @@ func (c *Consumer) UpsertLineStop(e providers.ProviderLineStop) {
 		line.Stops[station] = val
 	}
 	if e.Planned != nil {
-		copyStopInfo(e.Planned, &val.Planned)
+		copyProviderStopInfo(e.Planned, &val.Planned)
 	}
 	if e.Planned != nil {
 		copyProviderStopInfo(e.Planned, &val.Planned)
@@ -111,7 +111,7 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	to.DepartureTrack = from.Track
 }
 
-func (c *Consumer) CallProviders() {
+func (c *consumer) callProviders() {
 	c.providers = []providers.Provider{&dbtimetables.Timetables{}}
 	c.providerStations = defaultStations(8000240, 8070004, 8070003)
 	c.stations = map[int]*Station{}
@@ -122,7 +122,6 @@ func (c *Consumer) CallProviders() {
 	}
 	fmt.Printf("%+v", c.stations)
 	fmt.Printf("%+v", c.lines)
-	c.generateEdges()
 }
 
 func defaultStations(evaNumbers ...int) []providers.ProviderStation {
@@ -133,7 +132,7 @@ func defaultStations(evaNumbers ...int) []providers.ProviderStation {
 	return stations
 }
 
-func (c *Consumer) generateEdges() {
+func (c *consumer) generateEdges() {
 	for _, line := range c.lines {
 		var stops []*LineStop
 		for _, stop := range line.Stops {
@@ -181,4 +180,11 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	if !thisFrom.Arrival.IsZero() {
 		to.Arrival = thisFrom.Arrival
 	}
+}
+
+func ObtainData() (map[int]*Station, map[int]*Line) {
+	c := &consumer{}
+	c.callProviders()
+	c.generateEdges()
+	return c.stations, c.lines
 }

@@ -1,1 +1,1 @@
-eval $(cat deployments/conf.env | xargs) PORT=8080 go run ./cmd/main.go 
+eval $(cat deployments/conf.env | xargs) PORT=3000 go run ./cmd/main.go 

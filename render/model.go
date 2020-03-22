@@ -8,6 +8,7 @@ import (
 
 type StationLabel struct {
 	internal.Station
+	Coord     Coord
 	SpaceAxis int
 }
 
