@@ -17,36 +17,62 @@ import (
 )
 
 type Timetables struct {
+	consumer providers.Consumer
+	client   *apiclient.Timetable
 }
 
 func (p *Timetables) Fetch(c providers.Consumer) {
-	client := prepareClient()
-	stations := c.Stations()
-	for _, station := range stations {
-		var params = operations.NewGetPlanEvaNoDateHourParams()
-		params.EvaNo = strconv.Itoa(station.EvaNumber)
-		t := time.Now()
-		params.Date = fmt.Sprintf("%02d%02d%02d", t.Year()%100, t.Month(), t.Day())
-		params.Hour = fmt.Sprintf("%02d", t.Hour())
-		res, err := client.Operations.GetPlanEvaNoDateHour(params)
-		if err != nil {
-			log.Panic(err)
-			return
-		}
-		c.UpsertStation(providers.ProviderStation{EvaNumber: station.EvaNumber, Name: res.Payload.Station})
+	p.consumer = c
+	p.prepareClient()
 
-		for _, stop := range res.Payload.S {
-			lineID, err := strconv.Atoi(*stop.Tl.N)
-			if err != nil {
-				log.Printf("Failed to convert Line ID %d", lineID)
-			}
-			p.parseLine(stop, lineID, c)
-			p.parseLineStop(stop, station.EvaNumber, lineID, c)
+	current, to := p.consumer.RequestStationDataBetween(nil)
+	delta, _ := time.ParseDuration("1h")
+
+	i := 0
+	for current.Before(to) {
+		p.requestAtTime(current)
+		current = current.Add(delta)
+		i++
+		if i > 3 {
+			break
 		}
 	}
 }
 
-func (p *Timetables) parseLine(stop *models.TimetableStop, lineID int, c providers.Consumer) {
+func (p *Timetables) requestAtTime(time time.Time) {
+	stations := p.consumer.Stations()
+	for _, station := range stations {
+		from, to := p.consumer.RequestStationDataBetween(&station)
+		log.Print(from, time, station)
+		if from.Equal(time) || from.Before(time) && time.Before(to) {
+			p.requestStationAtTime(station, time)
+		}
+	}
+}
+
+func (p *Timetables) requestStationAtTime(station providers.ProviderStation, t time.Time) {
+	var params = operations.NewGetPlanEvaNoDateHourParams()
+	params.EvaNo = strconv.Itoa(station.EvaNumber)
+	params.Date = fmt.Sprintf("%02d%02d%02d", t.Year()%100, t.Month(), t.Day())
+	params.Hour = fmt.Sprintf("%02d", t.Hour())
+	res, err := p.client.Operations.GetPlanEvaNoDateHour(params)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+	p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: station.EvaNumber, Name: res.Payload.Station})
+
+	for _, stop := range res.Payload.S {
+		lineID, err := strconv.Atoi(*stop.Tl.N)
+		if err != nil {
+			log.Printf("Failed to convert Line ID %d", lineID)
+		}
+		p.parseLine(stop, lineID)
+		p.parseLineStop(stop, station.EvaNumber, lineID)
+	}
+}
+
+func (p *Timetables) parseLine(stop *models.TimetableStop, lineID int) {
 	lineName := ""
 	if stop.Ar != nil {
 		lineName = stop.Ar.L
@@ -54,10 +80,10 @@ func (p *Timetables) parseLine(stop *models.TimetableStop, lineID int, c provide
 	if stop.Dp != nil {
 		lineName = stop.Dp.L
 	}
-	c.UpsertLine(providers.ProviderLine{ID: lineID, Type: *stop.Tl.C, Name: lineName})
+	p.consumer.UpsertLine(providers.ProviderLine{ID: lineID, Type: *stop.Tl.C, Name: lineName})
 }
 
-func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, lineID int, c providers.Consumer) {
+func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, lineID int) {
 
 	planned := &providers.ProviderLineStopInfo{}
 	if stop.Ar != nil {
@@ -68,7 +94,7 @@ func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, li
 		planned.Departure = parseEventTime(stop.Dp.Pt)
 		planned.Track = stop.Dp.Pp
 	}
-	c.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: lineID, Planned: planned})
+	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: lineID, Planned: planned})
 }
 
 func parseEventTime(timeString string) time.Time {
@@ -86,7 +112,7 @@ func ato2i(r []rune, index int) int {
 	return val
 }
 
-func prepareClient() *apiclient.Timetable {
+func (p *Timetables) prepareClient() {
 	r := httptransport.New(apiclient.DefaultHost, apiclient.DefaultBasePath, apiclient.DefaultSchemes)
 	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("DB_API_ACCESS_TOKEN"))
 	r.DefaultMediaType = runtime.XMLMime
@@ -96,5 +122,5 @@ func prepareClient() *apiclient.Timetable {
 	r.Producers = map[string]runtime.Producer{
 		"application/xhtml+xml": runtime.XMLProducer(),
 	}
-	return apiclient.New(r, strfmt.Default)
+	p.client = apiclient.New(r, strfmt.Default)
 }

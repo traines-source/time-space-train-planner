@@ -8,6 +8,7 @@ type Station struct {
 	Departures []*Edge
 	Lat        float32
 	Lon        float32
+	Rank       int
 }
 
 type Edge struct {

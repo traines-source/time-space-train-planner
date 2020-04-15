@@ -7,7 +7,7 @@ type Provider interface {
 }
 
 type Consumer interface {
-	RequestStationDataUntil(station ProviderStation) time.Time
+	RequestStationDataBetween(station *ProviderStation) (from time.Time, to time.Time)
 	Stations() []ProviderStation
 	StationByName(name string) (ProviderStation, error)
 	StationByEva(evaNumber int) (ProviderStation, error)

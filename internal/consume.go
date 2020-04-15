@@ -18,9 +18,12 @@ type consumer struct {
 	lines            map[int]*Line
 }
 
-func (c *consumer) RequestStationDataUntil(station providers.ProviderStation) time.Time {
-	d, _ := time.ParseDuration("1h")
-	return time.Now().Add(d)
+func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
+	delta, _ := time.ParseDuration("3h")
+	t := time.Now()
+	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
+	from = time.Date(t.Year(), time.Month(3), 25, 16, 0, 0, 0, time.Local)
+	return from, from.Add(delta)
 }
 
 func (c *consumer) Stations() []providers.ProviderStation {
@@ -99,21 +102,29 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	if e.Planned != nil {
 		copyProviderStopInfo(e.Planned, &val.Planned)
 	}
-	if e.Planned != nil {
-		copyProviderStopInfo(e.Planned, &val.Planned)
+	if e.Current != nil {
+		copyProviderStopInfo(e.Current, &val.Current)
 	}
 	val.Message = e.Message
+	log.Print(e.LineID, e.EvaNumber)
 }
 
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	to.Departure = from.Departure
 	to.Arrival = from.Arrival
+	if from.Departure.IsZero() {
+		to.Departure = from.Arrival
+	}
+	if from.Arrival.IsZero() {
+		to.Arrival = from.Departure
+	}
 	to.DepartureTrack = from.Track
 }
 
 func (c *consumer) callProviders() {
 	c.providers = []providers.Provider{&dbtimetables.Timetables{}}
-	c.providerStations = defaultStations(8000240, 8070004, 8070003)
+	c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
+	// 8000105, 8098105
 	c.stations = map[int]*Station{}
 	c.lines = map[int]*Line{}
 
@@ -142,6 +153,7 @@ func (c *consumer) generateEdges() {
 			// TODO current?
 			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
 		})
+		log.Print("stops", len(stops))
 		for i := 1; i < len(stops); i++ {
 			edge := &Edge{
 				Line:    line,
@@ -159,6 +171,7 @@ func (c *consumer) generateEdges() {
 			edge.Current.Arrival = stops[i].Current.Arrival
 
 			line.Route = append(line.Route, edge)
+			log.Print(len(line.Route))
 			edge.From.Departures = append(edge.From.Departures, edge)
 		}
 	}
@@ -168,6 +181,14 @@ func (c *consumer) generateEdges() {
 		})
 	}
 
+}
+
+func (c *consumer) rankStations() {
+	i := 0
+	for _, s := range c.providerStations {
+		c.stations[s.EvaNumber].Rank = i
+		i++
+	}
 }
 
 func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
@@ -186,5 +207,6 @@ func ObtainData() (map[int]*Station, map[int]*Line) {
 	c := &consumer{}
 	c.callProviders()
 	c.generateEdges()
+	c.rankStations()
 	return c.stations, c.lines
 }

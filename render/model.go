@@ -18,7 +18,6 @@ type EdgePath struct {
 	ShortestPathFor []*EdgePath
 	From            Coord
 	To              Coord
-	Label           string
 }
 
 type Coord struct {

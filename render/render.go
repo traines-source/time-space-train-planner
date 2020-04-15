@@ -16,13 +16,16 @@ type container struct {
 	minTime          time.Time
 	maxTime          time.Time
 	timeAxisDistance float32
+	TimeIndicators   []time.Time
 	Width            int
 	Height           int
 }
 
 const (
-	width  = 500
-	height = 500
+	width                    = 1000
+	height                   = 1000
+	maxTimeIndicators        = 5
+	minTimeIndicatorDistance = "15m"
 )
 
 func TimeSpace(stations map[int]*internal.Station, lines map[int]*internal.Line, wr io.Writer) {
@@ -64,21 +67,20 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 }
 
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
-	if min.Before(c.minTime) {
+	if min.Before(c.minTime) || c.minTime.IsZero() {
 		c.minTime = min
 	}
-	if max.After(c.maxTime) {
+	if max.After(c.maxTime) || c.maxTime.IsZero() {
 		c.maxTime = max
 	}
 }
 
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edge := &EdgePath{
-		Edge:  *e,
-		ID:    fmt.Sprintf("%d_%d", e.Line.ID, e.From.EvaNumber),
-		From:  Coord{SpaceAxis: c.Stations[e.From], TimeAxis: e.Actual.Departure},
-		To:    Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
-		Label: makeLabel(e),
+		Edge: *e,
+		ID:   fmt.Sprintf("%d_%d", e.Line.ID, e.From.EvaNumber),
+		From: Coord{SpaceAxis: c.Stations[e.From], TimeAxis: e.Actual.Departure},
+		To:   Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
 	}
 	c.Edges = append(c.Edges, edge)
 	return edge
@@ -93,26 +95,21 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 	return edge
 }
 
-func makeLabel(e *internal.Edge) string {
-	var label string
-	if e.Line.Name != "" {
-		label = e.Line.Name
-	} else {
-		label = fmt.Sprintf("%d", e.Line.ID)
-	}
-	return e.Line.Type + " " + label
-}
-
 func (c *container) gravitate() {
 	c.Width = width
 	c.Height = height
 	num := float32(len(c.Stations))
-	i := 0
 	for _, s := range c.Stations {
-		s.SpaceAxis = int(float32(i)/num*float32(c.Height-50) + 50.0)
-		i++
+		s.SpaceAxis = int(float32(s.Station.Rank)/num*float32(c.Height-50) + 50.0)
 	}
-	c.timeAxisDistance = float32(c.maxTime.Unix() - c.minTime.Unix())
+	c.indicateTimes()
+}
+
+func (c *container) indicateTimes() {
+	delta := c.maxTime.Unix() - c.minTime.Unix()
+	c.timeAxisDistance = float32(delta)
+	//duration, _ := time.ParseDuration(fmt.Sprintf("%ds", delta/maxTimeIndicators))
+	//now := c.minTime
 }
 
 func (c *container) render(wr io.Writer) {
@@ -125,15 +122,59 @@ func (c *container) render(wr io.Writer) {
 
 func (c *container) timeAxis(t time.Time) int {
 	if t.IsZero() {
-		return 0
+		return 50
 	}
-	return int(float32((t.Unix()-c.minTime.Unix()))/c.timeAxisDistance*float32(c.Width-100) + 100.0)
+	delta := float32(t.Unix() - c.minTime.Unix())
+	log.Print(t, delta, c.timeAxisDistance)
+	return int(delta/c.timeAxisDistance*float32(c.Width-100) + 100.0)
 }
 
 func (c *container) X(coord Coord) int {
-	return c.timeAxis(coord.TimeAxis)
+	return coord.SpaceAxis.SpaceAxis
+	
 }
 
 func (c *container) Y(coord Coord) int {
-	return coord.SpaceAxis.SpaceAxis
+	return c.timeAxis(coord.TimeAxis)
+}
+
+func (c *container) Label(p *EdgePath) string {
+	e := p.Edge
+	if e.Line == nil {
+		return ""
+	}
+	var label string
+	if e.Line.Name != "" {
+		label = e.Line.Name
+	} else {
+		label = fmt.Sprintf("%d", e.Line.ID)
+	}
+	return e.Line.Type + " " + label
+}
+
+func (c *container) Departure(p *EdgePath) string {
+	e := p.Edge
+	if e.Line == nil {
+		return ""
+	}
+	var label string
+	label = simpleTime(e.Actual.Departure)
+	if e.Planned.DepartureTrack != "" {
+		label += e.Planned.DepartureTrack
+	}
+	return label
+}
+
+func (c *container) Arrival(p *EdgePath) string {
+	e := p.Edge
+	if e.Line == nil {
+		return ""
+	}
+	var label string	
+	label = simpleTime(e.Actual.Arrival)
+	return label
+}
+
+func simpleTime(t time.Time) string {
+	return fmt.Sprintf("%02d:%02d ", t.Hour(), t.Minute())
 }
