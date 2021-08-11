@@ -44,7 +44,6 @@ func (p *Timetables) requestAtTime(time time.Time) {
 	stations := p.consumer.Stations()
 	for _, station := range stations {
 		from, to := p.consumer.RequestStationDataBetween(&station)
-		log.Print(from, time, station)
 		if from.Equal(time) || from.Before(time) && time.Before(to) {
 			p.requestStationAtTime(station, time)
 		}

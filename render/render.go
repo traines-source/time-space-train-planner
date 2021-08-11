@@ -29,7 +29,7 @@ const (
 )
 
 func TimeSpace(stations map[int]*internal.Station, lines map[int]*internal.Line, wr io.Writer) {
-	c := &container{}
+	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[[2]*internal.Edge]*EdgePath{}}
 	c.setupStations(stations)
 	c.setupEdges(lines)
 	c.gravitate()
@@ -37,7 +37,6 @@ func TimeSpace(stations map[int]*internal.Station, lines map[int]*internal.Line,
 }
 
 func (c *container) setupStations(stations map[int]*internal.Station) {
-	c.Stations = map[*internal.Station]*StationLabel{}
 	for _, s := range stations {
 		station := &StationLabel{Station: *s}
 		station.Coord.SpaceAxis = station
@@ -47,10 +46,11 @@ func (c *container) setupStations(stations map[int]*internal.Station) {
 }
 
 func (c *container) setupEdges(lines map[int]*internal.Line) {
+	log.Print("test")
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			e := l.Route[i]
-			log.Print("e", e)
+			log.Print("e", e.ShortestPath)
 			if e.Redundant {
 				continue
 			}
@@ -69,6 +69,8 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 				for e := origin.ShortestPath; e != nil; e = e.ShortestPath {
 					if edgePath, ok := c.Edges[[2]*internal.Edge{e, e}]; ok {
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+						log.Print("here", len(edgePath.ShortestPathFor))
+
 					}
 					if edgePath, ok := c.Edges[[2]*internal.Edge{lastEdge, e}]; ok {
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
@@ -78,9 +80,9 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 			}
 		}
 	}
-	log.Print("test")
-	log.Printf("%+v", lines)
-	log.Printf("%+v", c.Edges)
+	//log.Print("test")
+	//log.Printf("%+v", lines)
+	//log.Printf("%+v", c.Edges)
 }
 
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
@@ -142,7 +144,7 @@ func (c *container) timeAxis(t time.Time) int {
 		return 50
 	}
 	delta := float32(t.Unix() - c.minTime.Unix())
-	log.Print(t, delta, c.timeAxisDistance)
+	//log.Print(t, delta, c.timeAxisDistance)
 	return int(delta/c.timeAxisDistance*float32(c.Width-100) + 100.0)
 }
 

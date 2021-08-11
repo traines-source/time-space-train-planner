@@ -1,0 +1,7 @@
+.edge {
+    stroke-width:2px;
+}
+
+.edge circle {
+    stroke: none;
+}

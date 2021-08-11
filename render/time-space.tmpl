@@ -1,3 +1,4 @@
+<?xml-stylesheet type="text/css" href="client.css" ?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
     width="100%" height="100%" viewPort="0 0 {{.Width}} {{.Height}}">
     <style>
@@ -12,20 +13,18 @@
         </marker>
     </defs>
 {{range .Stations}}
-    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}">{{.Station.EvaNumber}}</text>
+    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}">{{.Station.Name}}</text>
 {{end}}
 {{range .Edges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-        marker-start="url(#dot)" marker-end="url(#dot)" stroke="black" class="
-    {{- range .ShortestPathFor -}}
-        shortest-path-{{.ID}}
-    {{- end -}}        
+        marker-start="url(#dot)" marker-end="url(#dot)" stroke="black" class="edge
+    {{- range .ShortestPathFor }} shortest-path-{{.ID}}{{ end -}}
     " />
     <text>
         <textPath href="#{{.ID}}" startOffset="50%" text-anchor="middle">{{$.Label .}}</textPath>
     </text>
     <text x="{{$.X .To}}" y="{{$.Y .To}}" text-anchor="end" class="arrival">{{$.Arrival .}}</text>
     <text x="{{$.X .From}}" y="{{$.Y .From}}" text-anchor="start" class="departure">{{$.Departure .}}</text>
-
 {{end}}
+    <script xlink:href="../client.js" />
 </svg>

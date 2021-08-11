@@ -1,6 +1,6 @@
 package internal
 
-const inf = 1<<31
+const inf = 1 << 31
 
 type dijkstra struct {
 	vertexAtDeparture *Edge
@@ -35,9 +35,9 @@ func shortestPathsToEdge(stations map[int]*Station, edgeToDestination *Edge) {
 	}
 }
 
-func buildVertexSetByDestination(edgeToDestination *Edge) map[*Edge]dijkstra {
-	var verticesAtDeparture map[*Edge]dijkstra
-	verticesAtDeparture[edgeToDestination] = dijkstra{
+func buildVertexSetByDestination(edgeToDestination *Edge) map[*Edge]*dijkstra {
+	verticesAtDeparture := map[*Edge]*dijkstra{}
+	verticesAtDeparture[edgeToDestination] = &dijkstra{
 		vertexAtDeparture: edgeToDestination,
 		dist:              int(edgeToDestination.Actual.Arrival.Sub(edgeToDestination.Actual.Departure).Minutes()),
 		previous:          nil,
@@ -46,7 +46,7 @@ func buildVertexSetByDestination(edgeToDestination *Edge) map[*Edge]dijkstra {
 	return verticesAtDeparture
 }
 
-func buildVertexSet(verticesAtDeparture map[*Edge]dijkstra, vertexAtDeparture *Edge) {
+func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *Edge) {
 	for _, edge := range vertexAtDeparture.From.Arrivals {
 		if edge.ShortestPath != nil {
 			continue
@@ -54,7 +54,7 @@ func buildVertexSet(verticesAtDeparture map[*Edge]dijkstra, vertexAtDeparture *E
 		if vertexAtDeparture.Actual.Departure.Before(edge.Actual.Arrival) {
 			continue
 		}
-		verticesAtDeparture[edge] = dijkstra{
+		verticesAtDeparture[edge] = &dijkstra{
 			vertexAtDeparture: edge,
 			dist:              inf,
 			previous:          nil,
@@ -63,11 +63,11 @@ func buildVertexSet(verticesAtDeparture map[*Edge]dijkstra, vertexAtDeparture *E
 	}
 }
 
-func minDist(verticesAtDeparture map[*Edge]dijkstra) *dijkstra {
+func minDist(verticesAtDeparture map[*Edge]*dijkstra) *dijkstra {
 	var minVertex *dijkstra
 	for _, vertex := range verticesAtDeparture {
 		if minVertex == nil || vertex.dist < minVertex.dist {
-			minVertex = &vertex
+			minVertex = vertex
 		}
 	}
 	return minVertex

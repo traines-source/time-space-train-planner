@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -22,7 +21,7 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("3h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	//from = time.Date(t.Year(), time.Month(3), 25, 16, 0, 0, 0, time.Local)
+	from = time.Date(t.Year(), t.Month(), 11, 19, 0, 0, 0, time.Local)
 	return from, from.Add(delta)
 }
 
@@ -106,7 +105,6 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 		copyProviderStopInfo(e.Current, &val.Current)
 	}
 	val.Message = e.Message
-	log.Print(e.LineID, e.EvaNumber)
 }
 
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
@@ -131,8 +129,6 @@ func (c *consumer) callProviders() {
 	for _, p := range c.providers {
 		p.Fetch(c)
 	}
-	fmt.Printf("%+v", c.stations)
-	fmt.Printf("%+v", c.lines)
 }
 
 func defaultStations(evaNumbers ...int) []providers.ProviderStation {
@@ -153,7 +149,6 @@ func (c *consumer) generateEdges() {
 			// TODO current?
 			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
 		})
-		log.Print("stops", len(stops))
 		for i := 1; i < len(stops); i++ {
 			edge := &Edge{
 				Line:    line,
@@ -171,7 +166,6 @@ func (c *consumer) generateEdges() {
 			edge.Current.Arrival = stops[i].Current.Arrival
 
 			line.Route = append(line.Route, edge)
-			log.Print(len(line.Route))
 			edge.From.Departures = append(edge.From.Departures, edge)
 			edge.To.Arrivals = append(edge.To.Arrivals, edge)
 		}
@@ -187,12 +181,14 @@ func (c *consumer) generateEdges() {
 
 }
 
-func (c *consumer) rankStations() {
+func (c *consumer) rankStations() (destination *Station) {
 	i := 0
 	for _, s := range c.providerStations {
 		c.stations[s.EvaNumber].Rank = i
+		destination = c.stations[s.EvaNumber]
 		i++
 	}
+	return destination
 }
 
 func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
@@ -211,6 +207,7 @@ func ObtainData() (map[int]*Station, map[int]*Line) {
 	c := &consumer{}
 	c.callProviders()
 	c.generateEdges()
-	c.rankStations()
+	destination := c.rankStations()
+	shortestPaths(c.stations, destination)
 	return c.stations, c.lines
 }

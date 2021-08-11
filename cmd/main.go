@@ -10,7 +10,9 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", handler)
+	fs := http.FileServer(http.Dir("./"))
+	http.Handle("/", fs)
+	http.HandleFunc("/tstp", handler)
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
 
