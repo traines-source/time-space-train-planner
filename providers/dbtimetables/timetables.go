@@ -31,6 +31,7 @@ func (p *Timetables) Fetch(c providers.Consumer) {
 	i := 0
 	for current.Before(to) {
 		p.requestAtTime(current)
+		//return
 		current = current.Add(delta)
 		i++
 		if i > 3 {

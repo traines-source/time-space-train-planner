@@ -12,7 +12,7 @@ import (
 
 type container struct {
 	Stations         map[*internal.Station]*StationLabel
-	Edges            []*EdgePath
+	Edges            map[[2]*internal.Edge]*EdgePath
 	minTime          time.Time
 	maxTime          time.Time
 	timeAxisDistance float32
@@ -61,9 +61,26 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 			c.stretchTimeAxis(edge.From.TimeAxis, edge.To.TimeAxis)
 		}
 	}
+	for _, l := range lines {
+		for i := 0; i < len(l.Route); i++ {
+			origin := l.Route[i]
+			if originEdgePath, ok := c.Edges[[2]*internal.Edge{origin, origin}]; ok {
+				var lastEdge *internal.Edge
+				for e := origin.ShortestPath; e != nil; e = e.ShortestPath {
+					if edgePath, ok := c.Edges[[2]*internal.Edge{e, e}]; ok {
+						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+					}
+					if edgePath, ok := c.Edges[[2]*internal.Edge{lastEdge, e}]; ok {
+						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+					}
+					lastEdge = e
+				}
+			}
+		}
+	}
 	log.Print("test")
-	log.Print("%+v", lines)
-	log.Print("%+v", c.Edges)
+	log.Printf("%+v", lines)
+	log.Printf("%+v", c.Edges)
 }
 
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
@@ -82,7 +99,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		From: Coord{SpaceAxis: c.Stations[e.From], TimeAxis: e.Actual.Departure},
 		To:   Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
 	}
-	c.Edges = append(c.Edges, edge)
+	c.Edges[[2]*internal.Edge{e, e}] = edge
 	return edge
 }
 
@@ -91,7 +108,7 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		From: Coord{SpaceAxis: c.Stations[this.From], TimeAxis: last.Actual.Arrival},
 		To:   Coord{SpaceAxis: c.Stations[this.From], TimeAxis: this.Actual.Departure},
 	}
-	c.Edges = append(c.Edges, edge)
+	c.Edges[[2]*internal.Edge{last, this}] = edge
 	return edge
 }
 
@@ -131,7 +148,7 @@ func (c *container) timeAxis(t time.Time) int {
 
 func (c *container) X(coord Coord) int {
 	return coord.SpaceAxis.SpaceAxis
-	
+
 }
 
 func (c *container) Y(coord Coord) int {
@@ -170,8 +187,7 @@ func (c *container) Arrival(p *EdgePath) string {
 	if e.Line == nil {
 		return ""
 	}
-	var label string	
-	label = simpleTime(e.Actual.Arrival)
+	label := simpleTime(e.Actual.Arrival)
 	return label
 }
 

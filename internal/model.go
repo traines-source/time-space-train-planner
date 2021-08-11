@@ -6,6 +6,7 @@ type Station struct {
 	Name       string
 	EvaNumber  int
 	Departures []*Edge
+	Arrivals []*Edge
 	Lat        float32
 	Lon        float32
 	Rank       int
