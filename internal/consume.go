@@ -18,10 +18,10 @@ type consumer struct {
 }
 
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
-	delta, _ := time.ParseDuration("3h")
+	delta, _ := time.ParseDuration("4h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	from = time.Date(t.Year(), t.Month(), 11, 19, 0, 0, 0, time.Local)
+	//from = time.Date(t.Year(), t.Month(), 5, 19, 0, 0, 0, time.Local)
 	return from, from.Add(delta)
 }
 

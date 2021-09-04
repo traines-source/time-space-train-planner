@@ -1,18 +1,26 @@
 currentSelected = undefined;
 function selectEdge(edgeId) {
-    setColorForDependents(currentSelected, 'black');
-    setColorForDependents(edgeId, 'red');
+    setSelectedForDependents(currentSelected, false);
+    setSelectedForDependents(edgeId, true);
     currentSelected = edgeId;
 }
 
-function setColorForDependents(edgeId, color) {
+function setSelectedForDependents(edgeId, selected) {
     if (edgeId == undefined) {
         return;
     }
-    document.getElementById(edgeId).style.stroke = color;
+    setSelectedForElement(document.getElementById(edgeId), selected);
     const dependents = document.getElementsByClassName('shortest-path-'+edgeId);
     for(let i=0;i<dependents.length;i++) {
-        dependents[i].style.stroke = color;
+        setSelectedForElement(dependents[i], selected);
+    }
+}
+
+function setSelectedForElement(element, selected) {
+    if (selected) {
+        element.className.baseVal += " selected";
+    } else {
+        element.className.baseVal = element.className.baseVal.replace(" selected", "");
     }
 }
 

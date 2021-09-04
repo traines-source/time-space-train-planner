@@ -17,13 +17,13 @@ type container struct {
 	maxTime          time.Time
 	timeAxisDistance float32
 	TimeIndicators   []time.Time
-	Width            int
-	Height           int
+	TimeAxisSize     int
+	SpaceAxisSize    int
 }
 
 const (
-	width                    = 1000
-	height                   = 1000
+	timeAxisSize             = 2000
+	spaceAxisSize            = 2000
 	maxTimeIndicators        = 5
 	minTimeIndicatorDistance = "15m"
 )
@@ -115,11 +115,11 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 }
 
 func (c *container) gravitate() {
-	c.Width = width
-	c.Height = height
+	c.TimeAxisSize = timeAxisSize
+	c.SpaceAxisSize = spaceAxisSize
 	num := float32(len(c.Stations))
 	for _, s := range c.Stations {
-		s.SpaceAxis = int(float32(s.Station.Rank)/num*float32(c.Height-50) + 50.0)
+		s.SpaceAxis = int(float32(s.Station.Rank)/num*float32(c.SpaceAxisSize-50) + 50.0)
 	}
 	c.indicateTimes()
 }
@@ -145,7 +145,7 @@ func (c *container) timeAxis(t time.Time) int {
 	}
 	delta := float32(t.Unix() - c.minTime.Unix())
 	//log.Print(t, delta, c.timeAxisDistance)
-	return int(delta/c.timeAxisDistance*float32(c.Width-100) + 100.0)
+	return int(delta/c.timeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
 }
 
 func (c *container) X(coord Coord) int {

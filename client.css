@@ -5,3 +5,15 @@
 .edge circle {
     stroke: none;
 }
+
+.arrival, .departure, .label {
+    visibility: hidden;
+}
+
+.arrival.selected, .departure.selected, .label.selected {
+    visibility: visible;
+}
+
+.edge.selected {
+    stroke: red;
+}
