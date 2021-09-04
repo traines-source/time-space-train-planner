@@ -2,8 +2,9 @@
     stroke-width:2px;
 }
 
-.edge circle {
+#dot circle {
     stroke: none;
+    fill: context-fill;
 }
 
 .arrival, .departure, .label {
@@ -16,4 +17,8 @@
 
 .edge.selected {
     stroke: red;
+}
+
+.redundant-true {
+    stroke: #dbdbdb;
 }

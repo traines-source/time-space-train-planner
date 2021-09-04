@@ -88,11 +88,11 @@ func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, li
 	planned := &providers.ProviderLineStopInfo{}
 	if stop.Ar != nil {
 		planned.Arrival = parseEventTime(stop.Ar.Pt)
-		planned.Track = stop.Ar.Pp
+		planned.ArrivalTrack = stop.Ar.Pp
 	}
 	if stop.Dp != nil {
 		planned.Departure = parseEventTime(stop.Dp.Pt)
-		planned.Track = stop.Dp.Pp
+		planned.DepartureTrack = stop.Dp.Pp
 	}
 	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: lineID, Planned: planned})
 }

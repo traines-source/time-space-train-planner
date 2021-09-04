@@ -34,9 +34,10 @@ type ProviderLineStop struct {
 }
 
 type ProviderLineStopInfo struct {
-	Arrival   time.Time
-	Departure time.Time
-	Track     string
+	Arrival        time.Time
+	Departure      time.Time
+	ArrivalTrack   string
+	DepartureTrack string
 }
 
 type ProviderLine struct {

@@ -6,7 +6,7 @@ type Station struct {
 	Name       string
 	EvaNumber  int
 	Departures []*Edge
-	Arrivals []*Edge
+	Arrivals   []*Edge
 	Lat        float32
 	Lon        float32
 	Rank       int
@@ -28,6 +28,7 @@ type StopInfo struct {
 	Departure      time.Time
 	Arrival        time.Time
 	DepartureTrack string
+	ArrivalTrack   string
 }
 
 type Line struct {

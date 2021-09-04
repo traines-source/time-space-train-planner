@@ -13,7 +13,7 @@
 {{range .Edges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         marker-start="url(#dot)" marker-end="url(#dot)" stroke="black"
-        class="edge {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}"
+        class="edge redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}"
         />
     <text>
         <textPath href="#{{.ID}}" startOffset="50%" text-anchor="middle"

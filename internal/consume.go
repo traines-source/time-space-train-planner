@@ -21,7 +21,8 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("4h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	//from = time.Date(t.Year(), t.Month(), 5, 19, 0, 0, 0, time.Local)
+	from = time.Date(t.Year(), t.Month(), 4, 20, 0, 0, 0, time.Local)
+	log.Print(time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local).Sub(time.Date(t.Year(), t.Month(), t.Day(), t.Hour()+1, 0, 0, 0, time.Local)).Minutes())
 	return from, from.Add(delta)
 }
 
@@ -116,7 +117,8 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	if from.Arrival.IsZero() {
 		to.Arrival = from.Departure
 	}
-	to.DepartureTrack = from.Track
+	to.DepartureTrack = from.DepartureTrack
+	to.ArrivalTrack = from.ArrivalTrack
 }
 
 func (c *consumer) callProviders() {

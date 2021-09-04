@@ -3,7 +3,6 @@ package render
 import (
 	"fmt"
 	"io"
-	"log"
 	"text/template"
 	"time"
 
@@ -46,14 +45,9 @@ func (c *container) setupStations(stations map[int]*internal.Station) {
 }
 
 func (c *container) setupEdges(lines map[int]*internal.Line) {
-	log.Print("test")
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			e := l.Route[i]
-			log.Print("e", e.ShortestPath)
-			if e.Redundant {
-				continue
-			}
 			if i > 0 {
 				c.insertStationEdge(l.Route[i-1], e)
 			}
@@ -69,7 +63,6 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 				for e := origin.ShortestPath; e != nil; e = e.ShortestPath {
 					if edgePath, ok := c.Edges[[2]*internal.Edge{e, e}]; ok {
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
-						log.Print("here", len(edgePath.ShortestPathFor))
 
 					}
 					if edgePath, ok := c.Edges[[2]*internal.Edge{lastEdge, e}]; ok {
@@ -190,6 +183,9 @@ func (c *container) Arrival(p *EdgePath) string {
 		return ""
 	}
 	label := simpleTime(e.Actual.Arrival)
+	if e.Planned.ArrivalTrack != "" {
+		label += e.Planned.ArrivalTrack
+	}
 	return label
 }
 
