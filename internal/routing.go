@@ -1,6 +1,8 @@
 package internal
 
-import "log"
+import (
+	"log"
+)
 
 const inf = 1 << 31
 
@@ -47,11 +49,11 @@ func buildVertexSetByDestination(edgeToDestination *Edge) map[*Edge]*dijkstra {
 		dist:              int(edgeToDestination.Actual.Arrival.Sub(edgeToDestination.Actual.Departure).Minutes()),
 		previous:          nil,
 	}
-	buildVertexSet(verticesAtDeparture, edgeToDestination)
+	buildVertexSet(verticesAtDeparture, edgeToDestination, edgeToDestination.To)
 	return verticesAtDeparture
 }
 
-func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *Edge) {
+func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *Edge, destination *Station) {
 	for _, edge := range vertexAtDeparture.From.Arrivals {
 		if edge.ShortestPath != nil {
 			continue
@@ -59,12 +61,15 @@ func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *
 		if vertexAtDeparture.Actual.Departure.Before(edge.Actual.Arrival) {
 			continue
 		}
+		if edge.To == destination {
+			continue
+		}
 		verticesAtDeparture[edge] = &dijkstra{
 			vertexAtDeparture: edge,
 			dist:              inf,
 			previous:          nil,
 		}
-		buildVertexSet(verticesAtDeparture, edge)
+		buildVertexSet(verticesAtDeparture, edge, destination)
 	}
 }
 

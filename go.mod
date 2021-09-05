@@ -8,4 +8,5 @@ require (
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/swag v0.19.5
 	github.com/go-openapi/validate v0.19.3
+	github.com/stretchr/testify v1.4.0
 )

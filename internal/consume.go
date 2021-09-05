@@ -21,8 +21,7 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("4h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	from = time.Date(t.Year(), t.Month(), 4, 20, 0, 0, 0, time.Local)
-	log.Print(time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local).Sub(time.Date(t.Year(), t.Month(), t.Day(), t.Hour()+1, 0, 0, 0, time.Local)).Minutes())
+	//from = time.Date(t.Year(), t.Month(), 4, 20, 0, 0, 0, time.Local)
 	return from, from.Add(delta)
 }
 
@@ -177,7 +176,7 @@ func (c *consumer) generateEdges() {
 			return station.Departures[i].Actual.Departure.Before(station.Departures[j].Actual.Departure)
 		})
 		sort.Slice(station.Arrivals, func(i, j int) bool {
-			return station.Arrivals[i].Actual.Departure.Before(station.Arrivals[j].Actual.Departure)
+			return station.Arrivals[i].Actual.Arrival.Before(station.Arrivals[j].Actual.Arrival)
 		})
 	}
 
