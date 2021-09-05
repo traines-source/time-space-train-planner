@@ -2,6 +2,7 @@ package internal
 
 import (
 	"log"
+	"time"
 )
 
 const inf = 1 << 31
@@ -9,6 +10,7 @@ const inf = 1 << 31
 type dijkstra struct {
 	vertexAtDeparture *Edge
 	dist              int
+	hops              int
 	previous          *Edge
 }
 
@@ -32,9 +34,9 @@ func shortestPathsToEdge(stations map[int]*Station, edgeToDestination *Edge) {
 		for _, vertex := range u.vertexAtDeparture.From.Arrivals {
 			if v, ok := verticesAtDeparture[vertex]; ok {
 				alt := u.dist + travelBackDist(u.vertexAtDeparture, v.vertexAtDeparture)
-				if alt < v.dist {
-					// || alt == v.dist && v.previous.Actual.Departure.Sub(v.vertexAtDeparture.Actual.Arrival) > u.vertexAtDeparture.Actual.Departure.Sub(v.vertexAtDeparture.Actual.Arrival)
+				if alt < v.dist || alt == v.dist && u.hops+1 <= v.hops && earlierConnectionWithSameDist(u, v) {
 					v.dist = alt
+					v.hops = u.hops + 1
 					v.previous = u.vertexAtDeparture
 				}
 			}
@@ -47,6 +49,7 @@ func buildVertexSetByDestination(edgeToDestination *Edge) map[*Edge]*dijkstra {
 	verticesAtDeparture[edgeToDestination] = &dijkstra{
 		vertexAtDeparture: edgeToDestination,
 		dist:              int(edgeToDestination.Actual.Arrival.Sub(edgeToDestination.Actual.Departure).Minutes()),
+		hops:              0,
 		previous:          nil,
 	}
 	buildVertexSet(verticesAtDeparture, edgeToDestination, edgeToDestination.To)
@@ -67,6 +70,7 @@ func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *
 		verticesAtDeparture[edge] = &dijkstra{
 			vertexAtDeparture: edge,
 			dist:              inf,
+			hops:              inf,
 			previous:          nil,
 		}
 		buildVertexSet(verticesAtDeparture, edge, destination)
@@ -84,11 +88,19 @@ func minDist(verticesAtDeparture map[*Edge]*dijkstra) *dijkstra {
 }
 
 func travelBackDist(next *Edge, previous *Edge) int {
-	min := int(next.Actual.Departure.Sub(previous.Actual.Departure).Minutes())
+	return positiveDeltaMinutes(previous.Actual.Departure, next.Actual.Departure)
+}
+
+func positiveDeltaMinutes(previous time.Time, next time.Time) int {
+	min := int(next.Sub(previous).Minutes())
 	if min <= 0 {
 		return inf
 	}
 	return min
+}
+
+func earlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
+	return positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, u.vertexAtDeparture.Actual.Departure) < positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, v.previous.Actual.Departure)
 }
 
 func markAsRedundantIfRevisitsSameStation(edge *dijkstra) {
