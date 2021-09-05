@@ -3,31 +3,37 @@
     viewBox="0 0 {{.SpaceAxisSize}} {{.TimeAxisSize}}">
     <defs>
         <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5"
-            markerWidth="5" markerHeight="5">
-        <circle cx="5" cy="5" r="5" />
+            markerWidth="4" markerHeight="4" filter="none">
+            <circle cx="5" cy="5" r="5" />
         </marker>
+        <filter id="erode">
+            <feMorphology operator="erode" radius="8"/>
+        </filter>
     </defs>
 {{range .Stations}}
     <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}">{{.Station.Name}}</text>
 {{end}}
-{{range .Edges}}
+{{range .SortedEdges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-        marker-start="url(#dot)" marker-end="url(#dot)" stroke="black"
+        marker-start="url(#dot)" marker-end="url(#dot)"
         class="edge redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}"
+        />
+    <path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
+        class="edge-toucharea"
         />
     <text>
         <textPath href="#{{.ID}}" startOffset="50%" text-anchor="middle"
             class="label shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
-            {{$.Label .}}
+            {{.Label}}
         </textPath>
     </text>
     <text x="{{$.X .To}}" y="{{$.Y .To}}" text-anchor="end"
         class="arrival shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
-        {{$.Arrival .}}
+        {{.Arrival}}
     </text>
     <text x="{{$.X .From}}" y="{{$.Y .From}}" text-anchor="start" 
         class="departure shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
-        {{$.Departure .}}
+        {{.Departure}}
     </text>
 {{end}}
     <script xlink:href="../client.js" />

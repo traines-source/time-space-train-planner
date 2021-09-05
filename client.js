@@ -25,10 +25,11 @@ function setSelectedForElement(element, selected) {
 }
 
 
-const edges = document.getElementsByClassName('edge');
+const edges = document.getElementsByClassName('edge-toucharea');
 for(let i=0;i<edges.length;i++) {
     edges[i].onclick = function (evt) {
-        console.log('selected ', this.id);
-        selectEdge(this.id);
+        const id = this.id.replace('-toucharea', '');
+        console.log('selected ', id);
+        selectEdge(id);
     }
 }

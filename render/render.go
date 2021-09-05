@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 	"io"
+	"sort"
 	"text/template"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 type container struct {
 	Stations         map[*internal.Station]*StationLabel
 	Edges            map[[2]*internal.Edge]*EdgePath
+	SortedEdges      []*EdgePath
 	minTime          time.Time
 	maxTime          time.Time
 	timeAxisDistance float32
@@ -55,6 +57,9 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 			c.stretchTimeAxis(edge.From.TimeAxis, edge.To.TimeAxis)
 		}
 	}
+	sort.Slice(c.SortedEdges, func(i, j int) bool {
+		return c.SortedEdges[i].Redundant
+	})
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			origin := l.Route[i]
@@ -95,6 +100,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		To:   Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
 	}
 	c.Edges[[2]*internal.Edge{e, e}] = edge
+	c.SortedEdges = append(c.SortedEdges, edge)
 	return edge
 }
 
@@ -104,6 +110,7 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		To:   Coord{SpaceAxis: c.Stations[this.From], TimeAxis: this.Actual.Departure},
 	}
 	c.Edges[[2]*internal.Edge{last, this}] = edge
+	c.SortedEdges = append(c.SortedEdges, edge)
 	return edge
 }
 
@@ -150,7 +157,7 @@ func (c *container) Y(coord Coord) int {
 	return c.timeAxis(coord.TimeAxis)
 }
 
-func (c *container) Label(p *EdgePath) string {
+func (p *EdgePath) Label() string {
 	e := p.Edge
 	if e.Line == nil {
 		return ""
@@ -164,7 +171,7 @@ func (c *container) Label(p *EdgePath) string {
 	return e.Line.Type + " " + label
 }
 
-func (c *container) Departure(p *EdgePath) string {
+func (p *EdgePath) Departure() string {
 	e := p.Edge
 	if e.Line == nil {
 		return ""
@@ -177,7 +184,7 @@ func (c *container) Departure(p *EdgePath) string {
 	return label
 }
 
-func (c *container) Arrival(p *EdgePath) string {
+func (p *EdgePath) Arrival() string {
 	e := p.Edge
 	if e.Line == nil {
 		return ""

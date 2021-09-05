@@ -1,5 +1,11 @@
 .edge {
     stroke-width:2px;
+    stroke: black;
+}
+
+.edge-toucharea {
+    stroke-width: 20px;
+    stroke: transparent;
 }
 
 #dot circle {
