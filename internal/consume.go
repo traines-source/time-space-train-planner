@@ -3,7 +3,6 @@ package internal
 import (
 	"errors"
 	"log"
-	"sort"
 	"time"
 
 	"traines.eu/time-space-train-planner/providers"
@@ -22,7 +21,7 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("4h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	//from = time.Date(t.Year(), t.Month(), 4, 20, 0, 0, 0, time.Local)
+	//from = time.Date(t.Year(), t.Month(), 6, 20, 0, 0, 0, time.Local)
 	return from, from.Add(delta)
 }
 
@@ -58,18 +57,30 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	if station == nil {
 		station = &providers.ProviderStation{EvaNumber: e.EvaNumber}
 	}
-	station.Name = e.Name
-	station.Lat = e.Lat
-	station.Lon = e.Lon
+	if e.Name != "" {
+		station.Name = e.Name
+	}
+	if e.Lat != 0 {
+		station.Lat = e.Lat
+	}
+	if e.Lon != 0 {
+		station.Lon = e.Lon
+	}
 
 	val, ok := c.stations[e.EvaNumber]
 	if !ok {
 		val = &Station{EvaNumber: e.EvaNumber}
 		c.stations[e.EvaNumber] = val
 	}
-	val.Name = e.Name
-	val.Lat = e.Lat
-	val.Lon = e.Lon
+	if e.Name != "" {
+		val.Name = e.Name
+	}
+	if e.Lon != 0 {
+		val.Lat = e.Lat
+	}
+	if e.Lon != 0 {
+		val.Lon = e.Lon
+	}
 }
 
 func (c *consumer) UpsertLine(e providers.ProviderLine) {
@@ -122,7 +133,7 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 }
 
 func (c *consumer) callProviders() {
-	c.providers = []providers.Provider{&dbtimetables.Timetables{}, &dbrest.DbRest{}}
+	c.providers = []providers.Provider{&dbrest.DbRest{}, &dbtimetables.Timetables{}}
 	c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
 	// 8000105, 8098105
 	c.stations = map[int]*Station{}
@@ -131,7 +142,6 @@ func (c *consumer) callProviders() {
 	for _, p := range c.providers {
 		p.Fetch(c)
 	}
-	log.Print(c.stations[0].Lat)
 }
 
 func defaultStations(evaNumbers ...int) []providers.ProviderStation {
@@ -140,48 +150,6 @@ func defaultStations(evaNumbers ...int) []providers.ProviderStation {
 		stations = append(stations, providers.ProviderStation{EvaNumber: n})
 	}
 	return stations
-}
-
-func (c *consumer) generateEdges() {
-	for _, line := range c.lines {
-		var stops []*LineStop
-		for _, stop := range line.Stops {
-			stops = append(stops, stop)
-		}
-		sort.Slice(stops, func(i, j int) bool {
-			// TODO current?
-			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
-		})
-		for i := 1; i < len(stops); i++ {
-			edge := &Edge{
-				Line:    line,
-				From:    stops[i-1].Station,
-				To:      stops[i].Station,
-				Message: stops[i-1].Message,
-			}
-			copyStopInfo(&stops[i-1].Planned, &stops[i].Planned, &edge.Planned)
-			copyStopInfo(&stops[i-1].Current, &stops[i].Current, &edge.Current)
-			copyStopInfo(&stops[i-1].Planned, &stops[i].Planned, &edge.Actual)
-			copyStopInfo(&stops[i-1].Current, &stops[i].Current, &edge.Actual)
-
-			edge.Current.DepartureTrack = stops[i-1].Current.DepartureTrack
-			edge.Current.Departure = stops[i-1].Current.Departure
-			edge.Current.Arrival = stops[i].Current.Arrival
-
-			line.Route = append(line.Route, edge)
-			edge.From.Departures = append(edge.From.Departures, edge)
-			edge.To.Arrivals = append(edge.To.Arrivals, edge)
-		}
-	}
-	for _, station := range c.stations {
-		sort.Slice(station.Departures, func(i, j int) bool {
-			return station.Departures[i].Actual.Departure.Before(station.Departures[j].Actual.Departure)
-		})
-		sort.Slice(station.Arrivals, func(i, j int) bool {
-			return station.Arrivals[i].Actual.Arrival.Before(station.Arrivals[j].Actual.Arrival)
-		})
-	}
-
 }
 
 func (c *consumer) rankStations() (destination *Station) {

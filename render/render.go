@@ -95,7 +95,7 @@ func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edge := &EdgePath{
 		Edge: *e,
-		ID:   fmt.Sprintf("%d_%d", e.Line.ID, e.From.EvaNumber),
+		ID:   fmt.Sprintf("%d_%d", e.Line.ID, e.From.EvaNumber), // do not suppose that one line never stops twice at same station
 		From: Coord{SpaceAxis: c.Stations[e.From], TimeAxis: e.Actual.Departure},
 		To:   Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
 	}
