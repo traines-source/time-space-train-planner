@@ -1,0 +1,1 @@
+swagger generate client -A dbrest -f dbrest.json 

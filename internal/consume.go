@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"traines.eu/time-space-train-planner/providers"
+	"traines.eu/time-space-train-planner/providers/dbrest"
 	"traines.eu/time-space-train-planner/providers/dbtimetables"
 )
 
@@ -121,7 +122,7 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 }
 
 func (c *consumer) callProviders() {
-	c.providers = []providers.Provider{&dbtimetables.Timetables{}}
+	c.providers = []providers.Provider{&dbtimetables.Timetables{}, &dbrest.DbRest{}}
 	c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
 	// 8000105, 8098105
 	c.stations = map[int]*Station{}
@@ -130,6 +131,7 @@ func (c *consumer) callProviders() {
 	for _, p := range c.providers {
 		p.Fetch(c)
 	}
+	log.Print(c.stations[0].Lat)
 }
 
 func defaultStations(evaNumbers ...int) []providers.ProviderStation {
