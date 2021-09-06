@@ -9,7 +9,7 @@
       "email": "dbopendata@deutschebahn.com"
     }
   },
-  "host": "apicache",
+  "host": "api.deutschebahn.com",
   "basePath": "/timetables/v1",
   "schemes": [
     "https",
