@@ -19,7 +19,8 @@ func shortestPaths(stations map[int]*Station, destination *Station) {
 	for _, edgeToDestination := range destination.Arrivals {
 		shortestPathsToEdge(stations, edgeToDestination)
 	}
-	markAsRedundantIfNoShortestPath(stations, destination)
+	//markAsRedundantIfNoShortestPath(stations, destination)
+	markEdgesAsRedundant(stations, destination)
 }
 
 func shortestPathsToEdge(stations map[int]*Station, edgeToDestination *Edge) {
@@ -101,6 +102,49 @@ func positiveDeltaMinutes(previous time.Time, next time.Time) int {
 
 func earlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
 	return positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, u.vertexAtDeparture.Actual.Departure) < positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, v.previous.Actual.Departure)
+}
+
+func markEdgesAsRedundant(stations map[int]*Station, destination *Station) {
+	for _, station := range stations {
+		for _, departure := range station.Departures {
+			markEdgeAsRedundant(departure, destination)
+		}
+	}
+}
+
+func markEdgeAsRedundant(edge *Edge, destination *Station) {
+	hopsByEdge, arrivalByEdge := calculateTravelLength(edge, destination)
+	if hopsByEdge == -1 {
+		edge.Redundant = true
+		return
+	}
+
+	for _, departure := range edge.From.Departures {
+		if departure == edge || departure.Actual.Departure.Before(edge.Actual.Departure) {
+			continue
+		}
+		hops, arrival := calculateTravelLength(departure, destination)
+		if hops != -1 && (arrival.Before(arrivalByEdge)) {
+			edge.Redundant = true
+			break
+		}
+	}
+}
+
+func calculateTravelLength(startEdge *Edge, destination *Station) (hops int32, arrival time.Time) {
+	nextEdge := startEdge
+	for {
+		if nextEdge.To == destination {
+			return hops, nextEdge.Actual.Arrival
+		}
+		if nextEdge.ShortestPath != nil {
+			nextEdge = nextEdge.ShortestPath
+		} else {
+			break
+		}
+		hops++
+	}
+	return -1, time.Time{}
 }
 
 func markAsRedundantIfRevisitsSameStation(edge *dijkstra) {
