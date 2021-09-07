@@ -12,7 +12,7 @@ import (
 
 type container struct {
 	Stations         map[*internal.Station]*StationLabel
-	Edges            map[[2]*internal.Edge]*EdgePath
+	Edges            map[string]*EdgePath
 	SortedEdges      []*EdgePath
 	minTime          time.Time
 	maxTime          time.Time
@@ -30,7 +30,7 @@ const (
 )
 
 func TimeSpace(stations map[int]*internal.Station, lines map[int]*internal.Line, wr io.Writer) {
-	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[[2]*internal.Edge]*EdgePath{}}
+	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[string]*EdgePath{}}
 	c.setupStations(stations)
 	c.setupEdges(lines)
 	c.gravitate()
@@ -63,14 +63,14 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			origin := l.Route[i]
-			if originEdgePath, ok := c.Edges[[2]*internal.Edge{origin, origin}]; ok {
+			if originEdgePath, ok := c.Edges[generateEdgeID(origin)]; ok {
 				var lastEdge *internal.Edge
-				for e := origin.ShortestPath; e != nil; e = e.ShortestPath {
-					if edgePath, ok := c.Edges[[2]*internal.Edge{e, e}]; ok {
+				for e := origin; e != nil; e = e.ShortestPath {
+					if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
-
 					}
-					if edgePath, ok := c.Edges[[2]*internal.Edge{lastEdge, e}]; ok {
+					if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
+
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
 					}
 					lastEdge = e
@@ -78,9 +78,6 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 			}
 		}
 	}
-	//log.Print("test")
-	//log.Printf("%+v", lines)
-	//log.Printf("%+v", c.Edges)
 }
 
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
@@ -95,23 +92,35 @@ func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edge := &EdgePath{
 		Edge: *e,
-		ID:   fmt.Sprintf("%d_%d", e.Line.ID, e.From.EvaNumber), // do not suppose that one line never stops twice at same station
+		ID:   generateEdgeID(e),
 		From: Coord{SpaceAxis: c.Stations[e.From], TimeAxis: e.Actual.Departure},
 		To:   Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
 	}
-	c.Edges[[2]*internal.Edge{e, e}] = edge
+	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge)
 	return edge
 }
 
+func generateEdgeID(e *internal.Edge) string {
+	return fmt.Sprintf("%d_%d_%d", e.Line.ID, e.From.EvaNumber, e.Actual.Departure.Unix())
+}
+
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
 	edge := &EdgePath{
+		ID:   generateStationEdgeID(last, this),
 		From: Coord{SpaceAxis: c.Stations[this.From], TimeAxis: last.Actual.Arrival},
 		To:   Coord{SpaceAxis: c.Stations[this.From], TimeAxis: this.Actual.Departure},
 	}
-	c.Edges[[2]*internal.Edge{last, this}] = edge
+	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge)
 	return edge
+}
+
+func generateStationEdgeID(last *internal.Edge, this *internal.Edge) string {
+	if last == nil {
+		return "undefined"
+	}
+	return fmt.Sprintf("%d_%d_%d_station", this.Line.ID, this.From.EvaNumber, last.Actual.Arrival.Unix())
 }
 
 func (c *container) gravitate() {
@@ -144,7 +153,6 @@ func (c *container) timeAxis(t time.Time) int {
 		return 50
 	}
 	delta := float32(t.Unix() - c.minTime.Unix())
-	//log.Print(t, delta, c.timeAxisDistance)
 	return int(delta/c.timeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
 }
 
