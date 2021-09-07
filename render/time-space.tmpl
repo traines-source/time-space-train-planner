@@ -2,7 +2,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
     viewBox="0 0 {{.SpaceAxisSize}} {{.TimeAxisSize}}">
     <defs>
-        <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5"
+        <marker id="dot-redundant-false" viewBox="0 0 10 10" refX="5" refY="5"
+            markerWidth="4" markerHeight="4" filter="none">
+            <circle cx="5" cy="5" r="5" />
+        </marker>
+         <marker id="dot-redundant-true" viewBox="0 0 10 10" refX="5" refY="5"
             markerWidth="4" markerHeight="4" filter="none">
             <circle cx="5" cy="5" r="5" />
         </marker>
@@ -15,8 +19,8 @@
 {{end}}
 {{range .SortedEdges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-        marker-start="url(#dot)" marker-end="url(#dot)"
-        class="edge redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}"
+        marker-start="url(#dot-redundant-{{.Redundant}})" marker-end="url(#dot-redundant-{{.Redundant}})"
+        class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}"
         />
     <path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         class="edge-toucharea"

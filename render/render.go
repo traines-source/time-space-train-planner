@@ -110,6 +110,9 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		ID:   generateStationEdgeID(last, this),
 		From: Coord{SpaceAxis: c.Stations[this.From], TimeAxis: last.Actual.Arrival},
 		To:   Coord{SpaceAxis: c.Stations[this.From], TimeAxis: this.Actual.Departure},
+		Edge: internal.Edge{
+			Redundant: last.Redundant || this.Redundant,
+		},
 	}
 	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge)
@@ -176,7 +179,18 @@ func (p *EdgePath) Label() string {
 	} else {
 		label = fmt.Sprintf("%d", e.Line.ID)
 	}
+	if e.Line.Type == "Foot" {
+		return "🚶 " + label
+	}
 	return e.Line.Type + " " + label
+}
+
+func (p *EdgePath) Type() string {
+	e := p.Edge
+	if e.Line == nil {
+		return ""
+	}
+	return e.Line.Type
 }
 
 func (p *EdgePath) Departure() string {

@@ -1,6 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+
+svg {
+    background-color: white;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 16px;
+    line-height: 16px;
+}
+
 .edge {
     stroke-width:2px;
     stroke: black;
+    stroke-dasharray: 5 2;
 }
 
 .edge-toucharea {
@@ -8,9 +18,18 @@
     stroke: transparent;
 }
 
-#dot circle {
+.redundant-true {
+    stroke: #dbdbdb;
+}
+
+#dot-redundant-true circle {
     stroke: none;
-    fill: context-fill;
+    fill: #dbdbdb;
+}
+
+#dot-redundant-false circle {
+    stroke: none;
+    fill: black;
 }
 
 .arrival, .departure, .label {
@@ -25,6 +44,11 @@
     stroke: red;
 }
 
-.redundant-true {
-    stroke: #dbdbdb;
+.type-Foot {
+    stroke-dasharray: 1 5;
 }
+
+.type-ICE, .type-IC {
+    stroke-dasharray: 1 0;
+}
+
