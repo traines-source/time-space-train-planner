@@ -94,7 +94,7 @@ func travelBackDist(next *Edge, previous *Edge) int {
 
 func positiveDeltaMinutes(previous time.Time, next time.Time) int {
 	min := int(next.Sub(previous).Minutes())
-	if min <= 0 {
+	if min < 0 {
 		return inf
 	}
 	return min
