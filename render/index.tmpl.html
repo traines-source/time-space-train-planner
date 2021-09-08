@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TSTP</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="./conf.js"></script>
+</head>
+<body>
+
+<form action="?" onsubmit="return prepareSubmit()">
+
+<div>
+    <input id="from-name" placeholder="From" class="station-autocomplete" value="{{.From.Name}}" {{if ne .From.EvaNumber 0}}disabled{{end}}>
+    <input type="hidden" name="from" id="from" value="{{.From.EvaNumber}}">
+</div>
+<div>
+    <input id="to-name" placeholder="To" class="station-autocomplete" value="{{.To.Name}}" {{if ne .To.EvaNumber 0}}disabled{{end}}>
+    <input type="hidden" name="to" id="to" value="{{.To.EvaNumber}}">
+</div>
+<p>
+    You need to give via stations. Only direct connections between these stations will be used for route planning.
+</p>
+{{range $idx, $e := .Stations}}
+<div>
+    <input id="via-{{$idx}}-name" placeholder="Via" class="station-autocomplete" value="{{$e.Name}}">
+    <input type="hidden" name="vias" id="via-{{$idx}}" value="{{$e.EvaNumber}}">
+</div>
+{{end}}
+
+
+<input type="submit" value="Submit">
+
+</form>
+ 
+<script>
+    var stationMap = {};
+    $(".station-autocomplete").autocomplete({
+        source: function( request, response ) {
+            fetch(STATIONS_API + "?query="+request.term)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                var list = Object.values(data).map(station => {
+                    console.log(station.name, station["name"]);
+                    stationMap[station.name] = station.id;
+                    return station.name;
+                });
+                console.log(list)
+                response(list);
+            });
+        }
+    });
+
+    function prepareSubmit() {
+        const inputs = document.getElementsByClassName('station-autocomplete');
+        for (var i=0;i<inputs.length;i++) {
+            if (!mapEvaNumber(inputs[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function mapEvaNumber(inputField) {
+        if (inputField.disabled) {
+            return true;
+        }
+        const evaNumber = stationMap[inputField.value];
+        const id = inputField.id.replace('-name', '');
+        if (evaNumber == undefined) {
+            inputField.value = '';
+            return id != 'from' && id != 'to';
+        }
+        document.getElementById(id).value = evaNumber;
+        return true;
+    }
+</script>
+ 
+</body>
+</html>

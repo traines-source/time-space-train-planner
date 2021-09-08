@@ -21,7 +21,7 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("4h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	from = time.Date(t.Year(), t.Month(), 7, 19, 0, 0, 0, time.Local)
+	from = time.Date(t.Year(), t.Month(), 8, 19, 0, 0, 0, time.Local)
 	return from, from.Add(delta)
 }
 
@@ -132,10 +132,12 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	to.ArrivalTrack = from.ArrivalTrack
 }
 
-func (c *consumer) callProviders() {
+func (c *consumer) callProviders(evaNumbers []int) {
 	c.providers = []providers.Provider{&dbrest.DbRest{}, &dbtimetables.Timetables{}}
-	c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
+	//c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
 	// 8000105, 8098105
+	c.providerStations = defaultStations(evaNumbers)
+
 	c.stations = map[int]*Station{}
 	c.lines = map[int]*Line{}
 
@@ -144,7 +146,7 @@ func (c *consumer) callProviders() {
 	}
 }
 
-func defaultStations(evaNumbers ...int) []providers.ProviderStation {
+func defaultStations(evaNumbers []int) []providers.ProviderStation {
 	var stations []providers.ProviderStation
 	for _, n := range evaNumbers {
 		stations = append(stations, providers.ProviderStation{EvaNumber: n})
@@ -174,9 +176,15 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData() (map[int]*Station, map[int]*Line) {
+func ObtainData(from int, to int, vias []int) (map[int]*Station, map[int]*Line) {
 	c := &consumer{}
-	c.callProviders()
+
+	var evaNumbers []int
+	evaNumbers = append(evaNumbers, from)
+	evaNumbers = append(evaNumbers, vias...)
+	evaNumbers = append(evaNumbers, to)
+
+	c.callProviders(evaNumbers)
 	c.generateEdges()
 	destination := c.rankStations()
 	shortestPaths(c.stations, destination)

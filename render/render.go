@@ -144,7 +144,7 @@ func (c *container) indicateTimes() {
 }
 
 func (c *container) render(wr io.Writer) {
-	t := template.Must(template.New("time-space.tmpl").ParseFiles("./render/time-space.tmpl"))
+	t := template.Must(template.New("time-space.tmpl.svg").ParseFiles("./render/time-space.tmpl.svg"))
 	err := t.Execute(wr, c)
 	if err != nil {
 		panic(err)
