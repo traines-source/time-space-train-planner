@@ -71,8 +71,11 @@
         const evaNumber = stationMap[inputField.value];
         const id = inputField.id.replace('-name', '');
         if (evaNumber == undefined) {
-            inputField.value = '';
-            return id != 'from' && id != 'to';
+            if (id == 'from' || id == 'to') {
+                inputField.value = '';
+                return false
+            }
+            return true
         }
         document.getElementById(id).value = evaNumber;
         return true;

@@ -32,6 +32,10 @@ svg {
     fill: black;
 }
 
+.station-label {
+    text-anchor: middle;
+}
+
 .arrival, .departure, .label {
     visibility: hidden;
 }
