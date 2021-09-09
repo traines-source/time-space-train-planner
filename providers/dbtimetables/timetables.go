@@ -113,7 +113,7 @@ func ato2i(r []rune, index int) int {
 }
 
 func (p *Timetables) prepareClient() {
-	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("API_CACHE_PREFIX")+apiclient.DefaultBasePath, apiclient.DefaultSchemes)
+	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("API_CACHE_PREFIX")+apiclient.DefaultBasePath, []string{os.Getenv("API_CACHE_SCHEME")})
 	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("DB_API_ACCESS_TOKEN"))
 	r.DefaultMediaType = runtime.XMLMime
 	r.Consumers = map[string]runtime.Consumer{

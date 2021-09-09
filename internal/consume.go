@@ -21,7 +21,7 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("4h")
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	from = time.Date(t.Year(), t.Month(), 8, 19, 0, 0, 0, time.Local)
+	from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
 	return from, from.Add(delta)
 }
 

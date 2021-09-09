@@ -46,7 +46,7 @@ func (p *DbRest) requestStation(station providers.ProviderStation) {
 }
 
 func (p *DbRest) prepareClient() {
-	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("API_CACHE_PREFIX")+"/dbrest", apiclient.DefaultSchemes)
+	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("DBREST_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
 	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("DB_API_ACCESS_TOKEN"))
 	p.client = apiclient.New(r, strfmt.Default)
 }
