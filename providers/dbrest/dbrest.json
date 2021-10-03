@@ -100,6 +100,176 @@
           }
         }
       }
+    },
+    "/stops/{id}/departures": {
+      "get": {
+        "summary": "Fetches departures at a stop/station.",
+        "description": "Uses [`hafasClient.departures()`](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md) to **query departures at a stop/station**.",
+        "externalDocs": {
+          "description": "`hafasClient.departures()` documentation",
+          "url": "https://github.com/public-transport/hafas-client/blob/5/docs/departures.md"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "stop/station ID to show departures for",
+            "required": true,
+                          "type": "string"
+
+          },
+          {
+            "name": "when",
+            "in": "query",
+            "description": "Date & time to get departures for. – Default: *now*",
+                          "type": "string",
+              "format": "date-time"
+
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Filter departures by direction.",
+                          "type": "string"
+
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "description": "Show departures for how many minutes?",
+                          "type": "integer",
+              "default": 10
+
+          },
+          {
+            "name": "results",
+            "in": "query",
+            "description": "Max. number of departures. – Default: *whatever HAFAS wants",
+                          "type": "integer"
+
+          },
+          {
+            "name": "linesOfStops",
+            "in": "query",
+            "description": "Parse & return lines of each stop/station?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "remarks",
+            "in": "query",
+            "description": "Parse & return hints & warnings?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "Language of the results.",
+                          "type": "string",
+              "default": "en"
+
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of departures, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stops/{id}/arrivals": {
+      "get": {
+        "summary": "Fetches arrivals at a stop/station.",
+        "description": "Works like `/stops/{id}/departures`, except that it uses [`hafasClient.arrivals()`](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md) to **query arrivals at a stop/station**.",
+        "externalDocs": {
+          "description": "`hafasClient.arrivals()` documentation",
+          "url": "https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md"
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "stop/station ID to show arrivals for",
+            "required": true,
+                          "type": "string"
+
+          },
+          {
+            "name": "when",
+            "in": "query",
+            "description": "Date & time to get departures for. – Default: *now*",
+                          "type": "string",
+              "format": "date-time"
+
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "description": "Filter departures by direction.",
+                          "type": "string"
+
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "description": "Show departures for how many minutes?",
+                          "type": "integer",
+              "default": 10
+
+          },
+          {
+            "name": "results",
+            "in": "query",
+            "description": "Max. number of departures. – Default: *whatever HAFAS wants*",
+                          "type": "integer"
+
+          },
+          {
+            "name": "linesOfStops",
+            "in": "query",
+            "description": "Parse & return lines of each stop/station?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "remarks",
+            "in": "query",
+            "description": "Parse & return hints & warnings?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "Language of the results.",
+                          "type": "string",
+              "default": "en"
+
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of arrivals, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
