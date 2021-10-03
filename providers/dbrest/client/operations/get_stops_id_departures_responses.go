@@ -11,6 +11,8 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+
+	"traines.eu/time-space-train-planner/providers/dbrest/models"
 )
 
 // GetStopsIDDeparturesReader is a Reader for the GetStopsIDDepartures structure.
@@ -43,14 +45,14 @@ func NewGetStopsIDDeparturesOK() *GetStopsIDDeparturesOK {
 An array of departures, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md).
 */
 type GetStopsIDDeparturesOK struct {
-	Payload []interface{}
+	Payload []*models.DepartureArrival
 }
 
 func (o *GetStopsIDDeparturesOK) Error() string {
 	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesOK  %+v", 200, o.Payload)
 }
 
-func (o *GetStopsIDDeparturesOK) GetPayload() []interface{} {
+func (o *GetStopsIDDeparturesOK) GetPayload() []*models.DepartureArrival {
 	return o.Payload
 }
 

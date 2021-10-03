@@ -179,7 +179,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object"
+                "$ref": "#/definitions/departureArrival"
               }
             }
           }
@@ -264,12 +264,469 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "object"
+                "$ref": "#/definitions/departureArrival"
               }
             }
           }
         }
       }
+    },
+    "/journeys": {
+      "get": {
+        "summary": "Finds journeys from A to B.",
+        "description": "Uses [`hafasClient.journeys()`](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md) to **find journeys from A (`from`) to B (`to`)**.",
+        "externalDocs": {
+          "description": "`hafasClient.journeys()` documentation",
+          "url": "https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md"
+        },
+        "parameters": [
+          {
+            "name": "departure",
+            "in": "query",
+            "description": "Compute journeys departing at this date/time. Mutually exclusive with `arrival`. – Default: *now*",
+                          "type": "string",
+              "format": "date-time"
+
+          },
+          {
+            "name": "arrival",
+            "in": "query",
+            "description": "Compute journeys arriving at this date/time. Mutually exclusive with `departure`. – Default: *now*",
+                          "type": "string",
+              "format": "date-time"
+
+          },
+          {
+            "name": "earlierThan",
+            "in": "query",
+            "description": "Compute journeys \"before\" an `ealierRef`.",
+                          "type": "string"
+
+          },
+          {
+            "name": "laterThan",
+            "in": "query",
+            "description": "Compute journeys \"after\" an `laterRef`.",
+                          "type": "string"
+
+          },
+          {
+            "name": "results",
+            "in": "query",
+            "description": "Max. number of journeys.",
+                          "type": "integer",
+              "default": 3
+
+          },
+          {
+            "name": "stopovers",
+            "in": "query",
+            "description": "Fetch & parse stopovers on the way?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "transfers",
+            "in": "query",
+            "description": "Maximum number of transfers. – Default: *let HAFAS decide*",
+                          "type": "integer"
+
+          },
+          {
+            "name": "transferTime",
+            "in": "query",
+            "description": "Minimum time in minutes for a single transfer.",
+                          "type": "integer",
+              "default": 0
+
+          },
+          {
+            "name": "accessibility",
+            "in": "query",
+            "description": "`partial` or `complete`. – Default: *not accessible*",
+                          "type": "string"
+
+          },
+          {
+            "name": "bike",
+            "in": "query",
+            "description": "Compute only bike-friendly journeys?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "startWithWalking",
+            "in": "query",
+            "description": "Consider walking to nearby stations at the beginning of a journey?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "walkingSpeed",
+            "in": "query",
+            "description": "`slow`, `normal` or `fast`.",
+                          "type": "string",
+              "default": "normal",
+              "enum": [
+                "slow",
+                "normal",
+                "fast"
+              ]
+
+          },
+          {
+            "name": "tickets",
+            "in": "query",
+            "description": "Return information about available tickets?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "polylines",
+            "in": "query",
+            "description": "Fetch & parse a shape for each journey leg?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "remarks",
+            "in": "query",
+            "description": "Parse & return hints & warnings?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "scheduledDays",
+            "in": "query",
+            "description": "Parse & return dates each journey is valid on?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "Language of the results.",
+                          "type": "string",
+              "default": "en"
+
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of journeys, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md).",
+            "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+            }
+          }
+        }
+      }
+    },
+    "/locations": {
+      "get": {
+        "summary": "Finds stops/stations, POIs and addresses matching a query.",
+        "description": "Uses [`hafasClient.locations()`](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md) to **find stops/stations, POIs and addresses matching `query`**.",
+        "externalDocs": {
+          "description": "`hafasClient.locations()` documentation",
+          "url": "https://github.com/public-transport/hafas-client/blob/5/docs/locations.md"
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "The term to search for.",
+            "required": true,
+                          "type": "string"
+
+          },
+          {
+            "name": "fuzzy",
+            "in": "query",
+            "description": "Find more than exact matches?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "results",
+            "in": "query",
+            "description": "How many stations shall be shown?",
+                          "type": "integer",
+              "default": 10
+
+          },
+          {
+            "name": "stops",
+            "in": "query",
+            "description": "Show stops/stations?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "addresses",
+            "in": "query",
+            "description": "Show points of interest?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "poi",
+            "in": "query",
+            "description": "Show addresses?",
+                          "type": "boolean",
+              "default": true
+
+          },
+          {
+            "name": "linesOfStops",
+            "in": "query",
+            "description": "Parse & return lines of each stop/station?",
+                          "type": "boolean",
+              "default": false
+
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "description": "Language of the results.",
+                          "type": "string",
+              "default": "en"
+
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of locations, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md).",
+            "schema": {
+                                  "type": "array",
+                  "items": {
+                    "type": "object"
+
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "departureArrival": {
+      "description": "Dep or Arr",
+      "type": "object",
+      "properties": {
+        "tripId": {
+          "type": "string"
+        },
+        "stop": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "type",
+                "id",
+                "latitude",
+                "longitude"
+              ]
+            },
+            "products": {
+              "type": "object",
+              "properties": {
+                "nationalExpress": {
+                  "type": "boolean"
+                },
+                "national": {
+                  "type": "boolean"
+                },
+                "regionalExp": {
+                  "type": "boolean"
+                },
+                "regional": {
+                  "type": "boolean"
+                },
+                "suburban": {
+                  "type": "boolean"
+                },
+                "bus": {
+                  "type": "boolean"
+                },
+                "ferry": {
+                  "type": "boolean"
+                },
+                "subway": {
+                  "type": "boolean"
+                },
+                "tram": {
+                  "type": "boolean"
+                },
+                "taxi": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "nationalExpress",
+                "national",
+                "regionalExp",
+                "regional",
+                "suburban",
+                "bus",
+                "ferry",
+                "subway",
+                "tram",
+                "taxi"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "name",
+            "location",
+            "products"
+          ]
+        },
+        "when": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "plannedWhen": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "delay": {
+          "type": "integer"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "plannedPlatform": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "provenance": {
+          "type": "null"
+        },
+        "line": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "fahrtNr": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "public": {
+              "type": "boolean"
+            },
+            "adminCode": {
+              "type": "string"
+            },
+            "productName": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string"
+            },
+            "product": {
+              "type": "string"
+            },
+            "operator": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id",
+                "name"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "fahrtNr",
+            "name",
+            "public",
+            "adminCode",
+            "productName",
+            "mode",
+            "product",
+            "operator"
+          ]
+        },
+        "remarks": {
+          "type": "array",
+          "items": {}
+        },
+        "loadFactor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tripId",
+        "stop",
+        "when",
+        "plannedWhen",
+        "delay",
+        "platform",
+        "plannedPlatform",
+        "direction",
+        "provenance",
+        "line",
+        "remarks",
+        "loadFactor"
+      ]
     }
   }
 }

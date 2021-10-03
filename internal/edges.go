@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"sort"
 	"time"
@@ -16,6 +17,7 @@ func (c *consumer) generateTimetableEdges() {
 		for _, stop := range line.Stops {
 			stops = append(stops, stop)
 		}
+		log.Print(len(c.lines), len(stops))
 		sort.Slice(stops, func(i, j int) bool {
 			// TODO current?
 			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
@@ -31,6 +33,8 @@ func (c *consumer) generateTimetableEdges() {
 			copyStopInfo(&stops[i-1].Current, &stops[i].Current, &edge.Current)
 			copyStopInfo(&stops[i-1].Planned, &stops[i].Planned, &edge.Actual)
 			copyStopInfo(&stops[i-1].Current, &stops[i].Current, &edge.Actual)
+
+			log.Print(edge.Actual.Departure, edge.Actual.Arrival, edge.Line.Name, edge.Line.ID)
 
 			edge.Current.DepartureTrack = stops[i-1].Current.DepartureTrack
 			edge.Current.ArrivalTrack = stops[i].Current.ArrivalTrack

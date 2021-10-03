@@ -27,6 +27,10 @@ type Client struct {
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	GetJourneys(params *GetJourneysParams) (*GetJourneysOK, error)
+
+	GetLocations(params *GetLocationsParams) (*GetLocationsOK, error)
+
 	GetStationsID(params *GetStationsIDParams) (*GetStationsIDOK, error)
 
 	GetStopsIDArrivals(params *GetStopsIDArrivalsParams) (*GetStopsIDArrivalsOK, error)
@@ -34,6 +38,78 @@ type ClientService interface {
 	GetStopsIDDepartures(params *GetStopsIDDeparturesParams) (*GetStopsIDDeparturesOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+  GetJourneys finds journeys from a to b
+
+  Uses [`hafasClient.journeys()`](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md) to **find journeys from A (`from`) to B (`to`)**.
+*/
+func (a *Client) GetJourneys(params *GetJourneysParams) (*GetJourneysOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetJourneysParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetJourneys",
+		Method:             "GET",
+		PathPattern:        "/journeys",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetJourneysReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetJourneysOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetJourneys: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  GetLocations finds stops stations p o is and addresses matching a query
+
+  Uses [`hafasClient.locations()`](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md) to **find stops/stations, POIs and addresses matching `query`**.
+*/
+func (a *Client) GetLocations(params *GetLocationsParams) (*GetLocationsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetLocationsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetLocations",
+		Method:             "GET",
+		PathPattern:        "/locations",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetLocationsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetLocationsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for GetLocations: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*

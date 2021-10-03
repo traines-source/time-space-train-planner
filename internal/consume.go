@@ -7,7 +7,6 @@ import (
 
 	"traines.eu/time-space-train-planner/providers"
 	"traines.eu/time-space-train-planner/providers/dbrest"
-	"traines.eu/time-space-train-planner/providers/dbtimetables"
 )
 
 type consumer struct {
@@ -22,10 +21,10 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	delta, _ := time.ParseDuration("4h")
 
 	log.Print("Requesting for ", c.dateTime)
-	t := time.Now()
-	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
+	//t := time.Now()
+	//from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
 	//from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
-	//from = c.dateTime
+	from = c.dateTime
 	return from, from.Add(delta)
 }
 
@@ -114,6 +113,7 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 		val = &LineStop{Station: station}
 		line.Stops[station] = val
 	}
+	log.Print("len", len(c.lines), len(line.Stops))
 	if e.Planned != nil {
 		copyProviderStopInfo(e.Planned, &val.Planned)
 	}
@@ -124,20 +124,26 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 }
 
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
-	to.Departure = from.Departure
-	to.Arrival = from.Arrival
-	if from.Departure.IsZero() {
-		to.Departure = from.Arrival
+	if to.Departure.IsZero() {
+		to.Departure = from.Departure
+		if from.Departure.IsZero() {
+			to.Departure = from.Arrival
+		}
+		to.DepartureTrack = from.DepartureTrack
 	}
-	if from.Arrival.IsZero() {
-		to.Arrival = from.Departure
+	if to.Arrival.IsZero() {
+		to.Arrival = from.Arrival
+		if from.Arrival.IsZero() {
+			to.Arrival = from.Departure
+		}
+		to.ArrivalTrack = from.ArrivalTrack
+	} else {
+		log.Print("detece")
 	}
-	to.DepartureTrack = from.DepartureTrack
-	to.ArrivalTrack = from.ArrivalTrack
 }
 
 func (c *consumer) callProviders(evaNumbers []int) {
-	c.providers = []providers.Provider{&dbrest.DbRest{}, &dbtimetables.Timetables{}}
+	c.providers = []providers.Provider{&dbrest.DbRest{}}
 	//c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
 	// 8000105, 8098105
 	c.providerStations = defaultStations(evaNumbers)
