@@ -23,16 +23,17 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 	var vias = queryIntList(r.URL.Query()["vias"])
 
 	var form = r.URL.Query()["form"]
+	var datetime = r.URL.Query().Get("datetime")
 
 	if len(from) > 0 && len(to) > 0 {
-		stations, lines := internal.ObtainData(from[0], to[0], vias)
+		stations, lines := internal.ObtainData(from[0], to[0], vias, datetime)
 		if len(vias) > 0 && len(form) == 0 {
 			w.Header().Set("Content-Type", "image/svg+xml")
 			render.TimeSpace(stations, lines, w)
 			return
 		}
 		log.Print(to[0], stations)
-		render.Vias(stations, from[0], to[0], w)
+		render.Vias(stations, from[0], to[0], datetime, w)
 		return
 	}
 	render.Index(w)

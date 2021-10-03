@@ -15,13 +15,17 @@ type consumer struct {
 	providerStations []providers.ProviderStation
 	stations         map[int]*Station
 	lines            map[int]*Line
+	dateTime         time.Time
 }
 
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
 	delta, _ := time.ParseDuration("4h")
+
+	log.Print("Requesting for ", c.dateTime)
 	t := time.Now()
 	from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
-	from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
+	//from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
+	//from = c.dateTime
 	return from, from.Add(delta)
 }
 
@@ -176,8 +180,10 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData(from int, to int, vias []int) (map[int]*Station, map[int]*Line) {
+func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[int]*Line) {
 	c := &consumer{}
+
+	c.parseDate(dateTime)
 
 	var evaNumbers []int
 	evaNumbers = append(evaNumbers, from)
@@ -189,4 +195,14 @@ func ObtainData(from int, to int, vias []int) (map[int]*Station, map[int]*Line) 
 	destination := c.rankStations()
 	shortestPaths(c.stations, destination)
 	return c.stations, c.lines
+}
+
+func (c *consumer) parseDate(dateTime string) {
+	layout := "2006-01-02T15:04"
+	t, err := time.Parse(layout, dateTime)
+
+	if err != nil {
+		log.Panic(err)
+	}
+	c.dateTime = t
 }

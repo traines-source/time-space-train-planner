@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const MAX_FOOT_DIST_METERS = 3000
+const MAX_FOOT_DIST_METERS = 4000
 const FOOT_KMH = 5
 
 func (c *consumer) generateTimetableEdges() {

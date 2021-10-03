@@ -14,17 +14,22 @@ type model struct {
 	From     *internal.Station
 	To       *internal.Station
 	Stations []*internal.Station
+	DateTime string
 }
 
 func Index(wr io.Writer) {
-	m := &model{}
+	m := &model{
+		From: &internal.Station{},
+		To:   &internal.Station{},
+	}
 	m.template(wr)
 }
 
-func Vias(stations map[int]*internal.Station, from int, to int, wr io.Writer) {
+func Vias(stations map[int]*internal.Station, from int, to int, dateTime string, wr io.Writer) {
 	m := &model{
-		From: stations[from],
-		To:   stations[to],
+		From:     stations[from],
+		To:       stations[to],
+		DateTime: dateTime,
 	}
 	for _, s := range stations {
 		if s.EvaNumber == from || s.EvaNumber == to {
@@ -36,10 +41,14 @@ func Vias(stations map[int]*internal.Station, from int, to int, wr io.Writer) {
 		return m.Stations[i].Rank < m.Stations[j].Rank
 	})
 	var l = len(m.Stations)
-	for i := 0; i < 10-l; i++ {
+	fillupStations(m, l)
+	m.template(wr)
+}
+
+func fillupStations(m *model, existing int) {
+	for i := 0; i < 10-existing; i++ {
 		m.Stations = append(m.Stations, &internal.Station{})
 	}
-	m.template(wr)
 }
 
 func (m *model) template(wr io.Writer) {
