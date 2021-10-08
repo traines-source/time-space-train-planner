@@ -199,7 +199,7 @@ func (p *EdgePath) Departure() string {
 		return ""
 	}
 	var label string
-	label = simpleTime(e.Actual.Departure)
+	label = simpleTime(e.Actual.Departure) + delay(e.Current.Departure, e.Planned.Departure)
 	if e.Planned.DepartureTrack != "" {
 		label += e.Planned.DepartureTrack
 	}
@@ -211,7 +211,7 @@ func (p *EdgePath) Arrival() string {
 	if e.Line == nil {
 		return ""
 	}
-	label := simpleTime(e.Actual.Arrival)
+	label := simpleTime(e.Actual.Arrival) + delay(e.Current.Arrival, e.Planned.Arrival)
 	if e.Planned.ArrivalTrack != "" {
 		label += e.Planned.ArrivalTrack
 	}
@@ -220,4 +220,11 @@ func (p *EdgePath) Arrival() string {
 
 func simpleTime(t time.Time) string {
 	return fmt.Sprintf("%02d:%02d ", t.Hour(), t.Minute())
+}
+
+func delay(current time.Time, planned time.Time) string {
+	if !current.IsZero() {
+		return " (" + fmt.Sprintf("%+.0f", current.Sub(planned).Minutes()) + ")"
+	}
+	return ""
 }

@@ -127,7 +127,7 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 		if stop.PlannedPlatform != nil {
 			planned.ArrivalTrack = *stop.PlannedPlatform
 		}
-		if stop.When != nil {
+		if stop.When != nil && stop.Delay != nil {
 			current.Arrival = time.Time(*stop.When)
 		}
 		if stop.Platform != nil {
@@ -140,7 +140,7 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 		if stop.PlannedPlatform != nil {
 			planned.DepartureTrack = *stop.PlannedPlatform
 		}
-		if stop.When != nil {
+		if stop.When != nil && stop.Delay != nil {
 			current.Departure = time.Time(*stop.When)
 		}
 		if stop.Platform != nil {
