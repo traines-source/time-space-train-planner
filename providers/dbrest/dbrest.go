@@ -35,10 +35,7 @@ func (p *DbRest) requestStations() {
 
 func (p *DbRest) requestDeparturesAndArrivals() {
 	stations := p.consumer.Stations()
-	for i, station := range stations {
-		if i > 3 {
-			break
-		}
+	for _, station := range stations {
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
 		p.requestArrival(station, from, int64(duration))
@@ -101,7 +98,6 @@ func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, evaNumb
 		if err != nil {
 			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
 		}
-		log.Print(lineID, *stop.Line.Name, stop.When)
 		p.parseLine(stop, lineID)
 		p.parseLineStop(stop, arrival, evaNumber, lineID)
 	}
@@ -112,29 +108,42 @@ func (p *DbRest) parseLine(stop *models.DepartureArrival, lineID int) {
 	if stop.Line.Name != nil {
 		lineName = *stop.Line.Name
 	}
-	p.consumer.UpsertLine(providers.ProviderLine{ID: lineID, Type: *stop.Line.ProductName, Name: lineName})
+	productName := ""
+	if stop.Line.ProductName != nil {
+		productName = *stop.Line.ProductName
+	}
+	p.consumer.UpsertLine(providers.ProviderLine{ID: lineID, Type: productName, Name: lineName})
 }
 
 func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaNumber int, lineID int) {
 
 	planned := &providers.ProviderLineStopInfo{}
 	current := &providers.ProviderLineStopInfo{}
+
 	if arrival {
-		if stop.PlannedWhen != nil && stop.PlannedPlatform != nil {
-			planned.Arrival = (time.Time)(*stop.PlannedWhen)
+		if stop.PlannedWhen != nil {
+			planned.Arrival = time.Time(*stop.PlannedWhen)
+		}
+		if stop.PlannedPlatform != nil {
 			planned.ArrivalTrack = *stop.PlannedPlatform
 		}
-		if stop.When != nil && stop.Platform != nil {
-			current.Arrival = (time.Time)(*stop.When)
+		if stop.When != nil {
+			current.Arrival = time.Time(*stop.When)
+		}
+		if stop.Platform != nil {
 			current.ArrivalTrack = *stop.Platform
 		}
 	} else {
-		if stop.PlannedWhen != nil && stop.PlannedPlatform != nil {
-			planned.Departure = (time.Time)(*stop.PlannedWhen)
+		if stop.PlannedWhen != nil {
+			planned.Departure = time.Time(*stop.PlannedWhen)
+		}
+		if stop.PlannedPlatform != nil {
 			planned.DepartureTrack = *stop.PlannedPlatform
 		}
-		if stop.When != nil && stop.Platform != nil {
-			current.Departure = (time.Time)(*stop.When)
+		if stop.When != nil {
+			current.Departure = time.Time(*stop.When)
+		}
+		if stop.Platform != nil {
 			current.DepartureTrack = *stop.Platform
 		}
 	}

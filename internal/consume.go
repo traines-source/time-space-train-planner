@@ -113,7 +113,6 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 		val = &LineStop{Station: station}
 		line.Stops[station] = val
 	}
-	log.Print("len", len(c.lines), len(line.Stops))
 	if e.Planned != nil {
 		copyProviderStopInfo(e.Planned, &val.Planned)
 	}
@@ -137,8 +136,6 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 			to.Arrival = from.Departure
 		}
 		to.ArrivalTrack = from.ArrivalTrack
-	} else {
-		log.Print("detece")
 	}
 }
 

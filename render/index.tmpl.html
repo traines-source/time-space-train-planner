@@ -39,6 +39,8 @@
         if (document.getElementById('datetime').value == "") {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            now.setSeconds(0);
+            now.setMilliseconds(0);
             document.getElementById('datetime').value = now.toISOString().slice(0, -1);
         }
     </script>
