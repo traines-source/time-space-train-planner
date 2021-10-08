@@ -161,14 +161,12 @@ func defaultStations(evaNumbers []int) []providers.ProviderStation {
 	return stations
 }
 
-func (c *consumer) rankStations() (destination *Station) {
+func (c *consumer) rankStations() {
 	i := 0
 	for _, s := range c.providerStations {
 		c.stations[s.EvaNumber].Rank = i
-		destination = c.stations[s.EvaNumber]
 		i++
 	}
-	return destination
 }
 
 func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
@@ -194,9 +192,9 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 	evaNumbers = append(evaNumbers, to)
 
 	c.callProviders(evaNumbers)
-	c.generateEdges()
-	destination := c.rankStations()
-	shortestPaths(c.stations, destination)
+	c.generateEdges(c.stations[from], c.stations[to])
+	c.rankStations()
+	shortestPaths(c.stations, c.stations[to])
 	return c.stations, c.lines
 }
 

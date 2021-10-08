@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-const MAX_FOOT_DIST_METERS = 4000
-const FOOT_KMH = 5
+const MAX_FOOT_DIST_METERS = 5000
+const FOOT_KMH = 6
 
 func (c *consumer) generateTimetableEdges() {
 	for _, line := range c.lines {
@@ -44,7 +44,7 @@ func (c *consumer) generateTimetableEdges() {
 	}
 }
 
-func (c *consumer) generateOnFootEdges() {
+func (c *consumer) generateOnFootEdges(origin *Station, destination *Station) {
 	for _, s1 := range c.stations {
 		for _, s2 := range c.stations {
 			if s1 == s2 {
@@ -54,20 +54,30 @@ func (c *consumer) generateOnFootEdges() {
 			if dist > MAX_FOOT_DIST_METERS {
 				continue
 			}
-			c.generateOnFootEdgesBetweenTwoStations(s1, s2, dist)
+			c.generateOnFootEdgesBetweenTwoStations(s1, s2, dist, origin, destination)
 		}
 	}
 }
 
-func (c *consumer) generateOnFootEdgesBetweenTwoStations(s1 *Station, s2 *Station, dist float64) {
-	c.generateOnFootEdgesBetweenTwoStationsInDirection(s1, s2, dist)
-	c.generateOnFootEdgesBetweenTwoStationsInDirection(s2, s1, dist)
+func (c *consumer) generateOnFootEdgesBetweenTwoStations(s1 *Station, s2 *Station, dist float64, origin *Station, destination *Station) {
+
+	c.generateOnFootEdgesBetweenTwoStationsInDirection(s1, s2, dist, origin, destination)
+	c.generateOnFootEdgesBetweenTwoStationsInDirection(s2, s1, dist, origin, destination)
 }
 
-func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Station, to *Station, dist float64) {
-	var duration = time.Minute * time.Duration(math.Ceil(-dist/1000/FOOT_KMH*60))
+func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, origin *Station, destination *Station) {
+	if from == destination || to == origin {
+		return
+	}
+	sign := -1.0
+	departures := to.Departures
+	if to == destination {
+		sign = 1.0
+		departures = from.Arrivals
+	}
+	var duration = time.Minute * time.Duration(math.Ceil(sign*dist/1000/FOOT_KMH*60))
 
-	for i, departure := range to.Departures {
+	for i, departure := range departures {
 		if departure.Line.Type == "Foot" {
 			continue
 		}
@@ -91,6 +101,10 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 				Departure: departureTime,
 				Arrival:   departure.Actual.Departure,
 			},
+		}
+		if to == destination {
+			edge.Actual.Departure = edge.Actual.Arrival
+			edge.Actual.Arrival = departureTime
 		}
 		line.Route = append(line.Route, edge)
 		edge.From.Departures = append(edge.From.Departures, edge)
@@ -129,9 +143,9 @@ func (c *consumer) sortEdges() {
 	}
 }
 
-func (c *consumer) generateEdges() {
+func (c *consumer) generateEdges(from *Station, to *Station) {
 	c.generateTimetableEdges()
 	c.sortEdges()
-	c.generateOnFootEdges()
+	c.generateOnFootEdges(from, to)
 	c.sortEdges()
 }
