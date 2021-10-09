@@ -68,6 +68,9 @@ func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *
 		if edge.To == destination {
 			continue
 		}
+		if _, ok := verticesAtDeparture[edge]; ok {
+			continue
+		}
 		verticesAtDeparture[edge] = &dijkstra{
 			vertexAtDeparture: edge,
 			dist:              inf,

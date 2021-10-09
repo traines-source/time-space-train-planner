@@ -8,9 +8,13 @@ package operations
 import (
 	"fmt"
 	"io"
+	"strconv"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // GetJourneysReader is a Reader for the GetJourneys structure.
@@ -43,23 +47,1891 @@ func NewGetJourneysOK() *GetJourneysOK {
 An array of journeys, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md).
 */
 type GetJourneysOK struct {
-	Payload []interface{}
+	Payload *GetJourneysOKBody
 }
 
 func (o *GetJourneysOK) Error() string {
 	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK  %+v", 200, o.Payload)
 }
 
-func (o *GetJourneysOK) GetPayload() []interface{} {
+func (o *GetJourneysOK) GetPayload() *GetJourneysOKBody {
 	return o.Payload
 }
 
 func (o *GetJourneysOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(GetJourneysOKBody)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
+	return nil
+}
+
+/*GetJourneysOKBody get journeys o k body
+swagger:model GetJourneysOKBody
+*/
+type GetJourneysOKBody struct {
+
+	// earlier ref
+	EarlierRef string `json:"earlierRef,omitempty"`
+
+	// journeys
+	Journeys []*JourneysItems0 `json:"journeys"`
+
+	// later ref
+	LaterRef string `json:"laterRef,omitempty"`
+}
+
+// Validate validates this get journeys o k body
+func (o *GetJourneysOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateJourneys(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBody) validateJourneys(formats strfmt.Registry) error {
+
+	if swag.IsZero(o.Journeys) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(o.Journeys); i++ {
+		if swag.IsZero(o.Journeys[i]) { // not required
+			continue
+		}
+
+		if o.Journeys[i] != nil {
+			if err := o.Journeys[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getJourneysOK" + "." + "journeys" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetJourneysOKBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetJourneysOKBody) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0 journeys items0
+swagger:model JourneysItems0
+*/
+type JourneysItems0 struct {
+
+	// cycle
+	// Required: true
+	Cycle *JourneysItems0Cycle `json:"cycle"`
+
+	// legs
+	// Required: true
+	Legs []*JourneysItems0LegsItems0 `json:"legs"`
+
+	// price
+	// Required: true
+	Price interface{} `json:"price"`
+
+	// refresh token
+	// Required: true
+	RefreshToken *string `json:"refreshToken"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0
+func (o *JourneysItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateCycle(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLegs(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePrice(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateRefreshToken(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0) validateCycle(formats strfmt.Registry) error {
+
+	if err := validate.Required("cycle", "body", o.Cycle); err != nil {
+		return err
+	}
+
+	if o.Cycle != nil {
+		if err := o.Cycle.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cycle")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0) validateLegs(formats strfmt.Registry) error {
+
+	if err := validate.Required("legs", "body", o.Legs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(o.Legs); i++ {
+		if swag.IsZero(o.Legs[i]) { // not required
+			continue
+		}
+
+		if o.Legs[i] != nil {
+			if err := o.Legs[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("legs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0) validatePrice(formats strfmt.Registry) error {
+
+	return nil
+}
+
+func (o *JourneysItems0) validateRefreshToken(formats strfmt.Registry) error {
+
+	if err := validate.Required("refreshToken", "body", o.RefreshToken); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0Cycle journeys items0 cycle
+swagger:model JourneysItems0Cycle
+*/
+type JourneysItems0Cycle struct {
+
+	// min
+	// Required: true
+	Min *int64 `json:"min"`
+}
+
+// Validate validates this journeys items0 cycle
+func (o *JourneysItems0Cycle) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateMin(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0Cycle) validateMin(formats strfmt.Registry) error {
+
+	if err := validate.Required("cycle"+"."+"min", "body", o.Min); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0Cycle) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0Cycle) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0Cycle
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0 journeys items0 legs items0
+swagger:model JourneysItems0LegsItems0
+*/
+type JourneysItems0LegsItems0 struct {
+
+	// arrival
+	// Required: true
+	Arrival *string `json:"arrival"`
+
+	// arrival delay
+	// Required: true
+	ArrivalDelay interface{} `json:"arrivalDelay"`
+
+	// arrival platform
+	// Required: true
+	ArrivalPlatform *string `json:"arrivalPlatform"`
+
+	// cycle
+	// Required: true
+	Cycle *JourneysItems0LegsItems0Cycle `json:"cycle"`
+
+	// departure
+	// Required: true
+	Departure *string `json:"departure"`
+
+	// departure delay
+	// Required: true
+	DepartureDelay interface{} `json:"departureDelay"`
+
+	// departure platform
+	// Required: true
+	DeparturePlatform *string `json:"departurePlatform"`
+
+	// destination
+	// Required: true
+	Destination *JourneysItems0LegsItems0Destination `json:"destination"`
+
+	// direction
+	// Required: true
+	Direction *string `json:"direction"`
+
+	// line
+	// Required: true
+	Line *JourneysItems0LegsItems0Line `json:"line"`
+
+	// origin
+	// Required: true
+	Origin *JourneysItems0LegsItems0Origin `json:"origin"`
+
+	// planned arrival
+	// Required: true
+	PlannedArrival *string `json:"plannedArrival"`
+
+	// planned arrival platform
+	// Required: true
+	PlannedArrivalPlatform *string `json:"plannedArrivalPlatform"`
+
+	// planned departure
+	// Required: true
+	PlannedDeparture *string `json:"plannedDeparture"`
+
+	// planned departure platform
+	// Required: true
+	PlannedDeparturePlatform *string `json:"plannedDeparturePlatform"`
+
+	// reachable
+	// Required: true
+	Reachable *bool `json:"reachable"`
+
+	// trip Id
+	// Required: true
+	TripID *string `json:"tripId"`
+}
+
+// Validate validates this journeys items0 legs items0
+func (o *JourneysItems0LegsItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateArrival(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateArrivalDelay(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateArrivalPlatform(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCycle(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDeparture(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDepartureDelay(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDeparturePlatform(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDestination(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDirection(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLine(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateOrigin(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePlannedArrival(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePlannedArrivalPlatform(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePlannedDeparture(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePlannedDeparturePlatform(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateReachable(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTripID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateArrival(formats strfmt.Registry) error {
+
+	if err := validate.Required("arrival", "body", o.Arrival); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateArrivalDelay(formats strfmt.Registry) error {
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateArrivalPlatform(formats strfmt.Registry) error {
+
+	if err := validate.Required("arrivalPlatform", "body", o.ArrivalPlatform); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateCycle(formats strfmt.Registry) error {
+
+	if err := validate.Required("cycle", "body", o.Cycle); err != nil {
+		return err
+	}
+
+	if o.Cycle != nil {
+		if err := o.Cycle.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cycle")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateDeparture(formats strfmt.Registry) error {
+
+	if err := validate.Required("departure", "body", o.Departure); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateDepartureDelay(formats strfmt.Registry) error {
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateDeparturePlatform(formats strfmt.Registry) error {
+
+	if err := validate.Required("departurePlatform", "body", o.DeparturePlatform); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateDestination(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination", "body", o.Destination); err != nil {
+		return err
+	}
+
+	if o.Destination != nil {
+		if err := o.Destination.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("destination")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateDirection(formats strfmt.Registry) error {
+
+	if err := validate.Required("direction", "body", o.Direction); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateLine(formats strfmt.Registry) error {
+
+	if err := validate.Required("line", "body", o.Line); err != nil {
+		return err
+	}
+
+	if o.Line != nil {
+		if err := o.Line.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("line")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateOrigin(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin", "body", o.Origin); err != nil {
+		return err
+	}
+
+	if o.Origin != nil {
+		if err := o.Origin.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("origin")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validatePlannedArrival(formats strfmt.Registry) error {
+
+	if err := validate.Required("plannedArrival", "body", o.PlannedArrival); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validatePlannedArrivalPlatform(formats strfmt.Registry) error {
+
+	if err := validate.Required("plannedArrivalPlatform", "body", o.PlannedArrivalPlatform); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validatePlannedDeparture(formats strfmt.Registry) error {
+
+	if err := validate.Required("plannedDeparture", "body", o.PlannedDeparture); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validatePlannedDeparturePlatform(formats strfmt.Registry) error {
+
+	if err := validate.Required("plannedDeparturePlatform", "body", o.PlannedDeparturePlatform); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateReachable(formats strfmt.Registry) error {
+
+	if err := validate.Required("reachable", "body", o.Reachable); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0) validateTripID(formats strfmt.Registry) error {
+
+	if err := validate.Required("tripId", "body", o.TripID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0Cycle journeys items0 legs items0 cycle
+swagger:model JourneysItems0LegsItems0Cycle
+*/
+type JourneysItems0LegsItems0Cycle struct {
+
+	// max
+	// Required: true
+	Max *int64 `json:"max"`
+
+	// min
+	// Required: true
+	Min *int64 `json:"min"`
+
+	// nr
+	// Required: true
+	Nr *int64 `json:"nr"`
+}
+
+// Validate validates this journeys items0 legs items0 cycle
+func (o *JourneysItems0LegsItems0Cycle) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateMax(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateMin(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateNr(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Cycle) validateMax(formats strfmt.Registry) error {
+
+	if err := validate.Required("cycle"+"."+"max", "body", o.Max); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Cycle) validateMin(formats strfmt.Registry) error {
+
+	if err := validate.Required("cycle"+"."+"min", "body", o.Min); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Cycle) validateNr(formats strfmt.Registry) error {
+
+	if err := validate.Required("cycle"+"."+"nr", "body", o.Nr); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Cycle) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Cycle) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0Cycle
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0Destination journeys items0 legs items0 destination
+swagger:model JourneysItems0LegsItems0Destination
+*/
+type JourneysItems0LegsItems0Destination struct {
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// location
+	// Required: true
+	Location *JourneysItems0LegsItems0DestinationLocation `json:"location"`
+
+	// name
+	// Required: true
+	Name *string `json:"name"`
+
+	// products
+	// Required: true
+	Products *JourneysItems0LegsItems0DestinationProducts `json:"products"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0 legs items0 destination
+func (o *JourneysItems0LegsItems0Destination) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLocation(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateProducts(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Destination) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Destination) validateLocation(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"location", "body", o.Location); err != nil {
+		return err
+	}
+
+	if o.Location != nil {
+		if err := o.Location.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("destination" + "." + "location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Destination) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"name", "body", o.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Destination) validateProducts(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products", "body", o.Products); err != nil {
+		return err
+	}
+
+	if o.Products != nil {
+		if err := o.Products.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("destination" + "." + "products")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Destination) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Destination) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Destination) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0Destination
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0DestinationLocation journeys items0 legs items0 destination location
+swagger:model JourneysItems0LegsItems0DestinationLocation
+*/
+type JourneysItems0LegsItems0DestinationLocation struct {
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// latitude
+	// Required: true
+	Latitude *float64 `json:"latitude"`
+
+	// longitude
+	// Required: true
+	Longitude *float64 `json:"longitude"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0 legs items0 destination location
+func (o *JourneysItems0LegsItems0DestinationLocation) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLatitude(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLongitude(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationLocation) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"location"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationLocation) validateLatitude(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"location"+"."+"latitude", "body", o.Latitude); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationLocation) validateLongitude(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"location"+"."+"longitude", "body", o.Longitude); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationLocation) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"location"+"."+"type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0DestinationLocation) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0DestinationLocation) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0DestinationLocation
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0DestinationProducts journeys items0 legs items0 destination products
+swagger:model JourneysItems0LegsItems0DestinationProducts
+*/
+type JourneysItems0LegsItems0DestinationProducts struct {
+
+	// bus
+	// Required: true
+	Bus *bool `json:"bus"`
+
+	// ferry
+	// Required: true
+	Ferry *bool `json:"ferry"`
+
+	// national
+	// Required: true
+	National *bool `json:"national"`
+
+	// national express
+	// Required: true
+	NationalExpress *bool `json:"nationalExpress"`
+
+	// regional
+	// Required: true
+	Regional *bool `json:"regional"`
+
+	// regional exp
+	// Required: true
+	RegionalExp *bool `json:"regionalExp"`
+
+	// suburban
+	// Required: true
+	Suburban *bool `json:"suburban"`
+
+	// subway
+	// Required: true
+	Subway *bool `json:"subway"`
+
+	// taxi
+	// Required: true
+	Taxi *bool `json:"taxi"`
+
+	// tram
+	// Required: true
+	Tram *bool `json:"tram"`
+}
+
+// Validate validates this journeys items0 legs items0 destination products
+func (o *JourneysItems0LegsItems0DestinationProducts) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateBus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateFerry(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateNational(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateNationalExpress(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateRegional(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateRegionalExp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSuburban(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSubway(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTaxi(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTram(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateBus(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"bus", "body", o.Bus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateFerry(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"ferry", "body", o.Ferry); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateNational(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"national", "body", o.National); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateNationalExpress(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"nationalExpress", "body", o.NationalExpress); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateRegional(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"regional", "body", o.Regional); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateRegionalExp(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"regionalExp", "body", o.RegionalExp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateSuburban(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"suburban", "body", o.Suburban); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateSubway(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"subway", "body", o.Subway); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateTaxi(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"taxi", "body", o.Taxi); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0DestinationProducts) validateTram(formats strfmt.Registry) error {
+
+	if err := validate.Required("destination"+"."+"products"+"."+"tram", "body", o.Tram); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0DestinationProducts) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0DestinationProducts) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0DestinationProducts
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0Line journeys items0 legs items0 line
+swagger:model JourneysItems0LegsItems0Line
+*/
+type JourneysItems0LegsItems0Line struct {
+
+	// admin code
+	// Required: true
+	AdminCode *string `json:"adminCode"`
+
+	// fahrt nr
+	// Required: true
+	FahrtNr *string `json:"fahrtNr"`
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// mode
+	// Required: true
+	Mode *string `json:"mode"`
+
+	// name
+	// Required: true
+	Name *string `json:"name"`
+
+	// operator
+	// Required: true
+	Operator *JourneysItems0LegsItems0LineOperator `json:"operator"`
+
+	// product
+	// Required: true
+	Product *string `json:"product"`
+
+	// public
+	// Required: true
+	Public *bool `json:"public"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0 legs items0 line
+func (o *JourneysItems0LegsItems0Line) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateAdminCode(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateFahrtNr(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateMode(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateOperator(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateProduct(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validatePublic(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateAdminCode(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"adminCode", "body", o.AdminCode); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateFahrtNr(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"fahrtNr", "body", o.FahrtNr); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateMode(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"mode", "body", o.Mode); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"name", "body", o.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateOperator(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"operator", "body", o.Operator); err != nil {
+		return err
+	}
+
+	if o.Operator != nil {
+		if err := o.Operator.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("line" + "." + "operator")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateProduct(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"product", "body", o.Product); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validatePublic(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"public", "body", o.Public); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Line) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Line) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Line) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0Line
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0LineOperator journeys items0 legs items0 line operator
+swagger:model JourneysItems0LegsItems0LineOperator
+*/
+type JourneysItems0LegsItems0LineOperator struct {
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// name
+	// Required: true
+	Name *string `json:"name"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0 legs items0 line operator
+func (o *JourneysItems0LegsItems0LineOperator) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0LineOperator) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"operator"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0LineOperator) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"operator"+"."+"name", "body", o.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0LineOperator) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"operator"+"."+"type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0LineOperator) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0LineOperator) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0LineOperator
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0Origin journeys items0 legs items0 origin
+swagger:model JourneysItems0LegsItems0Origin
+*/
+type JourneysItems0LegsItems0Origin struct {
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// location
+	// Required: true
+	Location *JourneysItems0LegsItems0OriginLocation `json:"location"`
+
+	// name
+	// Required: true
+	Name *string `json:"name"`
+
+	// products
+	// Required: true
+	Products *JourneysItems0LegsItems0OriginProducts `json:"products"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0 legs items0 origin
+func (o *JourneysItems0LegsItems0Origin) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLocation(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateProducts(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Origin) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Origin) validateLocation(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"location", "body", o.Location); err != nil {
+		return err
+	}
+
+	if o.Location != nil {
+		if err := o.Location.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("origin" + "." + "location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Origin) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"name", "body", o.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Origin) validateProducts(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products", "body", o.Products); err != nil {
+		return err
+	}
+
+	if o.Products != nil {
+		if err := o.Products.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("origin" + "." + "products")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0Origin) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Origin) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0Origin) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0Origin
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0OriginLocation journeys items0 legs items0 origin location
+swagger:model JourneysItems0LegsItems0OriginLocation
+*/
+type JourneysItems0LegsItems0OriginLocation struct {
+
+	// id
+	// Required: true
+	ID *string `json:"id"`
+
+	// latitude
+	// Required: true
+	Latitude *float64 `json:"latitude"`
+
+	// longitude
+	// Required: true
+	Longitude *float64 `json:"longitude"`
+
+	// type
+	// Required: true
+	Type *string `json:"type"`
+}
+
+// Validate validates this journeys items0 legs items0 origin location
+func (o *JourneysItems0LegsItems0OriginLocation) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLatitude(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateLongitude(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginLocation) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"location"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginLocation) validateLatitude(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"location"+"."+"latitude", "body", o.Latitude); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginLocation) validateLongitude(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"location"+"."+"longitude", "body", o.Longitude); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginLocation) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"location"+"."+"type", "body", o.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0OriginLocation) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0OriginLocation) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0OriginLocation
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*JourneysItems0LegsItems0OriginProducts journeys items0 legs items0 origin products
+swagger:model JourneysItems0LegsItems0OriginProducts
+*/
+type JourneysItems0LegsItems0OriginProducts struct {
+
+	// bus
+	// Required: true
+	Bus *bool `json:"bus"`
+
+	// ferry
+	// Required: true
+	Ferry *bool `json:"ferry"`
+
+	// national
+	// Required: true
+	National *bool `json:"national"`
+
+	// national express
+	// Required: true
+	NationalExpress *bool `json:"nationalExpress"`
+
+	// regional
+	// Required: true
+	Regional *bool `json:"regional"`
+
+	// regional exp
+	// Required: true
+	RegionalExp *bool `json:"regionalExp"`
+
+	// suburban
+	// Required: true
+	Suburban *bool `json:"suburban"`
+
+	// subway
+	// Required: true
+	Subway *bool `json:"subway"`
+
+	// taxi
+	// Required: true
+	Taxi *bool `json:"taxi"`
+
+	// tram
+	// Required: true
+	Tram *bool `json:"tram"`
+}
+
+// Validate validates this journeys items0 legs items0 origin products
+func (o *JourneysItems0LegsItems0OriginProducts) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateBus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateFerry(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateNational(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateNationalExpress(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateRegional(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateRegionalExp(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSuburban(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateSubway(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTaxi(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTram(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateBus(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"bus", "body", o.Bus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateFerry(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"ferry", "body", o.Ferry); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateNational(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"national", "body", o.National); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateNationalExpress(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"nationalExpress", "body", o.NationalExpress); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateRegional(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"regional", "body", o.Regional); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateRegionalExp(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"regionalExp", "body", o.RegionalExp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateSuburban(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"suburban", "body", o.Suburban); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateSubway(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"subway", "body", o.Subway); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateTaxi(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"taxi", "body", o.Taxi); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *JourneysItems0LegsItems0OriginProducts) validateTram(formats strfmt.Registry) error {
+
+	if err := validate.Required("origin"+"."+"products"+"."+"tram", "body", o.Tram); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0OriginProducts) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *JourneysItems0LegsItems0OriginProducts) UnmarshalBinary(b []byte) error {
+	var res JourneysItems0LegsItems0OriginProducts
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
 	return nil
 }

@@ -21,6 +21,9 @@ func (c *consumer) generateTimetableEdges() {
 			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
 		})
 		for i := 1; i < len(stops); i++ {
+			if geoDistStations(stops[i-1].Station, stops[i].Station) == 0 {
+				continue
+			}
 			edge := &Edge{
 				Line:    line,
 				From:    stops[i-1].Station,
@@ -50,7 +53,7 @@ func (c *consumer) generateOnFootEdges(origin *Station, destination *Station) {
 			if s1 == s2 {
 				continue
 			}
-			var dist = geoDist(s1.Lat, s1.Lon, s2.Lat, s2.Lon)
+			var dist = geoDistStations(s1, s2)
 			if dist > MAX_FOOT_DIST_METERS {
 				continue
 			}
@@ -114,6 +117,10 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 
 func degreesToRadians(degrees float32) float64 {
 	return float64(degrees) * math.Pi / 180
+}
+
+func geoDistStations(from *Station, to *Station) float64 {
+	return geoDist(from.Lat, from.Lon, to.Lat, to.Lon)
 }
 
 func geoDist(fromLat float32, fromLon float32, toLat float32, toLon float32) float64 {

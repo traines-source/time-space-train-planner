@@ -24,6 +24,7 @@ func (p *DbRest) Fetch(c providers.Consumer) {
 	p.prepareClient()
 	//p.requestStations()
 	p.requestDeparturesAndArrivals()
+	p.requestJourneys()
 }
 
 func (p *DbRest) requestStations() {
@@ -35,11 +36,39 @@ func (p *DbRest) requestStations() {
 
 func (p *DbRest) requestDeparturesAndArrivals() {
 	stations := p.consumer.Stations()
-	for _, station := range stations {
+	for i, station := range stations {
+		if i > 10 {
+			break
+		}
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
 		p.requestArrival(station, from, int64(duration))
 		p.requestDeparture(station, from, int64(duration))
+	}
+}
+
+func (p *DbRest) requestJourneys() {
+	stations := p.consumer.Stations()
+	departure, _ := p.consumer.RequestStationDataBetween(&stations[0])
+	var params = operations.NewGetJourneysParams()
+	from := strconv.Itoa(stations[0].EvaNumber)
+	to := strconv.Itoa(stations[len(stations)-1].EvaNumber)
+	params.From = &from
+	params.To = &to
+	params.Departure = (*strfmt.DateTime)(&departure)
+	res, err := p.client.Operations.GetJourneys(params)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+	for _, journey := range res.Payload.Journeys {
+		for _, leg := range journey.Legs {
+			log.Print(*leg.Origin.Name, *leg.Origin.ID)
+			evaNumber, err := strconv.Atoi(*leg.Origin.ID)
+			if err == nil {
+				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumber, Name: *leg.Origin.Name})
+			}
+		}
 	}
 }
 

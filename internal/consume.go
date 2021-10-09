@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"log"
+	"sort"
 	"time"
 
 	"traines.eu/time-space-train-planner/providers"
@@ -59,6 +60,7 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	}
 	if station == nil {
 		station = &providers.ProviderStation{EvaNumber: e.EvaNumber}
+		//c.providerStations = append(c.providerStations, *station)
 	}
 	if e.Name != "" {
 		station.Name = e.Name
@@ -161,9 +163,22 @@ func defaultStations(evaNumbers []int) []providers.ProviderStation {
 	return stations
 }
 
-func (c *consumer) rankStations() {
+func (c *consumer) rankStations(origin *Station, destination *Station) {
+	var stationsSlice []*Station
+	for _, s := range c.stations {
+		stationsSlice = append(stationsSlice, s)
+	}
+	sort.Slice(stationsSlice, func(i, j int) bool {
+		if stationsSlice[i] == origin || stationsSlice[j] == destination {
+			return true
+		}
+		if stationsSlice[j] == origin || stationsSlice[i] == destination {
+			return false
+		}
+		return geoDistStations(origin, stationsSlice[i]) < geoDistStations(origin, stationsSlice[j])
+	})
 	i := 0
-	for _, s := range c.providerStations {
+	for _, s := range stationsSlice {
 		c.stations[s.EvaNumber].Rank = i
 		i++
 	}
@@ -193,7 +208,7 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 
 	c.callProviders(evaNumbers)
 	c.generateEdges(c.stations[from], c.stations[to])
-	c.rankStations()
+	c.rankStations(c.stations[from], c.stations[to])
 	shortestPaths(c.stations, c.stations[to])
 	return c.stations, c.lines
 }

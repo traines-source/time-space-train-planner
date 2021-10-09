@@ -39,10 +39,11 @@ func TimeSpace(stations map[int]*internal.Station, lines map[int]*internal.Line,
 
 func (c *container) setupStations(stations map[int]*internal.Station) {
 	for _, s := range stations {
-		station := &StationLabel{Station: *s}
-		station.Coord.SpaceAxis = station
-		c.Stations[s] = station
-
+		if len(s.Arrivals) > 0 || len(s.Departures) > 0 {
+			station := &StationLabel{Station: *s}
+			station.Coord.SpaceAxis = station
+			c.Stations[s] = station
+		}
 	}
 }
 
@@ -58,6 +59,9 @@ func (c *container) setupEdges(lines map[int]*internal.Line) {
 		}
 	}
 	sort.Slice(c.SortedEdges, func(i, j int) bool {
+		if c.SortedEdges[i].Redundant == c.SortedEdges[j].Redundant && c.SortedEdges[i].Line != nil {
+			return c.SortedEdges[i].Line.Type == "Foot"
+		}
 		return c.SortedEdges[i].Redundant
 	})
 	for _, l := range lines {

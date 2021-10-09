@@ -178,6 +178,8 @@ type GetJourneysParams struct {
 
 	*/
 	EarlierThan *string
+	/*From*/
+	From *string
 	/*Language
 	  Language of the results.
 
@@ -223,6 +225,8 @@ type GetJourneysParams struct {
 
 	*/
 	Tickets *bool
+	/*To*/
+	To *string
 	/*TransferTime
 	  Minimum time in minutes for a single transfer.
 
@@ -332,6 +336,17 @@ func (o *GetJourneysParams) SetEarlierThan(earlierThan *string) {
 	o.EarlierThan = earlierThan
 }
 
+// WithFrom adds the from to the get journeys params
+func (o *GetJourneysParams) WithFrom(from *string) *GetJourneysParams {
+	o.SetFrom(from)
+	return o
+}
+
+// SetFrom adds the from to the get journeys params
+func (o *GetJourneysParams) SetFrom(from *string) {
+	o.From = from
+}
+
 // WithLanguage adds the language to the get journeys params
 func (o *GetJourneysParams) WithLanguage(language *string) *GetJourneysParams {
 	o.SetLanguage(language)
@@ -429,6 +444,17 @@ func (o *GetJourneysParams) WithTickets(tickets *bool) *GetJourneysParams {
 // SetTickets adds the tickets to the get journeys params
 func (o *GetJourneysParams) SetTickets(tickets *bool) {
 	o.Tickets = tickets
+}
+
+// WithTo adds the to to the get journeys params
+func (o *GetJourneysParams) WithTo(to *string) *GetJourneysParams {
+	o.SetTo(to)
+	return o
+}
+
+// SetTo adds the to to the get journeys params
+func (o *GetJourneysParams) SetTo(to *string) {
+	o.To = to
 }
 
 // WithTransferTime adds the transferTime to the get journeys params
@@ -546,6 +572,22 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		qEarlierThan := qrEarlierThan
 		if qEarlierThan != "" {
 			if err := r.SetQueryParam("earlierThan", qEarlierThan); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.From != nil {
+
+		// query param from
+		var qrFrom string
+		if o.From != nil {
+			qrFrom = *o.From
+		}
+		qFrom := qrFrom
+		if qFrom != "" {
+			if err := r.SetQueryParam("from", qFrom); err != nil {
 				return err
 			}
 		}
@@ -690,6 +732,22 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		qTickets := swag.FormatBool(qrTickets)
 		if qTickets != "" {
 			if err := r.SetQueryParam("tickets", qTickets); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.To != nil {
+
+		// query param to
+		var qrTo string
+		if o.To != nil {
+			qrTo = *o.To
+		}
+		qTo := qrTo
+		if qTo != "" {
+			if err := r.SetQueryParam("to", qTo); err != nil {
 				return err
 			}
 		}
