@@ -85,7 +85,7 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 			continue
 		}
 		var departureTime = departure.Actual.Departure.Add(duration)
-		if departureTime.Before(from.Arrivals[0].Actual.Arrival) {
+		if len(from.Arrivals) == 0 || departureTime.Before(from.Arrivals[0].Actual.Arrival) {
 			continue
 		}
 		var lineID = fmt.Sprint(from.EvaNumber*1000000000 + to.EvaNumber*100 + i)

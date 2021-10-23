@@ -21,7 +21,7 @@ type Consumer interface {
 type ProviderStation struct {
 	EvaNumber   int
 	Code100     string
-	GroupNumber int
+	GroupNumber *int
 	Name        string
 	Lat         float32
 	Lon         float32

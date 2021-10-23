@@ -10,6 +10,7 @@ type Station struct {
 	Lat        float32
 	Lon        float32
 	Rank       int
+	GroupNumber      *int
 }
 
 type Edge struct {

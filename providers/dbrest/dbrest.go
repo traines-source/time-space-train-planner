@@ -85,12 +85,6 @@ func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Tim
 		log.Panic(err)
 		return
 	}
-	p.consumer.UpsertStation(providers.ProviderStation{
-		EvaNumber: station.EvaNumber,
-		Name:      *res.Payload[0].Stop.Name,
-		Lat:       float32(*res.Payload[0].Stop.Location.Latitude),
-		Lon:       float32(*res.Payload[0].Stop.Location.Longitude),
-	})
 	p.parseDepartureArrival(res.Payload, station.EvaNumber, true)
 }
 
@@ -108,15 +102,32 @@ func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.T
 	p.parseDepartureArrival(res.Payload, station.EvaNumber, false)
 }
 
-func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, evaNumber int, arrival bool) {
+func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupNumber int, arrival bool) {
 	for _, stop := range stops {
 		lineID, err := strconv.Atoi(*stop.Line.FahrtNr)
 		if err != nil {
 			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
+			continue
 		}
+		evaNumber, err := strconv.Atoi(*stop.Stop.ID)
+		if err != nil {
+			log.Printf("Failed to convert Eva Number %s", *stop.Stop.ID)
+			continue
+		}
+		p.parseStation(stop, evaNumber, groupNumber)
 		p.parseLine(stop, *stop.TripID, lineID)
 		p.parseLineStop(stop, arrival, evaNumber, *stop.TripID)
 	}
+}
+
+func (p *DbRest) parseStation(stop *models.DepartureArrival, evaNumber int, groupNumber int) {
+	p.consumer.UpsertStation(providers.ProviderStation{
+		EvaNumber: evaNumber,
+		GroupNumber: &groupNumber,
+		Name:      *stop.Stop.Name,
+		Lat:       float32(*stop.Stop.Location.Latitude),
+		Lon:       float32(*stop.Stop.Location.Longitude),
+	})
 }
 
 func (p *DbRest) parseLine(stop *models.DepartureArrival, tripID string, lineID int) {
@@ -199,7 +210,7 @@ func (p *DbRest) parseStationsFromJourneys() {
 			evaNumberTo, err2 := strconv.Atoi(*leg.Destination.ID)
 			if err1 == nil && err2 == nil {
 				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberFrom, Name: *leg.Origin.Name})
-				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberTo, Name: *leg.Origin.Name})
+				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberTo, Name: *leg.Destination.Name})
 			} else {
 				log.Print("Error while trying to read stations from journeys")
 			}

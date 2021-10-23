@@ -71,6 +71,9 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	if e.Lon != 0 {
 		station.Lon = e.Lon
 	}
+	if e.GroupNumber != nil {
+		station.GroupNumber = e.GroupNumber
+	}
 
 	val, ok := c.stations[e.EvaNumber]
 	if !ok {
@@ -85,6 +88,9 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	}
 	if e.Lon != 0 {
 		val.Lon = e.Lon
+	}
+	if e.GroupNumber != nil {
+		val.GroupNumber = e.GroupNumber
 	}
 }
 

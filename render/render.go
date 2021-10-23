@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 	"io"
+	"log"
 	"sort"
 	"text/template"
 	"time"
@@ -16,6 +17,7 @@ type container struct {
 	SortedEdges      []*EdgePath
 	minTime          time.Time
 	maxTime          time.Time
+	maxSpace         int
 	timeAxisDistance float32
 	TimeIndicators   []time.Time
 	TimeAxisSize     int
@@ -133,10 +135,29 @@ func generateStationEdgeID(last *internal.Edge, this *internal.Edge) string {
 func (c *container) gravitate() {
 	c.TimeAxisSize = timeAxisSize
 	c.SpaceAxisSize = spaceAxisSize
-	num := float32(len(c.Stations))
+
+	var stationsSlice []*StationLabel
 	for _, s := range c.Stations {
-		s.SpaceAxis = int(float32(s.Station.Rank)/num*float32(c.SpaceAxisSize-50) + 50.0)
+		stationsSlice = append(stationsSlice, s)
 	}
+	sort.Slice(stationsSlice, func(i, j int) bool {
+		return stationsSlice[i].Rank < stationsSlice[j].Rank
+	})
+	x := -1
+	y := 0
+	var lastGroup = 0
+	for _, s := range stationsSlice {
+		log.Print(*s.GroupNumber)
+		if s.GroupNumber == nil || lastGroup != *s.GroupNumber {
+			x++
+			y = 0
+			lastGroup = *s.GroupNumber
+		}
+		s.SpaceAxis = x
+		s.SpaceAxisHeap = y
+		y++
+	}
+	c.maxSpace = x
 	c.indicateTimes()
 }
 
@@ -155,21 +176,16 @@ func (c *container) render(wr io.Writer) {
 	}
 }
 
-func (c *container) timeAxis(t time.Time) int {
-	if t.IsZero() {
-		return 50
-	}
-	delta := float32(t.Unix() - c.minTime.Unix())
-	return int(delta/c.timeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
-}
-
 func (c *container) X(coord Coord) int {
-	return coord.SpaceAxis.SpaceAxis
-
+	return int(float32(coord.SpaceAxis.SpaceAxis)/float32(c.maxSpace)*float32(c.SpaceAxisSize-50) + 50.0)
 }
 
 func (c *container) Y(coord Coord) int {
-	return c.timeAxis(coord.TimeAxis)
+	if coord.TimeAxis.IsZero() {
+		return 50 + coord.SpaceAxis.SpaceAxisHeap*20
+	}
+	delta := float32(coord.TimeAxis.Unix() - c.minTime.Unix())
+	return int(delta/c.timeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
 }
 
 func (p *EdgePath) Label() string {
