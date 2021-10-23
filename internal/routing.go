@@ -103,7 +103,10 @@ func positiveDeltaMinutes(previous time.Time, next time.Time) int {
 }
 
 func earlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
-	return positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, u.vertexAtDeparture.Actual.Departure) < positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, v.previous.Actual.Departure)
+	departingEarlier := positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, u.vertexAtDeparture.Actual.Departure) < positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, v.previous.Actual.Departure)
+	arrivingEarlierIfSameDestination := u.vertexAtDeparture.To != v.previous.To || u.vertexAtDeparture.Actual.Arrival.Before(v.previous.Actual.Arrival)
+
+	return departingEarlier && arrivingEarlierIfSameDestination
 }
 
 func markEdgesAsRedundant(stations map[int]*Station, destination *Station) {
