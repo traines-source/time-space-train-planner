@@ -224,7 +224,7 @@ func (p *DbRest) parseEdgesFromJourneys() {
 			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
 			evaNumberTo, err2 := strconv.Atoi(*leg.Destination.ID)
 			if err1 != nil || err2 != nil || leg.Line == nil {
-				log.Print("Error while trying to read edges from journeys")
+				log.Print("Error while trying to read edges from journeys ", err1, err2, leg.Line)
 				continue
 			}
 			hafas := true
@@ -242,6 +242,6 @@ func (p *DbRest) parseEdgesFromJourneys() {
 			})
 
 		}
-		break
+		//break
 	}
 }

@@ -136,16 +136,20 @@ func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 		log.Printf("Non-existant Line %s for edge upsert", e.LineID)
 		return
 	}
-	found := false
+	foundStart := false
+	foundEnd := false
 	for _, edge := range line.Route {
-		if edge.From.EvaNumber == e.EvaNumberFrom && edge.To.EvaNumber == e.EvaNumberTo {
+		if edge.From.EvaNumber == e.EvaNumberFrom || foundStart && !foundEnd {
 			if e.ProviderShortestPath != nil {
 				edge.ProviderShortestPath = *e.ProviderShortestPath
 			}
-			found = true
+			foundStart = true
+			if edge.To.EvaNumber == e.EvaNumberTo {
+				foundEnd = true
+			}
 		}
 	}
-	if !found {
+	if !foundEnd {
 		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID)
 		from, ok1 := c.stations[e.EvaNumberFrom]
 		to, ok2 := c.stations[e.EvaNumberTo]
