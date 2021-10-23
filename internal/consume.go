@@ -18,6 +18,8 @@ type consumer struct {
 	dateTime         time.Time
 }
 
+var loc, _ = time.LoadLocation("Europe/Berlin")
+
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
 	delta, _ := time.ParseDuration("4h")
 
@@ -272,7 +274,7 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 
 func (c *consumer) parseDate(dateTime string) {
 	layout := "2006-01-02T15:04"
-	t, err := time.Parse(layout, dateTime)
+	t, err := time.ParseInLocation(layout, dateTime, loc)
 
 	if err != nil {
 		log.Panic(err)
