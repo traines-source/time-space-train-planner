@@ -172,16 +172,16 @@ func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 }
 
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
-	if to.Departure.IsZero() {
+	if to.Departure.IsZero() || to.Departure == to.Arrival {
 		to.Departure = from.Departure
-		if from.Departure.IsZero() {
+		if from.Departure.IsZero() && !from.Arrival.IsZero() {
 			to.Departure = from.Arrival
 		}
 		to.DepartureTrack = from.DepartureTrack
 	}
-	if to.Arrival.IsZero() {
+	if to.Arrival.IsZero() || to.Departure == to.Arrival {
 		to.Arrival = from.Arrival
-		if from.Arrival.IsZero() {
+		if from.Arrival.IsZero() && !from.Departure.IsZero() {
 			to.Arrival = from.Departure
 		}
 		to.ArrivalTrack = from.ArrivalTrack
