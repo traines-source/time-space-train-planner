@@ -209,8 +209,18 @@ func (p *DbRest) parseStationsFromJourneys() {
 			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
 			evaNumberTo, err2 := strconv.Atoi(*leg.Destination.ID)
 			if err1 == nil && err2 == nil {
-				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberFrom, Name: *leg.Origin.Name})
-				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberTo, Name: *leg.Destination.Name})
+				p.consumer.UpsertStation(providers.ProviderStation{
+					EvaNumber: evaNumberFrom,
+					Name:      *leg.Origin.Name,
+					Lat:       float32(*leg.Origin.Location.Latitude),
+					Lon:       float32(*leg.Origin.Location.Longitude),
+				})
+				p.consumer.UpsertStation(providers.ProviderStation{
+					EvaNumber: evaNumberTo,
+					Name:      *leg.Destination.Name,
+					Lat:       float32(*leg.Destination.Location.Latitude),
+					Lon:       float32(*leg.Destination.Location.Longitude),
+				})
 			} else {
 				log.Print("Error while trying to read stations from journeys")
 			}

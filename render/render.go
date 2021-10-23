@@ -154,14 +154,16 @@ func (c *container) layoutStations() {
 	})
 	x := -1
 	y := 0
-	var lastGroup = 0
+	var lastGroup *int
 	for _, s := range stationsSlice {
-		if s.GroupNumber == nil || lastGroup != *s.GroupNumber {
+		log.Print(s.Name, s.GroupNumber, s.Rank)
+		if s.GroupNumber != nil {
+			log.Print(*s.GroupNumber)
+		}
+		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
 			x++
 			y = 0
-			if s.GroupNumber != nil {
-				lastGroup = *s.GroupNumber
-			}
+			lastGroup = s.GroupNumber
 		}
 		s.SpaceAxis = x
 		s.SpaceAxisHeap = y

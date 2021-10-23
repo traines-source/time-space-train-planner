@@ -15,7 +15,7 @@
         </filter>
     </defs>
 {{range .Stations}}
-    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">{{.Station.Name}} {{.Station.EvaNumber}}</text>
+    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">{{.Station.Name}} ({{.Station.EvaNumber}})</text>
 {{end}}
 {{range .SortedEdges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
