@@ -14,7 +14,7 @@ type consumer struct {
 	providers        []providers.Provider
 	providerStations []providers.ProviderStation
 	stations         map[int]*Station
-	lines            map[int]*Line
+	lines            map[string]*Line
 	dateTime         time.Time
 }
 
@@ -102,12 +102,12 @@ func (c *consumer) UpsertLine(e providers.ProviderLine) {
 func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	station, ok := c.stations[e.EvaNumber]
 	if !ok {
-		log.Panicf("Non-existant Station %d for stop of Line %d", e.EvaNumber, e.LineID)
+		log.Panicf("Non-existant Station %d for stop of Line %s", e.EvaNumber, e.LineID)
 		return
 	}
 	line, ok := c.lines[e.LineID]
 	if !ok {
-		log.Panicf("Non-existant Line %d for Station  %d", e.LineID, e.EvaNumber)
+		log.Panicf("Non-existant Line %s for Station  %d", e.LineID, e.EvaNumber)
 		return
 	}
 	val, ok := line.Stops[station]
@@ -127,7 +127,7 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 	line, ok := c.lines[e.LineID]
 	if !ok {
-		log.Print("Non-existant Line %d for edge upsert", e.LineID)
+		log.Printf("Non-existant Line %s for edge upsert", e.LineID)
 		return
 	}
 	found := false
@@ -140,11 +140,11 @@ func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 		}
 	}
 	if !found {
-		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %d)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID)
+		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID)
 		from, ok1 := c.stations[e.EvaNumberFrom]
 		to, ok2 := c.stations[e.EvaNumberTo]
 		if !ok1 || !ok2 {
-			log.Panicf("Non-existant Station for stop of Line %d", e.LineID)
+			log.Panicf("Non-existant Station for stop of Line %s", e.LineID)
 			return
 		}
 		edge := &Edge{
@@ -187,7 +187,7 @@ func (c *consumer) initializeProviders(evaNumbers []int) {
 	c.providerStations = defaultStations(evaNumbers)
 
 	c.stations = map[int]*Station{}
-	c.lines = map[int]*Line{}
+	c.lines = map[string]*Line{}
 }
 
 func (c *consumer) callProviders(enrich bool) {
@@ -241,7 +241,7 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[int]*Line) {
+func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[string]*Line) {
 	c := &consumer{}
 
 	c.parseDate(dateTime)

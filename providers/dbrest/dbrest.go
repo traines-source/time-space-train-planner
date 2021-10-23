@@ -114,12 +114,12 @@ func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, evaNumb
 		if err != nil {
 			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
 		}
-		p.parseLine(stop, lineID)
-		p.parseLineStop(stop, arrival, evaNumber, lineID)
+		p.parseLine(stop, *stop.TripID, lineID)
+		p.parseLineStop(stop, arrival, evaNumber, *stop.TripID)
 	}
 }
 
-func (p *DbRest) parseLine(stop *models.DepartureArrival, lineID int) {
+func (p *DbRest) parseLine(stop *models.DepartureArrival, tripID string, lineID int) {
 	lineName := ""
 	if stop.Line.Name != nil {
 		lineName = *stop.Line.Name
@@ -128,10 +128,10 @@ func (p *DbRest) parseLine(stop *models.DepartureArrival, lineID int) {
 	if stop.Line.ProductName != nil {
 		productName = *stop.Line.ProductName
 	}
-	p.consumer.UpsertLine(providers.ProviderLine{ID: lineID, Type: productName, Name: lineName})
+	p.consumer.UpsertLine(providers.ProviderLine{ID: tripID, TripName: lineID, Type: productName, Name: lineName})
 }
 
-func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaNumber int, lineID int) {
+func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaNumber int, tripID string) {
 
 	planned := &providers.ProviderLineStopInfo{}
 	current := &providers.ProviderLineStopInfo{}
@@ -163,7 +163,7 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 			current.DepartureTrack = *stop.Platform
 		}
 	}
-	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: lineID, Planned: planned, Current: current})
+	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned, Current: current})
 }
 
 func (p *DbRest) requestJourneys() {
@@ -216,17 +216,12 @@ func (p *DbRest) parseEdgesFromJourneys() {
 				log.Print("Error while trying to read edges from journeys")
 				continue
 			}
-			lineID, err3 := strconv.Atoi(*leg.Line.FahrtNr)
-			if err3 != nil {
-				log.Print("Error while trying to read line from journeys")
-				continue
-			}
 			log.Print(evaNumberFrom, *leg.Departure)
 			hafas := true
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
 				EvaNumberFrom:        evaNumberFrom,
 				EvaNumberTo:          evaNumberTo,
-				LineID:               lineID,
+				LineID:               *leg.TripID,
 				ProviderShortestPath: &hafas,
 				Planned: &providers.ProviderLineStopInfo{
 					Departure: time.Time(*leg.Departure),

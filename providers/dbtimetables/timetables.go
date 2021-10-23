@@ -71,12 +71,12 @@ func (p *Timetables) requestStationAtTime(station providers.ProviderStation, t t
 		if err != nil {
 			log.Printf("Failed to convert Line ID %d", lineID)
 		}
-		p.parseLine(stop, lineID)
-		p.parseLineStop(stop, station.EvaNumber, lineID)
+		p.parseLine(stop, *stop.Tl.N, lineID) // TODO stop.Tl.N is not the correct tripID
+		p.parseLineStop(stop, station.EvaNumber, *stop.Tl.N)
 	}
 }
 
-func (p *Timetables) parseLine(stop *models.TimetableStop, lineID int) {
+func (p *Timetables) parseLine(stop *models.TimetableStop, tripID string, lineID int) {
 	lineName := ""
 	if stop.Ar != nil {
 		lineName = stop.Ar.L
@@ -84,10 +84,10 @@ func (p *Timetables) parseLine(stop *models.TimetableStop, lineID int) {
 	if stop.Dp != nil {
 		lineName = stop.Dp.L
 	}
-	p.consumer.UpsertLine(providers.ProviderLine{ID: lineID, Type: *stop.Tl.C, Name: lineName})
+	p.consumer.UpsertLine(providers.ProviderLine{ID: tripID, TripName: lineID, Type: *stop.Tl.C, Name: lineName})
 }
 
-func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, lineID int) {
+func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, tripID string) {
 
 	planned := &providers.ProviderLineStopInfo{}
 	if stop.Ar != nil {
@@ -98,7 +98,7 @@ func (p *Timetables) parseLineStop(stop *models.TimetableStop, evaNumber int, li
 		planned.Departure = parseEventTime(stop.Dp.Pt)
 		planned.DepartureTrack = stop.Dp.Pp
 	}
-	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: lineID, Planned: planned})
+	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned})
 }
 
 func parseEventTime(timeString string) time.Time {

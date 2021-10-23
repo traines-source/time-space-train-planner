@@ -29,7 +29,7 @@ type ProviderStation struct {
 
 type ProviderLineStop struct {
 	EvaNumber int
-	LineID    int
+	LineID    string
 	Planned   *ProviderLineStopInfo
 	Current   *ProviderLineStopInfo
 	Message   string
@@ -43,16 +43,17 @@ type ProviderLineStopInfo struct {
 }
 
 type ProviderLine struct {
-	Type    string
-	Name    string
-	ID      int
-	Message string
+	ID       string
+	Type     string
+	Name     string
+	TripName int
+	Message  string
 }
 
 type ProviderLineEdge struct {
 	EvaNumberFrom        int
 	EvaNumberTo          int
-	LineID               int
+	LineID               string
 	ProviderShortestPath *bool
 	Planned              *ProviderLineStopInfo
 }

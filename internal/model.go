@@ -35,7 +35,7 @@ type StopInfo struct {
 type Line struct {
 	Type    string
 	Name    string
-	ID      int
+	ID      string
 	Message string
 	Route   []*Edge
 	Stops   map[*Station]*LineStop

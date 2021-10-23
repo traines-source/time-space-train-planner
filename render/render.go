@@ -29,7 +29,7 @@ const (
 	minTimeIndicatorDistance = "15m"
 )
 
-func TimeSpace(stations map[int]*internal.Station, lines map[int]*internal.Line, wr io.Writer) {
+func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer) {
 	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[string]*EdgePath{}}
 	c.setupStations(stations)
 	c.setupEdges(lines)
@@ -47,7 +47,7 @@ func (c *container) setupStations(stations map[int]*internal.Station) {
 	}
 }
 
-func (c *container) setupEdges(lines map[int]*internal.Line) {
+func (c *container) setupEdges(lines map[string]*internal.Line) {
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			e := l.Route[i]
@@ -106,7 +106,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 }
 
 func generateEdgeID(e *internal.Edge) string {
-	return fmt.Sprintf("%d_%d_%d", e.Line.ID, e.From.EvaNumber, e.Actual.Departure.Unix())
+	return fmt.Sprintf("%s_%d_%d", e.Line.ID, e.From.EvaNumber, e.Actual.Departure.Unix())
 }
 
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
@@ -127,7 +127,7 @@ func generateStationEdgeID(last *internal.Edge, this *internal.Edge) string {
 	if last == nil {
 		return "undefined"
 	}
-	return fmt.Sprintf("%d_%d_%d_station", this.Line.ID, this.From.EvaNumber, last.Actual.Arrival.Unix())
+	return fmt.Sprintf("%s_%d_%d_station", this.Line.ID, this.From.EvaNumber, last.Actual.Arrival.Unix())
 }
 
 func (c *container) gravitate() {
@@ -181,7 +181,7 @@ func (p *EdgePath) Label() string {
 	if e.Line.Name != "" {
 		label = e.Line.Name
 	} else {
-		label = fmt.Sprintf("%d", e.Line.ID)
+		label = e.Line.ID
 	}
 	if e.Line.Type == "Foot" {
 		return "🚶 " + label
