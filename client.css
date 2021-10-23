@@ -45,8 +45,17 @@ svg {
 }
 
 .edge.selected {
+    stroke: green;
+}
+
+.edge.provider-shortest-path {
     stroke: red;
 }
+
+.edge.provider-shortest-path.selected {
+    stroke: orange;
+}
+
 
 .type-Foot {
     stroke-dasharray: 1 5;
@@ -55,4 +64,5 @@ svg {
 .type-ICE, .type-IC {
     stroke-dasharray: 1 0;
 }
+
 

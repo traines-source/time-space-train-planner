@@ -15,8 +15,9 @@ import (
 )
 
 type DbRest struct {
-	consumer providers.Consumer
-	client   *apiclient.Dbrest
+	consumer       providers.Consumer
+	client         *apiclient.Dbrest
+	cachedJourneys *operations.GetJourneysOKBody
 }
 
 func (p *DbRest) Fetch(c providers.Consumer) {
@@ -27,48 +28,21 @@ func (p *DbRest) Fetch(c providers.Consumer) {
 	p.requestJourneys()
 }
 
+func (p *DbRest) Enrich(c providers.Consumer) {
+	p.consumer = c
+	p.requestJourneys()
+}
+
+func (p *DbRest) prepareClient() {
+	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("DBREST_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
+	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("DB_API_ACCESS_TOKEN"))
+	p.client = apiclient.New(r, strfmt.Default)
+}
+
 func (p *DbRest) requestStations() {
 	stations := p.consumer.Stations()
 	for _, station := range stations {
 		p.requestStation(station)
-	}
-}
-
-func (p *DbRest) requestDeparturesAndArrivals() {
-	stations := p.consumer.Stations()
-	for i, station := range stations {
-		if i > 10 {
-			break
-		}
-		from, to := p.consumer.RequestStationDataBetween(&station)
-		duration := to.Sub(from).Minutes()
-		p.requestArrival(station, from, int64(duration))
-		p.requestDeparture(station, from, int64(duration))
-	}
-}
-
-func (p *DbRest) requestJourneys() {
-	stations := p.consumer.Stations()
-	departure, _ := p.consumer.RequestStationDataBetween(&stations[0])
-	var params = operations.NewGetJourneysParams()
-	from := strconv.Itoa(stations[0].EvaNumber)
-	to := strconv.Itoa(stations[len(stations)-1].EvaNumber)
-	params.From = &from
-	params.To = &to
-	params.Departure = (*strfmt.DateTime)(&departure)
-	res, err := p.client.Operations.GetJourneys(params)
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-	for _, journey := range res.Payload.Journeys {
-		for _, leg := range journey.Legs {
-			log.Print(*leg.Origin.Name, *leg.Origin.ID)
-			evaNumber, err := strconv.Atoi(*leg.Origin.ID)
-			if err == nil {
-				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumber, Name: *leg.Origin.Name})
-			}
-		}
 	}
 }
 
@@ -85,6 +59,19 @@ func (p *DbRest) requestStation(station providers.ProviderStation) {
 		Lat:       float32(res.Payload.Location.Latitude),
 		Lon:       float32(res.Payload.Location.Longitude),
 	})
+}
+
+func (p *DbRest) requestDeparturesAndArrivals() {
+	stations := p.consumer.Stations()
+	for i, station := range stations {
+		if i > 10 {
+			break
+		}
+		from, to := p.consumer.RequestStationDataBetween(&station)
+		duration := to.Sub(from).Minutes()
+		p.requestArrival(station, from, int64(duration))
+		p.requestDeparture(station, from, int64(duration))
+	}
 }
 
 func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Time, duration int64) {
@@ -179,8 +166,77 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: lineID, Planned: planned, Current: current})
 }
 
-func (p *DbRest) prepareClient() {
-	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("DBREST_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
-	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("DB_API_ACCESS_TOKEN"))
-	p.client = apiclient.New(r, strfmt.Default)
+func (p *DbRest) requestJourneys() {
+	if p.cachedJourneys == nil {
+		p.requestJourneysApi()
+		p.parseStationsFromJourneys()
+	} else {
+		p.parseEdgesFromJourneys()
+	}
+}
+
+func (p *DbRest) requestJourneysApi() {
+	stations := p.consumer.Stations()
+	departure, _ := p.consumer.RequestStationDataBetween(&stations[0])
+	var params = operations.NewGetJourneysParams()
+	from := strconv.Itoa(stations[0].EvaNumber)
+	to := strconv.Itoa(stations[len(stations)-1].EvaNumber)
+	params.From = &from
+	params.To = &to
+	params.Departure = (*strfmt.DateTime)(&departure)
+	res, err := p.client.Operations.GetJourneys(params)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+	p.cachedJourneys = res.Payload
+}
+
+func (p *DbRest) parseStationsFromJourneys() {
+	for _, journey := range p.cachedJourneys.Journeys {
+		for _, leg := range journey.Legs {
+			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
+			evaNumberTo, err2 := strconv.Atoi(*leg.Destination.ID)
+			if err1 == nil && err2 == nil {
+				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberFrom, Name: *leg.Origin.Name})
+				p.consumer.UpsertStation(providers.ProviderStation{EvaNumber: evaNumberTo, Name: *leg.Origin.Name})
+			} else {
+				log.Print("Error while trying to read stations from journeys")
+			}
+		}
+	}
+}
+
+func (p *DbRest) parseEdgesFromJourneys() {
+	for _, journey := range p.cachedJourneys.Journeys {
+		for _, leg := range journey.Legs {
+			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
+			evaNumberTo, err2 := strconv.Atoi(*leg.Destination.ID)
+			if err1 != nil || err2 != nil || leg.Line == nil {
+				log.Print("Error while trying to read edges from journeys")
+				continue
+			}
+			lineID, err3 := strconv.Atoi(*leg.Line.FahrtNr)
+			if err3 != nil {
+				log.Print("Error while trying to read line from journeys")
+				continue
+			}
+			log.Print(evaNumberFrom, *leg.Departure)
+			hafas := true
+			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
+				EvaNumberFrom:        evaNumberFrom,
+				EvaNumberTo:          evaNumberTo,
+				LineID:               lineID,
+				ProviderShortestPath: &hafas,
+				Planned: &providers.ProviderLineStopInfo{
+					Departure: time.Time(*leg.Departure),
+					Arrival:   time.Time(*leg.Arrival),
+					//					DepartureTrack: *leg.DeparturePlatform,
+					//					ArrivalTrack:   *leg.ArrivalPlatform,
+				},
+			})
+
+		}
+		break
+	}
 }

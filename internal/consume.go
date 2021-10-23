@@ -124,6 +124,47 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	val.Message = e.Message
 }
 
+func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
+	line, ok := c.lines[e.LineID]
+	if !ok {
+		log.Print("Non-existant Line %d for edge upsert", e.LineID)
+		return
+	}
+	found := false
+	for _, edge := range line.Route {
+		if edge.From.EvaNumber == e.EvaNumberFrom && edge.To.EvaNumber == e.EvaNumberTo {
+			if e.ProviderShortestPath != nil {
+				edge.ProviderShortestPath = *e.ProviderShortestPath
+			}
+			found = true
+		}
+	}
+	if !found {
+		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %d)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID)
+		from, ok1 := c.stations[e.EvaNumberFrom]
+		to, ok2 := c.stations[e.EvaNumberTo]
+		if !ok1 || !ok2 {
+			log.Panicf("Non-existant Station for stop of Line %d", e.LineID)
+			return
+		}
+		edge := &Edge{
+			Line: line,
+			From: from,
+			To:   to,
+			Actual: StopInfo{
+				Departure:      e.Planned.Departure,
+				Arrival:        e.Planned.Arrival,
+				DepartureTrack: e.Planned.DepartureTrack,
+				ArrivalTrack:   e.Planned.ArrivalTrack,
+			},
+			ProviderShortestPath: *e.ProviderShortestPath,
+		}
+		line.Route = append(line.Route, edge)
+		edge.From.Departures = append(edge.From.Departures, edge)
+		edge.To.Arrivals = append(edge.To.Arrivals, edge)
+	}
+}
+
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	if to.Departure.IsZero() {
 		to.Departure = from.Departure
@@ -141,17 +182,21 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	}
 }
 
-func (c *consumer) callProviders(evaNumbers []int) {
+func (c *consumer) initializeProviders(evaNumbers []int) {
 	c.providers = []providers.Provider{&dbrest.DbRest{}}
-	//c.providerStations = defaultStations(8003819, 8003816, 8000240, 8070004, 8070003, 8000257, 8000236, 8000244, 8000096)
-	// 8000105, 8098105
 	c.providerStations = defaultStations(evaNumbers)
 
 	c.stations = map[int]*Station{}
 	c.lines = map[int]*Line{}
+}
 
+func (c *consumer) callProviders(enrich bool) {
 	for _, p := range c.providers {
-		p.Fetch(c)
+		if !enrich {
+			p.Fetch(c)
+		} else {
+			p.Enrich(c)
+		}
 	}
 }
 
@@ -206,10 +251,12 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 	evaNumbers = append(evaNumbers, vias...)
 	evaNumbers = append(evaNumbers, to)
 
-	c.callProviders(evaNumbers)
+	c.initializeProviders(evaNumbers)
+	c.callProviders(false)
 	c.generateEdges(c.stations[from], c.stations[to])
 	c.rankStations(c.stations[from], c.stations[to])
 	shortestPaths(c.stations, c.stations[to])
+	c.callProviders(true)
 	return c.stations, c.lines
 }
 

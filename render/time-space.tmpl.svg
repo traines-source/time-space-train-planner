@@ -15,12 +15,12 @@
         </filter>
     </defs>
 {{range .Stations}}
-    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">{{.Station.Name}}</text>
+    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">{{.Station.Name}} {{.Station.EvaNumber}}</text>
 {{end}}
 {{range .SortedEdges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         marker-start="url(#dot-redundant-{{.Redundant}})" marker-end="url(#dot-redundant-{{.Redundant}})"
-        class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}"
+        class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
         />
     <path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         class="edge-toucharea"

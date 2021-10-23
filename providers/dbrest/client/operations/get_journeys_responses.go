@@ -340,7 +340,8 @@ type JourneysItems0LegsItems0 struct {
 
 	// arrival
 	// Required: true
-	Arrival *string `json:"arrival"`
+	// Format: date-time
+	Arrival *strfmt.DateTime `json:"arrival"`
 
 	// arrival delay
 	// Required: true
@@ -356,7 +357,8 @@ type JourneysItems0LegsItems0 struct {
 
 	// departure
 	// Required: true
-	Departure *string `json:"departure"`
+	// Format: date-time
+	Departure *strfmt.DateTime `json:"departure"`
 
 	// departure delay
 	// Required: true
@@ -384,7 +386,8 @@ type JourneysItems0LegsItems0 struct {
 
 	// planned arrival
 	// Required: true
-	PlannedArrival *string `json:"plannedArrival"`
+	// Format: date-time
+	PlannedArrival *strfmt.DateTime `json:"plannedArrival"`
 
 	// planned arrival platform
 	// Required: true
@@ -392,7 +395,8 @@ type JourneysItems0LegsItems0 struct {
 
 	// planned departure
 	// Required: true
-	PlannedDeparture *string `json:"plannedDeparture"`
+	// Format: date-time
+	PlannedDeparture *strfmt.DateTime `json:"plannedDeparture"`
 
 	// planned departure platform
 	// Required: true
@@ -491,6 +495,10 @@ func (o *JourneysItems0LegsItems0) validateArrival(formats strfmt.Registry) erro
 		return err
 	}
 
+	if err := validate.FormatOf("arrival", "body", "date-time", o.Arrival.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -529,6 +537,10 @@ func (o *JourneysItems0LegsItems0) validateCycle(formats strfmt.Registry) error 
 func (o *JourneysItems0LegsItems0) validateDeparture(formats strfmt.Registry) error {
 
 	if err := validate.Required("departure", "body", o.Departure); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("departure", "body", "date-time", o.Departure.String(), formats); err != nil {
 		return err
 	}
 
@@ -618,6 +630,10 @@ func (o *JourneysItems0LegsItems0) validatePlannedArrival(formats strfmt.Registr
 		return err
 	}
 
+	if err := validate.FormatOf("plannedArrival", "body", "date-time", o.PlannedArrival.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -633,6 +649,10 @@ func (o *JourneysItems0LegsItems0) validatePlannedArrivalPlatform(formats strfmt
 func (o *JourneysItems0LegsItems0) validatePlannedDeparture(formats strfmt.Registry) error {
 
 	if err := validate.Required("plannedDeparture", "body", o.PlannedDeparture); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("plannedDeparture", "body", "date-time", o.PlannedDeparture.String(), formats); err != nil {
 		return err
 	}
 

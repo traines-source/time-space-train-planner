@@ -40,6 +40,10 @@ func (p *Timetables) Fetch(c providers.Consumer) {
 	}
 }
 
+func (p *Timetables) Enrich(c providers.Consumer) {
+	return
+}
+
 func (p *Timetables) requestAtTime(time time.Time) {
 	stations := p.consumer.Stations()
 	for _, station := range stations {

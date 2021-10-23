@@ -636,19 +636,23 @@
                                 ]
                               },
                               "departure": {
-                                "type": "string"
+                                "type": "string",
+                                "format": "date-time"
                               },
                               "plannedDeparture": {
-                                "type": "string"
+                                "type": "string",
+                                "format": "date-time"
                               },
                               "departureDelay": {
                                 "type": "null"
                               },
                               "arrival": {
-                                "type": "string"
+                                "type": "string",
+                                "format": "date-time"
                               },
                               "plannedArrival": {
-                                "type": "string"
+                                "type": "string",
+                                "format": "date-time"
                               },
                               "arrivalDelay": {
                                 "type": "null"

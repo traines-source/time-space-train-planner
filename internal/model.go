@@ -13,15 +13,16 @@ type Station struct {
 }
 
 type Edge struct {
-	Line         *Line
-	From         *Station
-	To           *Station
-	Planned      StopInfo
-	Current      StopInfo
-	Actual       StopInfo
-	Message      string
-	ShortestPath *Edge
-	Redundant    bool
+	Line                 *Line
+	From                 *Station
+	To                   *Station
+	Planned              StopInfo
+	Current              StopInfo
+	Actual               StopInfo
+	Message              string
+	ShortestPath         *Edge
+	ProviderShortestPath bool
+	Redundant            bool
 }
 
 type StopInfo struct {

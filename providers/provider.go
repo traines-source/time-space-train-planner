@@ -4,6 +4,7 @@ import "time"
 
 type Provider interface {
 	Fetch(c Consumer)
+	Enrich(c Consumer)
 }
 
 type Consumer interface {
@@ -14,6 +15,7 @@ type Consumer interface {
 	UpsertStation(station ProviderStation)
 	UpsertLine(line ProviderLine)
 	UpsertLineStop(lineStop ProviderLineStop)
+	UpsertLineEdge(lineEdge ProviderLineEdge)
 }
 
 type ProviderStation struct {
@@ -45,4 +47,12 @@ type ProviderLine struct {
 	Name    string
 	ID      int
 	Message string
+}
+
+type ProviderLineEdge struct {
+	EvaNumberFrom        int
+	EvaNumberTo          int
+	LineID               int
+	ProviderShortestPath *bool
+	Planned              *ProviderLineStopInfo
 }
