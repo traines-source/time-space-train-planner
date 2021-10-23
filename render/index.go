@@ -32,7 +32,7 @@ func Vias(stations map[int]*internal.Station, from int, to int, dateTime string,
 		DateTime: dateTime,
 	}
 	for _, s := range stations {
-		if s.EvaNumber == from || s.EvaNumber == to {
+		if s.EvaNumber == from || s.EvaNumber == to || s.GroupNumber != nil && *s.GroupNumber != s.EvaNumber {
 			continue
 		}
 		m.Stations = append(m.Stations, s)

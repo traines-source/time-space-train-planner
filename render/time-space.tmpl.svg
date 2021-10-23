@@ -4,11 +4,11 @@
     <defs>
         <marker id="dot-redundant-false" viewBox="0 0 10 10" refX="5" refY="5"
             markerWidth="4" markerHeight="4" filter="none">
-            <circle cx="5" cy="5" r="5" />
+            <circle cx="5" cy="5" r="3" />
         </marker>
          <marker id="dot-redundant-true" viewBox="0 0 10 10" refX="5" refY="5"
             markerWidth="4" markerHeight="4" filter="none">
-            <circle cx="5" cy="5" r="5" />
+            <circle cx="5" cy="5" r="3" />
         </marker>
         <filter id="erode">
             <feMorphology operator="erode" radius="8"/>

@@ -156,10 +156,6 @@ func (c *container) layoutStations() {
 	y := 0
 	var lastGroup *int
 	for _, s := range stationsSlice {
-		log.Print(s.Name, s.GroupNumber, s.Rank)
-		if s.GroupNumber != nil {
-			log.Print(*s.GroupNumber)
-		}
 		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
 			x++
 			y = 0
@@ -213,7 +209,7 @@ func (p *EdgePath) Label() string {
 	if e.Line.Type == "Foot" {
 		return "🚶 " + label
 	}
-	return e.Line.Type + " " + label
+	return label
 }
 
 func (p *EdgePath) Type() string {

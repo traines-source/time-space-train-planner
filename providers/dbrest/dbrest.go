@@ -136,8 +136,8 @@ func (p *DbRest) parseLine(stop *models.DepartureArrival, tripID string, lineID 
 		lineName = *stop.Line.Name
 	}
 	productName := ""
-	if stop.Line.ProductName != nil {
-		productName = *stop.Line.ProductName
+	if stop.Line.Product != nil {
+		productName = *stop.Line.Product
 	}
 	p.consumer.UpsertLine(providers.ProviderLine{ID: tripID, TripName: lineID, Type: productName, Name: lineName})
 }

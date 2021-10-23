@@ -10,7 +10,6 @@ svg {
 .edge {
     stroke-width:2px;
     stroke: black;
-    stroke-dasharray: 5 2;
 }
 
 .edge-toucharea {
@@ -45,24 +44,33 @@ svg {
 }
 
 .edge.selected {
-    stroke: green;
+    stroke: #01579B;
 }
 
 .edge.provider-shortest-path {
-    stroke: red;
+    stroke: #B71C1C;
 }
 
 .edge.provider-shortest-path.selected {
-    stroke: orange;
+    stroke: #880E4F;
 }
 
 
 .type-Foot {
     stroke-dasharray: 1 5;
+    stroke-width: 1px;
 }
 
-.type-ICE, .type-IC {
-    stroke-dasharray: 1 0;
+
+.type-nationalExpress, .type-national {
+    stroke-width: 3px;
 }
 
+.type-regional, .type-regionalExp, .type-suburban {
+    stroke-width: 2px;
+}
+
+.type-bus, .type-subway, .type-tram {
+    stroke-width: 1px;
+}
 
