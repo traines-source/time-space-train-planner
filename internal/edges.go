@@ -72,47 +72,52 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 	if from == destination || to == origin {
 		return
 	}
-	sign := -1.0
-	departures := to.Departures
+	correspondances := to.Departures
 	if to == destination {
-		sign = 1.0
-		departures = from.Arrivals
+		correspondances = from.Arrivals
 	}
-	var duration = time.Minute * time.Duration(math.Ceil(sign*dist/1000/FOOT_KMH*60))
+	var duration = time.Minute * time.Duration(math.Ceil(dist/1000/FOOT_KMH*60))
 
-	for i, departure := range departures {
-		if departure.Line.Type == "Foot" {
+	for _, correspondance := range correspondances {
+		if correspondance.Line.Type == "Foot" {
 			continue
 		}
-		var departureTime = departure.Actual.Departure.Add(duration)
-		if len(from.Arrivals) == 0 || departureTime.Before(from.Arrivals[0].Actual.Arrival) {
-			continue
-		}
-		var lineID = fmt.Sprint(from.EvaNumber*1000000000 + to.EvaNumber*100 + i)
 
-		var line = &Line{
-			ID:   lineID,
-			Name: fmt.Sprintf("%.0fm", math.Round(dist)),
-			Type: "Foot",
-		}
-		c.lines[lineID] = line
-		edge := &Edge{
-			Line: line,
-			From: from,
-			To:   to,
-			Actual: StopInfo{
-				Departure: departureTime,
-				Arrival:   departure.Actual.Departure,
-			},
-		}
 		if to == destination {
-			edge.Actual.Departure = edge.Actual.Arrival
-			edge.Actual.Arrival = departureTime
+			complementaryTime := correspondance.Actual.Arrival.Add(duration)
+			c.generateOnFootEdgeBetweenTwoStationsInDirection(from, to, dist, correspondance.Actual.Arrival, complementaryTime)
+		} else {
+			complementaryTime := correspondance.Actual.Departure.Add(-duration)
+			if len(from.Arrivals) == 0 || complementaryTime.Before(from.Arrivals[0].Actual.Arrival) {
+				continue
+			}
+			c.generateOnFootEdgeBetweenTwoStationsInDirection(from, to, dist, complementaryTime, correspondance.Actual.Departure)
 		}
-		line.Route = append(line.Route, edge)
-		edge.From.Departures = append(edge.From.Departures, edge)
-		edge.To.Arrivals = append(edge.To.Arrivals, edge)
 	}
+}
+
+func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, departure time.Time, arrival time.Time) {
+
+	var lineID = fmt.Sprint(int64(from.EvaNumber*1000000000+to.EvaNumber*100) + departure.Unix())
+
+	var line = &Line{
+		ID:   lineID,
+		Name: fmt.Sprintf("%.0fm", math.Round(dist)),
+		Type: "Foot",
+	}
+	c.lines[lineID] = line
+	edge := &Edge{
+		Line: line,
+		From: from,
+		To:   to,
+		Actual: StopInfo{
+			Departure: departure,
+			Arrival:   arrival,
+		},
+	}
+	line.Route = append(line.Route, edge)
+	edge.From.Departures = append(edge.From.Departures, edge)
+	edge.To.Arrivals = append(edge.To.Arrivals, edge)
 }
 
 func degreesToRadians(degrees float32) float64 {

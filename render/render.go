@@ -136,6 +136,11 @@ func (c *container) gravitate() {
 	c.TimeAxisSize = timeAxisSize
 	c.SpaceAxisSize = spaceAxisSize
 
+	c.layoutStations()
+	c.indicateTimes()
+}
+
+func (c *container) layoutStations() {
 	var stationsSlice []*StationLabel
 	for _, s := range c.Stations {
 		stationsSlice = append(stationsSlice, s)
@@ -158,7 +163,6 @@ func (c *container) gravitate() {
 		y++
 	}
 	c.maxSpace = x
-	c.indicateTimes()
 }
 
 func (c *container) indicateTimes() {
