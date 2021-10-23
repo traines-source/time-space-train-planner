@@ -11,8 +11,7 @@ import (
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("./"))
-	http.Handle("/", fs)
+	http.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("./res"))))
 	http.HandleFunc("/tstp", renderTimeSpace)
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
