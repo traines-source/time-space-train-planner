@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"log"
 	"time"
 )
 
@@ -158,7 +157,6 @@ func markAsRedundantIfRevisitsSameStation(edge *dijkstra) {
 			nextEdge = nextEdge.ShortestPath
 			if nextEdge.To.EvaNumber == from {
 				edge.vertexAtDeparture.Redundant = true
-				log.Print("redundant")
 				break
 			}
 		} else {

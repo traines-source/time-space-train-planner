@@ -112,6 +112,10 @@ func generateEdgeID(e *internal.Edge) string {
 }
 
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
+	if last.To != this.From {
+		log.Print("Tried to create stationEdge for line segments of different stations ", last.To.EvaNumber, this.From.EvaNumber)
+		return nil
+	}
 	edge := &EdgePath{
 		ID:   generateStationEdgeID(last, this),
 		From: Coord{SpaceAxis: c.Stations[this.From], TimeAxis: last.Actual.Arrival},
@@ -152,8 +156,7 @@ func (c *container) layoutStations() {
 	y := 0
 	var lastGroup = 0
 	for _, s := range stationsSlice {
-		log.Print(*s.GroupNumber)
-		if s.GroupNumber == nil || lastGroup != *s.GroupNumber {
+		if true || s.GroupNumber == nil || lastGroup != *s.GroupNumber {
 			x++
 			y = 0
 			lastGroup = *s.GroupNumber

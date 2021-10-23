@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-const MAX_FOOT_DIST_METERS = 5000
-const FOOT_KMH = 6
+const maxFootDistMeters = 5000
+const footKmh = 6
 
 func (c *consumer) generateTimetableEdges() {
 	for _, line := range c.lines {
@@ -54,7 +54,7 @@ func (c *consumer) generateOnFootEdges(origin *Station, destination *Station) {
 				continue
 			}
 			var dist = geoDistStations(s1, s2)
-			if dist > MAX_FOOT_DIST_METERS {
+			if dist > maxFootDistMeters {
 				continue
 			}
 			c.generateOnFootEdgesBetweenTwoStations(s1, s2, dist, origin, destination)
@@ -76,7 +76,7 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 	if to == destination {
 		correspondances = from.Arrivals
 	}
-	var duration = time.Minute * time.Duration(math.Ceil(dist/1000/FOOT_KMH*60))
+	var duration = time.Minute * time.Duration(math.Ceil(dist/1000/footKmh*60))
 
 	for _, correspondance := range correspondances {
 		if correspondance.Line.Type == "Foot" {

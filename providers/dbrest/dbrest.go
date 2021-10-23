@@ -122,11 +122,11 @@ func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupNu
 
 func (p *DbRest) parseStation(stop *models.DepartureArrival, evaNumber int, groupNumber int) {
 	p.consumer.UpsertStation(providers.ProviderStation{
-		EvaNumber: evaNumber,
+		EvaNumber:   evaNumber,
 		GroupNumber: &groupNumber,
-		Name:      *stop.Stop.Name,
-		Lat:       float32(*stop.Stop.Location.Latitude),
-		Lon:       float32(*stop.Stop.Location.Longitude),
+		Name:        *stop.Stop.Name,
+		Lat:         float32(*stop.Stop.Location.Latitude),
+		Lon:         float32(*stop.Stop.Location.Longitude),
 	})
 }
 
@@ -227,7 +227,6 @@ func (p *DbRest) parseEdgesFromJourneys() {
 				log.Print("Error while trying to read edges from journeys")
 				continue
 			}
-			log.Print(evaNumberFrom, *leg.Departure)
 			hafas := true
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
 				EvaNumberFrom:        evaNumberFrom,
