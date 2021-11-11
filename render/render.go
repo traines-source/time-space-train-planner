@@ -25,8 +25,8 @@ type container struct {
 }
 
 const (
-	timeAxisSize             = 2000
-	spaceAxisSize            = 2000
+	timeAxisSize             = 1500
+	spaceAxisSize            = 1500
 	maxTimeIndicators        = 5
 	minTimeIndicatorDistance = "15m"
 )
@@ -184,7 +184,7 @@ func (c *container) render(wr io.Writer) {
 }
 
 func (c *container) X(coord Coord) int {
-	return int(float32(coord.SpaceAxis.SpaceAxis)/float32(c.maxSpace)*float32(c.SpaceAxisSize-50) + 50.0)
+	return int(float32(coord.SpaceAxis.SpaceAxis)/float32(c.maxSpace)*float32(c.SpaceAxisSize-100) + 50.0)
 }
 
 func (c *container) Y(coord Coord) int {

@@ -26,17 +26,17 @@
         class="edge-toucharea"
         />
     <text>
-        <textPath href="#{{.ID}}" startOffset="50%" text-anchor="middle"
-            class="label shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
+        <textPath href="#{{.ID}}" id="{{.ID}}-label" startOffset="50%" text-anchor="middle"
+            class="label type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
             {{.Label}}
         </textPath>
     </text>
-    <text x="{{$.X .To}}" y="{{$.Y .To}}" text-anchor="end"
-        class="arrival shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
+    <text x="{{$.X .To}}" y="{{$.Y .To}}" id="{{.ID}}-arrival" text-anchor="end"
+        class="arrival type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
         {{.Arrival}}
     </text>
-    <text x="{{$.X .From}}" y="{{$.Y .From}}" text-anchor="start" 
-        class="departure shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
+    <text x="{{$.X .From}}" y="{{$.Y .From}}" id="{{.ID}}-departure" text-anchor="start" 
+        class="departure type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
         {{.Departure}}
     </text>
 {{end}}

@@ -45,6 +45,7 @@ svg {
 
 .edge.selected {
     stroke: #01579B;
+    filter: drop-shadow( 0px 0px 3px rgba(1, 87, 155, .7));
 }
 
 .edge.provider-shortest-path {
@@ -53,24 +54,24 @@ svg {
 
 .edge.provider-shortest-path.selected {
     stroke: #880E4F;
+    filter: drop-shadow( 0px 0px 3px rgba(136, 14, 79, .7));
 }
 
 
-.type-Foot {
+.edge.type-Foot {
     stroke-dasharray: 1 5;
     stroke-width: 1px;
 }
 
-
-.type-nationalExpress, .type-national {
+.edge.type-nationalExpress, .edge.type-national {
     stroke-width: 3px;
 }
 
-.type-regional, .type-regionalExp, .type-suburban {
+.edge.type-regional, .edge.type-regionalExp, .edge.type-suburban {
     stroke-width: 2px;
 }
 
-.type-bus, .type-subway, .type-tram {
+.edge.type-bus, .edge.type-subway, .edge.type-tram {
     stroke-width: 1px;
 }
 
