@@ -126,8 +126,9 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	}
 	var val *LineStop
 	for _, stop := range line.Stops {
-		if stop.Station == station && !existingStopHasDifferentPlanned(e, stop) {
+		if stop.Station == station {
 			val = stop
+			break
 		}
 	}
 	if val == nil {
