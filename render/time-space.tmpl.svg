@@ -39,6 +39,12 @@
         class="departure type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
         {{.Departure}}
     </text>
+    {{if and (not .Redundant) (ne .Type "Foot")}}
+    <rect data-station="{{.ID}}-0" x="{{$.X .From}}" y="{{$.Y .From}}" />
+    <rect data-station="{{.ID}}-1" x="{{$.X .To}}" y="{{$.Y .To}}" />
+    <path data-line="{{.ID}}-line" data-stops="{{.ID}}-0 {{.ID}}-1" data-from="16 0 noanim-keepzoom" />
+    <path data-train="{{.ID}}-line" data-stops="{{.ID}}-0 +{{$.Minutes .Actual.Departure}}+{{$.Minutes .Actual.Arrival}} {{.ID}}-1" class="train-{{.Type}}" data-from="16 0 keepzoom-autoshow" />
+    {{end}}
 {{end}}
     <script xlink:href="res/client.js" />
 </svg>

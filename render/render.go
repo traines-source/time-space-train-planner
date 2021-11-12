@@ -15,8 +15,8 @@ type container struct {
 	Stations         map[*internal.Station]*StationLabel
 	Edges            map[string]*EdgePath
 	SortedEdges      []*EdgePath
-	minTime          time.Time
-	maxTime          time.Time
+	MinTime          time.Time
+	MaxTime          time.Time
 	maxSpace         int
 	timeAxisDistance float32
 	TimeIndicators   []time.Time
@@ -87,11 +87,11 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 }
 
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
-	if min.Before(c.minTime) || c.minTime.IsZero() {
-		c.minTime = min
+	if min.Before(c.MinTime) || c.MinTime.IsZero() {
+		c.MinTime = min
 	}
-	if max.After(c.maxTime) || c.maxTime.IsZero() {
-		c.maxTime = max
+	if max.After(c.MaxTime) || c.MaxTime.IsZero() {
+		c.MaxTime = max
 	}
 }
 
@@ -169,7 +169,7 @@ func (c *container) layoutStations() {
 }
 
 func (c *container) indicateTimes() {
-	delta := c.maxTime.Unix() - c.minTime.Unix()
+	delta := c.MaxTime.Unix() - c.MinTime.Unix()
 	c.timeAxisDistance = float32(delta)
 	//duration, _ := time.ParseDuration(fmt.Sprintf("%ds", delta/maxTimeIndicators))
 	//now := c.minTime
@@ -191,7 +191,7 @@ func (c *container) Y(coord Coord) int {
 	if coord.TimeAxis.IsZero() {
 		return 50 + coord.SpaceAxis.SpaceAxisHeap*20
 	}
-	delta := float32(coord.TimeAxis.Unix() - c.minTime.Unix())
+	delta := float32(coord.TimeAxis.Unix() - c.MinTime.Unix())
 	return int(delta/c.timeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
 }
 
@@ -243,6 +243,10 @@ func (p *EdgePath) Arrival() string {
 		label += e.Planned.ArrivalTrack
 	}
 	return label
+}
+
+func (c *container) Minutes(time time.Time) string {
+	return fmt.Sprintf("%.0f", time.Sub(c.MinTime).Minutes())
 }
 
 func simpleTime(t time.Time) string {

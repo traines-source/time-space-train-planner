@@ -232,7 +232,17 @@ func defaultStations(evaNumbers []int) []providers.ProviderStation {
 	return stations
 }
 
+func indexOf(slice []int, value int) int {
+	for i, e := range slice {
+		if e == value {
+			return i
+		}
+	}
+	return -1
+}
+
 func (c *consumer) rankStations(origin *Station, destination *Station) {
+	force := []int{}
 	var stationsSlice []*Station
 	for _, s := range c.stations {
 		stationsSlice = append(stationsSlice, s)
@@ -246,6 +256,11 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		}
 		if *stationsSlice[i].GroupNumber == *stationsSlice[j].GroupNumber {
 			return false
+		}
+		forceI := indexOf(force, stationsSlice[i].EvaNumber)
+		forceJ := indexOf(force, stationsSlice[j].EvaNumber)
+		if forceI != -1 && forceJ != -1 {
+			return forceI < forceJ
 		}
 		return geoDistStations(origin, stationsSlice[i])-geoDistStations(destination, stationsSlice[i]) < geoDistStations(origin, stationsSlice[j])-geoDistStations(destination, stationsSlice[j])
 	})
