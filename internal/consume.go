@@ -233,21 +233,8 @@ func defaultStations(evaNumbers []int) []providers.ProviderStation {
 
 func (c *consumer) rankStations(origin *Station, destination *Station) {
 	var stationsSlice []*Station
-	nonRedundantEdgeCount := map[[2]*Station]*int{}
 	for _, s := range c.stations {
 		stationsSlice = append(stationsSlice, s)
-		for _, e := range s.Departures {
-			if e.Redundant {
-				continue
-			}
-			count, ok := nonRedundantEdgeCount[[2]*Station{s, e.To}]
-			if !ok {
-				zero := 0
-				count = &zero
-				nonRedundantEdgeCount[[2]*Station{s, e.To}] = count
-			}
-			(*count)++
-		}
 	}
 	sort.SliceStable(stationsSlice, func(i, j int) bool {
 		if stationsSlice[i] == origin || stationsSlice[j] == destination {
@@ -256,18 +243,10 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		if stationsSlice[j] == origin || stationsSlice[i] == destination {
 			return false
 		}
-		if stationsSlice[i].GroupNumber == stationsSlice[j].GroupNumber {
+		if *stationsSlice[i].GroupNumber == *stationsSlice[j].GroupNumber {
 			return false
 		}
-		ij := nonRedundantEdgeCount[[2]*Station{stationsSlice[i], stationsSlice[j]}]
-		ji := nonRedundantEdgeCount[[2]*Station{stationsSlice[j], stationsSlice[i]}]
-		if ij == nil {
-			return false
-		}
-		if ji == nil {
-			return true
-		}
-		return *ij > *ji
+		return geoDistStations(origin, stationsSlice[i])-geoDistStations(destination, stationsSlice[i]) < geoDistStations(origin, stationsSlice[j])-geoDistStations(destination, stationsSlice[j])
 	})
 	i := 0
 	for _, s := range stationsSlice {
