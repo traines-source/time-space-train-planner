@@ -12,10 +12,7 @@ const footKmh = 6
 
 func (c *consumer) generateTimetableEdges() {
 	for _, line := range c.lines {
-		var stops []*LineStop
-		for _, stop := range line.Stops {
-			stops = append(stops, stop)
-		}
+		var stops []*LineStop = line.Stops
 		sort.Slice(stops, func(i, j int) bool {
 			// TODO current?
 			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)

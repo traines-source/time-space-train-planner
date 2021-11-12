@@ -39,7 +39,7 @@ type Line struct {
 	ID      string
 	Message string
 	Route   []*Edge
-	Stops   map[*Station]*LineStop
+	Stops   []*LineStop
 }
 
 type LineStop struct {

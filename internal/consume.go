@@ -99,12 +99,18 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 func (c *consumer) UpsertLine(e providers.ProviderLine) {
 	val, ok := c.lines[e.ID]
 	if !ok {
-		val = &Line{ID: e.ID, Stops: map[*Station]*LineStop{}}
+		val = &Line{ID: e.ID, Stops: []*LineStop{}}
 		c.lines[e.ID] = val
 	}
 	val.Name = e.Name
 	val.Type = e.Type
 	val.Message = e.Message
+}
+
+func existingStopHasDifferentPlanned(e providers.ProviderLineStop, stop *LineStop) bool {
+	return e.Planned != nil &&
+		(!e.Planned.Arrival.IsZero() && e.Planned.Arrival != stop.Planned.Arrival ||
+			!e.Planned.Departure.IsZero() && e.Planned.Departure != stop.Planned.Departure)
 }
 
 func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
@@ -118,10 +124,15 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 		log.Panicf("Non-existant Line %s for Station  %d", e.LineID, e.EvaNumber)
 		return
 	}
-	val, ok := line.Stops[station]
-	if !ok {
+	var val *LineStop
+	for _, stop := range line.Stops {
+		if stop.Station == station && !existingStopHasDifferentPlanned(e, stop) {
+			val = stop
+		}
+	}
+	if val == nil {
 		val = &LineStop{Station: station}
-		line.Stops[station] = val
+		line.Stops = append(line.Stops, val)
 	}
 	if e.Planned != nil {
 		copyProviderStopInfo(e.Planned, &val.Planned)
