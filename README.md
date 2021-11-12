@@ -4,7 +4,7 @@ An SVG-based tool to visualize public transport journeys retrieved from a HAFAS 
 
 ![Example Diagram](res/screenshot.png?raw=true)
 
-Often, the HAFAS routing system will not show the fastest routes, because it deems the transfer times to short or because there are just too many possibilities. This tool will display all direct connections between a given set of stations and will help you find the fastest connection and any backup connections that might be good to know about.
+Often, the HAFAS routing system will not show the fastest routes, because it deems the transfer times too short or because there are just too many possibilities. This tool will display all direct connections between a given set of stations and will help you find the fastest connection and any backup connections that might be good to know about.
 
 ## Running TSTP
 
