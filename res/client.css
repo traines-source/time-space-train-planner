@@ -9,7 +9,7 @@ svg {
 
 .edge {
     stroke-width:2px;
-    stroke: black;
+    stroke: #212121;
 }
 
 .edge-toucharea {
@@ -28,7 +28,7 @@ svg {
 
 #dot-redundant-false circle {
     stroke: none;
-    fill: black;
+    fill: #212121;
 }
 
 .station-label {

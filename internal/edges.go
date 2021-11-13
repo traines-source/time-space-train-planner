@@ -126,7 +126,7 @@ func geoDistStations(from *Station, to *Station) float64 {
 }
 
 func geoDist(fromLat float32, fromLon float32, toLat float32, toLon float32) float64 {
-	var earthRadiusKm float64 = 6371000
+	var earthRadiusM float64 = 6371000
 
 	var dLat = degreesToRadians(toLat - fromLat)
 	var dLon = degreesToRadians(toLon - fromLon)
@@ -138,7 +138,7 @@ func geoDist(fromLat float32, fromLon float32, toLat float32, toLon float32) flo
 		math.Sin(dLon/2)*math.Sin(dLon/2)*math.Cos(fromLatRad)*math.Cos(toLatRad)
 	var c = 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
-	return earthRadiusKm * c
+	return earthRadiusM * c
 }
 
 func (c *consumer) sortEdges() {
