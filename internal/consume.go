@@ -254,7 +254,7 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		if stationsSlice[j] == origin || stationsSlice[i] == destination {
 			return false
 		}
-		if *stationsSlice[i].GroupNumber == *stationsSlice[j].GroupNumber {
+		if stationsSlice[i].GroupNumber != nil && stationsSlice[j].GroupNumber != nil && *stationsSlice[i].GroupNumber == *stationsSlice[j].GroupNumber {
 			return false
 		}
 		forceI := indexOf(force, stationsSlice[i].EvaNumber)
