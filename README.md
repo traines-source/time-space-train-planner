@@ -18,8 +18,8 @@ In addition, you should run an aggressive HTTP cache in between TSTP and this AP
 
 The steps to run TSTP itself are:
 
-1. Rename `deployments/conf.example.env` to `deployments/conf.env` and fill in the host name of your HTTP cache (`API_CACHE_HOST`) and, if your setup is not exactly mirroring db-rest, the path prefix (`HAFAS_API_CACHE_PREFIX`). If you run the cache locally (e.g. in another Docker container), you probably want to adjust the `API_CACHE_SCHEME` to `http`. The DB Open API and thus the respective environment variables are currently not used anymore.
-2. Rename `res/conf.example.js` to `res/conf.js` and fill in the complete URL to the /stations endpoint of your db-rest instance (preferably cached as well). Obviously, since this will be used by the browser for autocompletion, this URL needs to be accessible from the outside (i.e. no Docker hostname).
-3. Start TSTP using the `docker-compose.yaml` (add a port mapping if you need to) or, if you have installed all go dependencies, using `start.sh`. The default port is 3000.
+1. Copy `deployments/conf.example.env` to `deployments/conf.env` and fill in the host name of your HTTP cache (`API_CACHE_HOST`) and, if your setup is not exactly mirroring db-rest, the path prefix (`HAFAS_API_CACHE_PREFIX`). If you run the cache locally (e.g. in another Docker container), you probably want to adjust the `API_CACHE_SCHEME` to `http`. The DB Open API and thus the respective environment variables are currently not used anymore.
+2. Copy `res/conf.example.js` to `res/conf.js` and fill in the complete URL to the /stations endpoint of your db-rest instance (preferably cached as well). Obviously, since this will be used by the browser for autocompletion, this URL needs to be accessible from the outside (i.e. no Docker hostname).
+3. Start TSTP using the `docker-compose.yaml` (add a port mapping if you need to) or, if you have installed all Go dependencies, without Docker using `start.sh`. The default port is 3000.
 4. You should now be able to access TSTP at your selected port under `/tstp` in your browser.
 5. If something goes wrong, consider looking into TSTP's stdout logs.
