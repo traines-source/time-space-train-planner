@@ -34,8 +34,7 @@ func (p *DbRest) Enrich(c providers.Consumer) {
 }
 
 func (p *DbRest) prepareClient() {
-	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("DBREST_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
-	r.DefaultAuthentication = httptransport.BearerToken(os.Getenv("DB_API_ACCESS_TOKEN"))
+	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("HAFAS_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
 	p.client = apiclient.New(r, strfmt.Default)
 }
 

@@ -1,0 +1,6 @@
+version: '3'
+services:
+  tstp:
+    build: ./
+    container_name: tstp
+    env_file: deployments/conf.env
