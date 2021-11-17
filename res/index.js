@@ -3,7 +3,7 @@ if (document.getElementById('datetime').value == "") {
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     now.setSeconds(0);
     now.setMilliseconds(0);
-    document.getElementById('datetime').value = now.toISOString().slice(0, -1);
+    document.getElementById('datetime').value = now.toISOString().slice(0, -8);
 }
 
 var stationMap = {};
