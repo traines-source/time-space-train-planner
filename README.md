@@ -1,6 +1,6 @@
 # Time-Space Train Planner
 
-An SVG-based tool to visualize public transport journeys retrieved from a HAFAS system, in order to see all possible connections and possibly find faster connections.
+An SVG-based tool to visualize public transport journeys retrieved from a HAFAS system, in order to see all possible connections and possibly find faster connections. See it in action in this video: https://youtu.be/rD5iATcC9Mo
 
 ![Example Diagram](res/screenshot.png?raw=true)
 
