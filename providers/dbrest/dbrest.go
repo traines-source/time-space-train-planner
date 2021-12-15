@@ -14,6 +14,8 @@ import (
 	"traines.eu/time-space-train-planner/providers/dbrest/models"
 )
 
+const results = 1000
+
 type DbRest struct {
 	consumer       providers.Consumer
 	client         *apiclient.Dbrest
@@ -77,6 +79,8 @@ func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Tim
 	var params = operations.NewGetStopsIDArrivalsParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	params.Duration = &duration
+	r := int64(results)
+	params.Results = &r
 	params.When = (*strfmt.DateTime)(&when)
 
 	res, err := p.client.Operations.GetStopsIDArrivals(params)
@@ -91,6 +95,8 @@ func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.T
 	var params = operations.NewGetStopsIDDeparturesParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	params.Duration = &duration
+	r := int64(results)
+	params.Results = &r
 	params.When = (*strfmt.DateTime)(&when)
 
 	res, err := p.client.Operations.GetStopsIDDepartures(params)
@@ -102,6 +108,9 @@ func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.T
 }
 
 func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupNumber int, arrival bool) {
+	if len(stops) >= results {
+		log.Printf("Warning: Potentially missing arrivals/departures (max. results of %d exceeded)", len(stops))
+	}
 	for _, stop := range stops {
 		lineID, err := strconv.Atoi(*stop.Line.FahrtNr)
 		if err != nil {
