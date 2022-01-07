@@ -1,1 +1,1 @@
-const STATIONS_API=""
+const STATIONS_API="/dbrest/stations/";

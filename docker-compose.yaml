@@ -3,4 +3,13 @@ services:
   tstp:
     build: ./
     container_name: tstp
-    env_file: deployments/conf.env
+    env_file: ./deployments/conf.env
+    volumes:
+      - ./res/:/app/res/
+  tstp-proxy:
+    image: nginx
+    container_name: tstp-proxy
+    volumes:
+      - ./deployments/nginx-cache.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
