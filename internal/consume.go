@@ -21,6 +21,7 @@ type consumer struct {
 var loc, _ = time.LoadLocation("Europe/Berlin")
 
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
+	// TODO increase depending on journey time according to HAFAS, otherwise longer journeys are impossible to plan
 	delta, _ := time.ParseDuration("4h")
 
 	log.Print("Requesting for ", c.dateTime)

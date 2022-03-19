@@ -14,6 +14,7 @@ import (
 	"traines.eu/time-space-train-planner/providers/dbrest/models"
 )
 
+// TODO some stations, e.g. Hamburg Hbf, yield more than 1000 results within 4 hours. Maybe filter out local transport (buses, trams etc.) in request if no vias station is specified that is nearby (reasonably reachable by local transport)?
 const results = 1000
 
 type DbRest struct {
@@ -252,8 +253,8 @@ func (p *DbRest) parseEdgesFromJourneys() {
 				LineID:               *leg.TripID,
 				ProviderShortestPath: &hafas,
 				Planned: &providers.ProviderLineStopInfo{
-					Departure: time.Time(*leg.Departure),
-					Arrival:   time.Time(*leg.Arrival),
+					Departure: time.Time(*leg.Departure), // TODO can be nil
+					Arrival:   time.Time(*leg.Arrival), // TODO can be nil
 					//					DepartureTrack: *leg.DeparturePlatform,
 					//					ArrivalTrack:   *leg.ArrivalPlatform,
 				},
