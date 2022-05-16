@@ -15,7 +15,7 @@ import (
 )
 
 // TODO some stations, e.g. Hamburg Hbf, yield more than 1000 results within 4 hours. Maybe filter out local transport (buses, trams etc.) in request if no vias station is specified that is nearby (reasonably reachable by local transport)?
-const results = 1000
+const results = 3000
 
 type DbRest struct {
 	consumer       providers.Consumer
@@ -27,8 +27,8 @@ func (p *DbRest) Fetch(c providers.Consumer) {
 	p.consumer = c
 	p.prepareClient()
 	//p.requestStations()
-	p.requestDeparturesAndArrivals()
 	p.requestJourneys()
+	p.requestDeparturesAndArrivals()
 }
 
 func (p *DbRest) Enrich(c providers.Consumer) {
@@ -213,6 +213,7 @@ func (p *DbRest) requestJourneysApi() {
 }
 
 func (p *DbRest) parseStationsFromJourneys() {
+	var start, end time.Time
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
 			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
@@ -230,11 +231,19 @@ func (p *DbRest) parseStationsFromJourneys() {
 					Lat:       float32(*leg.Destination.Location.Latitude),
 					Lon:       float32(*leg.Destination.Location.Longitude),
 				})
+				if leg.Departure != nil && start.IsZero() {
+					start = time.Time(*leg.Departure)
+				}
+				if leg.Arrival != nil {
+					end = time.Time(*leg.Arrival)
+				}
 			} else {
 				log.Print("Error while trying to read stations from journeys")
 			}
 		}
 	}
+	log.Print("expdur", start, end)
+	p.consumer.SetExpectedTravelDuration(end.Sub(start))
 }
 
 func (p *DbRest) parseEdgesFromJourneys() {
@@ -247,20 +256,20 @@ func (p *DbRest) parseEdgesFromJourneys() {
 				continue
 			}
 			hafas := true
+			planned := &providers.ProviderLineStopInfo{}
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
 				EvaNumberFrom:        evaNumberFrom,
 				EvaNumberTo:          evaNumberTo,
 				LineID:               *leg.TripID,
 				ProviderShortestPath: &hafas,
-				Planned: &providers.ProviderLineStopInfo{
-					Departure: time.Time(*leg.Departure), // TODO can be nil
-					Arrival:   time.Time(*leg.Arrival), // TODO can be nil
-					//					DepartureTrack: *leg.DeparturePlatform,
-					//					ArrivalTrack:   *leg.ArrivalPlatform,
-				},
+				Planned:              planned,
 			})
-
+			if leg.Departure != nil {
+				planned.Departure = time.Time(*leg.Departure)
+			}
+			if leg.Arrival != nil {
+				planned.Arrival = time.Time(*leg.Arrival)
+			}
 		}
-		//break
 	}
 }

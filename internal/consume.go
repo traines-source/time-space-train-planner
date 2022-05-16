@@ -11,20 +11,30 @@ import (
 )
 
 type consumer struct {
-	providers        []providers.Provider
-	providerStations []providers.ProviderStation
-	stations         map[int]*Station
-	lines            map[string]*Line
-	dateTime         time.Time
+	providers              []providers.Provider
+	providerStations       []providers.ProviderStation
+	stations               map[int]*Station
+	lines                  map[string]*Line
+	dateTime               time.Time
+	expectedTravelDuration time.Duration
 }
 
 var loc, _ = time.LoadLocation("Europe/Berlin")
 
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
 	// TODO increase depending on journey time according to HAFAS, otherwise longer journeys are impossible to plan
-	delta, _ := time.ParseDuration("4h")
+	defaultDuration, _ := time.ParseDuration("4h")
+	maxDuration, _ := time.ParseDuration("12h")
 
-	log.Print("Requesting for ", c.dateTime)
+	var delta time.Duration
+	if c.expectedTravelDuration < defaultDuration {
+		delta = defaultDuration
+	} else if c.expectedTravelDuration > maxDuration {
+		delta = maxDuration
+	} else {
+		delta = c.expectedTravelDuration.Round(time.Hour)
+	}
+	log.Print("Requesting for ", c.dateTime, " with duration ", delta)
 	//t := time.Now()
 	//from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
 	//from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
@@ -154,6 +164,7 @@ func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 	foundStart := false
 	foundEnd := false
 	for _, edge := range line.Route {
+		// TODO handle multi-line trains (ICE / RE, IC / NJ etc, e.g. IC 60400/NJ 40470)
 		if edge.From.EvaNumber == e.EvaNumberFrom || foundStart && !foundEnd {
 			if e.ProviderShortestPath != nil {
 				edge.ProviderShortestPath = *e.ProviderShortestPath
@@ -166,28 +177,11 @@ func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 	}
 	if !foundEnd {
 		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID)
-		from, ok1 := c.stations[e.EvaNumberFrom]
-		to, ok2 := c.stations[e.EvaNumberTo]
-		if !ok1 || !ok2 {
-			log.Panicf("Non-existant Station for stop of Line %s", e.LineID)
-			return
-		}
-		edge := &Edge{
-			Line: line,
-			From: from,
-			To:   to,
-			Actual: StopInfo{
-				Departure:      e.Planned.Departure,
-				Arrival:        e.Planned.Arrival,
-				DepartureTrack: e.Planned.DepartureTrack,
-				ArrivalTrack:   e.Planned.ArrivalTrack,
-			},
-			ProviderShortestPath: *e.ProviderShortestPath,
-		}
-		line.Route = append(line.Route, edge)
-		edge.From.Departures = append(edge.From.Departures, edge)
-		edge.To.Arrivals = append(edge.To.Arrivals, edge)
 	}
+}
+
+func (c *consumer) SetExpectedTravelDuration(duration time.Duration) {
+	c.expectedTravelDuration = duration
 }
 
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
@@ -243,6 +237,7 @@ func indexOf(slice []int, value int) int {
 }
 
 func (c *consumer) rankStations(origin *Station, destination *Station) {
+	//force := []int{8070003, 8070004, 8000105, 8098105, 8006404, 8000615}
 	force := []int{}
 	var stationsSlice []*Station
 	for _, s := range c.stations {

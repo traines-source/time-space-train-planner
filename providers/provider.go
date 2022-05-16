@@ -16,6 +16,7 @@ type Consumer interface {
 	UpsertLine(line ProviderLine)
 	UpsertLineStop(lineStop ProviderLineStop)
 	UpsertLineEdge(lineEdge ProviderLineEdge)
+	SetExpectedTravelDuration(duration time.Duration)
 }
 
 type ProviderStation struct {
