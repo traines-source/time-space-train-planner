@@ -34,7 +34,7 @@ func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation)
 	} else {
 		delta = c.expectedTravelDuration.Round(time.Hour)
 	}
-	log.Print("Requesting for ", c.dateTime, " with duration ", delta)
+	log.Print("Requesting for ", station.EvaNumber, " at ", c.dateTime, " with duration ", delta)
 	//t := time.Now()
 	//from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
 	//from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
@@ -289,6 +289,7 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 	evaNumbers = append(evaNumbers, vias...)
 	evaNumbers = append(evaNumbers, to)
 
+	log.Print(evaNumbers)
 	c.initializeProviders(evaNumbers)
 	c.callProviders(false)
 	c.generateEdges(c.stations[from], c.stations[to])

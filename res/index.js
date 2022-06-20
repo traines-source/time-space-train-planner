@@ -9,11 +9,11 @@ if (document.getElementById('datetime').value == "") {
 var stationMap = {};
 $(".station-autocomplete").autocomplete({
     source: function( request, response ) {
-        fetch(STATIONS_API + "?query="+request.term)
+        fetch(STATIONS_API + "?addresses=false&poi=false&pretty=false&query="+request.term)
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            var list = Object.values(data).map(station => {
+            var list = data.map(station => {
                 console.log(station.name, station["name"]);
                 stationMap[station.name] = station.id;
                 return station.name;

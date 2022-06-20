@@ -27,6 +27,7 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 	if len(from) > 0 && len(to) > 0 {
 		stations, lines := internal.ObtainData(from[0], to[0], vias, datetime)
 		if len(vias) > 0 && len(form) == 0 {
+			log.Print("Request:", r.URL.RawQuery)
 			w.Header().Set("Content-Type", "image/svg+xml")
 			render.TimeSpace(stations, lines, w)
 			return
