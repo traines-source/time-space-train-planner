@@ -260,6 +260,9 @@ func calculateTravelLength(startEdge *Edge, destination *Station) (hops int32, a
 }
 
 func markAsRedundantIfRevisitsSameStation(edge *dijkstra) {
+	if edge.vertexAtTime.getShortestPath() == nil || edge.vertexAtTime.getShortestPath().getEdge() != edge.vertexAtTime.getEdge().ShortestPath {
+		return
+	}
 	from := edge.vertexAtTime.getEdge().From.EvaNumber
 	nextEdge := edge.vertexAtTime
 	for {

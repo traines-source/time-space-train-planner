@@ -72,21 +72,11 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			if originEdgePath, ok := c.Edges[generateEdgeID(origin)]; ok {
 				var lastEdge *internal.Edge
 				for e := origin; e != nil; e = e.ShortestPath {
-					if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
-						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
-					}
-					if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
-						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
-					}
+					c.setShortestPathFor(originEdgePath, e, lastEdge)
 					lastEdge = e
 				}
 				for e := origin; e != nil; e = e.ReverseShortestPath {
-					if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
-						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
-					}
-					if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
-						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
-					}
+					c.setShortestPathFor(originEdgePath, e, lastEdge)
 					lastEdge = e
 				}
 			}
@@ -94,6 +84,14 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 	}
 }
 
+func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, lastEdge *internal.Edge) {
+	if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
+		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+	}
+	if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
+		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+	}
+}
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 	if min.Before(c.MinTime) || c.MinTime.IsZero() {
 		c.MinTime = min
