@@ -76,7 +76,15 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
 					}
 					if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
-
+						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+					}
+					lastEdge = e
+				}
+				for e := origin; e != nil; e = e.ReverseShortestPath {
+					if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
+						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+					}
+					if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
 						edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
 					}
 					lastEdge = e

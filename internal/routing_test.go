@@ -48,7 +48,7 @@ func TestSimpleRouting(t *testing.T) {
 	interm.Departures = []*Edge{edge2, edge4}
 	dest.Arrivals = []*Edge{edge2, edge4}
 
-	shortestPaths(map[int]*Station{0: dep, 1: interm, 2: dest}, dest)
+	shortestPaths(map[int]*Station{0: dep, 1: interm, 2: dest}, nil, dest)
 
 	assert.Equal(t, edge1.ShortestPath, edge2, "wrong shortest path")
 	assert.Equal(t, edge3.ShortestPath, edge2, "wrong shortest path")
@@ -86,7 +86,7 @@ func TestRoutingWithOvertakingTrains(t *testing.T) {
 	interm.Departures = []*Edge{edge2, edge4}
 	dest.Arrivals = []*Edge{edge2, edge4}
 
-	shortestPaths(map[int]*Station{0: dep, 1: interm, 2: dest}, dest)
+	shortestPaths(map[int]*Station{0: dep, 1: interm, 2: dest}, nil, dest)
 
 	assert.Equal(t, edge1.ShortestPath, edge2, "wrong shortest path")
 }
@@ -142,7 +142,7 @@ func TestRoutingTakeFirstTrainPossible(t *testing.T) {
 	interm2.Departures = []*Edge{edge4, edge6}
 	dest.Arrivals = []*Edge{edge4}
 
-	shortestPaths(map[int]*Station{0: dep, 1: interm1, 2: interm2, 3: dest}, dest)
+	shortestPaths(map[int]*Station{0: dep, 1: interm1, 2: interm2, 3: dest}, nil, dest)
 
 	assert.Equal(t, edge1.ShortestPath, edge2, "wrong shortest path")
 	assert.Equal(t, edge2.ShortestPath, edge4, "wrong shortest path")
@@ -200,7 +200,7 @@ func TestRoutingDontTakeFirstTrainPossibleIfTakesLonger(t *testing.T) {
 	interm2.Departures = []*Edge{edge4, edge6}
 	dest.Arrivals = []*Edge{edge4}
 
-	shortestPaths(map[int]*Station{0: dep, 1: interm1, 2: interm2, 3: dest}, dest)
+	shortestPaths(map[int]*Station{0: dep, 1: interm1, 2: interm2, 3: dest}, nil, dest)
 
 	assert.Equal(t, edge1.ShortestPath, edge3, "wrong shortest path 1")
 	assert.Equal(t, edge2.ShortestPath, edge4, "wrong shortest path 2")

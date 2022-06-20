@@ -296,7 +296,7 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 	c.initializeProviders(evaNumbers)
 	c.callProviders(false)
 	c.generateEdges(c.stations[from], c.stations[to])
-	shortestPaths(c.stations, c.stations[to])
+	shortestPaths(c.stations, c.stations[from], c.stations[to])
 	c.callProviders(true)
 	c.rankStations(c.stations[from], c.stations[to])
 	return c.stations, c.lines
