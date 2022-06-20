@@ -14,7 +14,9 @@ func (c *consumer) generateTimetableEdges() {
 	for _, line := range c.lines {
 		var stops []*LineStop = line.Stops
 		sort.Slice(stops, func(i, j int) bool {
-			// TODO current?
+			if (!stops[i].Current.Departure.IsZero() && !stops[j].Current.Departure.IsZero()) {
+				return stops[i].Current.Departure.Before(stops[j].Current.Departure)
+			} 
 			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
 		})
 		for i := 1; i < len(stops); i++ {
