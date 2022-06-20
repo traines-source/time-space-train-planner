@@ -116,6 +116,9 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		log.Print("Tried to create stationEdge for line segments of different stations ", last.To.EvaNumber, this.From.EvaNumber)
 		return nil
 	}
+	if this.Actual.Departure.Sub(last.Actual.Arrival).Minutes() > 30 {
+		return nil
+	}
 	edge := &EdgePath{
 		ID:   generateStationEdgeID(last, this),
 		From: Coord{SpaceAxis: c.Stations[this.From], TimeAxis: last.Actual.Arrival},

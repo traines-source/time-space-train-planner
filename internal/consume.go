@@ -120,8 +120,8 @@ func (c *consumer) UpsertLine(e providers.ProviderLine) {
 
 func existingStopHasDifferentPlanned(e providers.ProviderLineStop, stop *LineStop) bool {
 	return e.Planned != nil &&
-		(!e.Planned.Arrival.IsZero() && e.Planned.Arrival != stop.Planned.Arrival ||
-			!e.Planned.Departure.IsZero() && e.Planned.Departure != stop.Planned.Departure)
+		(!e.Planned.Arrival.IsZero() && !stop.Planned.Arrival.IsZero() && e.Planned.Arrival != stop.Planned.Arrival ||
+			!e.Planned.Departure.IsZero() && !stop.Planned.Departure.IsZero() && e.Planned.Departure != stop.Planned.Departure)
 }
 
 func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
@@ -137,7 +137,7 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	}
 	var val *LineStop
 	for _, stop := range line.Stops {
-		if stop.Station == station {
+		if stop.Station == station && !existingStopHasDifferentPlanned(e, stop) {
 			val = stop
 			break
 		}
@@ -270,6 +270,9 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	if lastFrom.DepartureTrack != "" {
 		to.DepartureTrack = lastFrom.DepartureTrack
+	}
+	if thisFrom.ArrivalTrack != "" {
+		to.ArrivalTrack = thisFrom.ArrivalTrack
 	}
 	if !lastFrom.Departure.IsZero() {
 		to.Departure = lastFrom.Departure
