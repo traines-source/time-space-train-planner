@@ -23,23 +23,23 @@ var loc, _ = time.LoadLocation("Europe/Berlin")
 
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
 	// TODO increase depending on journey time according to HAFAS, otherwise longer journeys are impossible to plan
-	defaultDuration, _ := time.ParseDuration("4h")
-	maxDuration, _ := time.ParseDuration("12h")
+	defaultDuration, _ := time.ParseDuration("2h")
+	maxDuration, _ := time.ParseDuration("10h")
 
-	var delta time.Duration
+	var travelDuration time.Duration
 	if c.expectedTravelDuration < defaultDuration {
-		delta = defaultDuration
+		travelDuration = defaultDuration
 	} else if c.expectedTravelDuration > maxDuration {
-		delta = maxDuration
+		travelDuration = maxDuration
 	} else {
-		delta = c.expectedTravelDuration.Round(time.Hour)
+		travelDuration = c.expectedTravelDuration.Round(time.Hour)
 	}
-	log.Print("Requesting for ", station.EvaNumber, " at ", c.dateTime, " with duration ", delta)
+	log.Print("Requesting for ", station.EvaNumber, " at ", c.dateTime, " with duration +2 ", travelDuration)
 	//t := time.Now()
 	//from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
 	//from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
 	from = c.dateTime
-	return from, from.Add(delta)
+	return from, from.Add(travelDuration).Add(defaultDuration)
 }
 
 func (c *consumer) Stations() []providers.ProviderStation {

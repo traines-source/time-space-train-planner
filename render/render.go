@@ -165,8 +165,12 @@ func (c *container) layoutStations() {
 			lastGroup = s.GroupNumber
 		}
 		s.SpaceAxis = x
-		s.SpaceAxisHeap = y
-		y++
+		if s.GroupNumber == nil || s.GroupNumber != nil && *s.GroupNumber == s.EvaNumber {
+			s.SpaceAxisHeap = 0
+		} else {
+			y++
+			s.SpaceAxisHeap = y
+		}
 	}
 	c.maxSpace = x
 }
