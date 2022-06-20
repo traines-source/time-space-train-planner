@@ -7,82 +7,143 @@ import (
 const inf = 1 << 31
 
 type dijkstra struct {
-	vertexAtDeparture *Edge
-	dist              int
-	hops              int
-	previous          *Edge
+	vertexAtTime dijkstraVertex
+	dist         int
+	hops         int
+	toTarget     *Edge
 }
+
+type dijkstraToDestination struct {
+	*Edge
+}
+
+type dijkstraToOrigin struct {
+	*Edge
+}
+
+type dijkstraVertex interface {
+	getVertices() []dijkstraVertex
+	getEdge() *Edge
+	isTargetEdge(*Edge) bool
+	getShortestPath() dijkstraVertex
+	setShortestPath(*Edge)
+	earlierConnectionWithSameDist(*dijkstra, *dijkstra) bool
+}
+
+func (edge *dijkstraToDestination) getVertices() []dijkstraVertex {
+	var edges []dijkstraVertex
+	for _, edge := range edge.From.Arrivals {
+		edges = append(edges, &dijkstraToDestination{edge})
+	}
+	return edges
+}
+
+func (edge *dijkstraToDestination) getEdge() *Edge {
+	return edge.Edge
+}
+
+func (edge *dijkstraToDestination) isTargetEdge(targetEdge *Edge) bool {
+	return edge.To == targetEdge.To
+}
+
+func (edge *dijkstraToDestination) getShortestPath() dijkstraVertex {
+	if edge.Edge.ShortestPath == nil {
+		return nil
+	}
+	return &dijkstraToDestination{edge.Edge.ShortestPath}
+}
+
+func (edge *dijkstraToDestination) setShortestPath(target *Edge) {
+	edge.Edge.ShortestPath = target
+}
+
+func (edge *dijkstraToDestination) earlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
+	departingEarlier := positiveDeltaMinutes(v.vertexAtTime.getEdge().Actual.Arrival, u.vertexAtTime.getEdge().Actual.Departure) < positiveDeltaMinutes(v.vertexAtTime.getEdge().Actual.Arrival, v.toTarget.Actual.Departure)
+	arrivingEarlierIfSameDestination := u.vertexAtTime.getEdge().To != v.toTarget.To || u.vertexAtTime.getEdge().Actual.Arrival.Before(v.toTarget.Actual.Arrival)
+
+	return departingEarlier && arrivingEarlierIfSameDestination
+}
+
+/*
+func TODOearlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
+	arrivingLater := positiveDeltaMinutes(u.vertexAtTime.Actual.Arrival, v.vertexAtTime.Actual.Departure) < positiveDeltaMinutes(v.toTarget.Actual.Arrival, v.vertexAtTime.Actual.Departure)
+	departingLaterIfSameOrigin := u.vertexAtTime.From != v.toTarget.From || v.toTarget.Actual.Departure.Before(u.vertexAtTime.Actual.Departure)
+
+	return arrivingLater && departingLaterIfSameOrigin
+}*/
 
 func shortestPaths(stations map[int]*Station, destination *Station) {
 
 	for _, edgeToDestination := range destination.Arrivals {
-		shortestPathsToEdge(stations, edgeToDestination)
+		dE := &dijkstraToDestination{edgeToDestination}
+		shortestPathsToDestination(stations, dE)
 	}
 	//markAsRedundantIfNoShortestPath(stations, destination)
 	markEdgesAsRedundant(stations, destination)
 }
 
-func shortestPathsToEdge(stations map[int]*Station, edgeToDestination *Edge) {
-	verticesAtDeparture := buildVertexSetByDestination(edgeToDestination)
+func shortestPathsToDestination(stations map[int]*Station, edgeToTarget dijkstraVertex) {
+	verticesAtDeparture := buildVertexSetByTarget(edgeToTarget)
 
 	for len(verticesAtDeparture) != 0 {
 		u := minDist(verticesAtDeparture)
-		u.vertexAtDeparture.ShortestPath = u.previous
+		u.vertexAtTime.setShortestPath(u.toTarget)
 		markAsRedundantIfRevisitsSameStation(u)
-		delete(verticesAtDeparture, u.vertexAtDeparture)
+		delete(verticesAtDeparture, u.vertexAtTime.getEdge())
 
-		for _, vertex := range u.vertexAtDeparture.From.Arrivals {
-			if v, ok := verticesAtDeparture[vertex]; ok {
-				alt := u.dist + travelBackDist(u.vertexAtDeparture, v.vertexAtDeparture)
-				if alt < v.dist || alt == v.dist && u.hops+1 <= v.hops && earlierConnectionWithSameDist(u, v) {
+		for _, vertex := range u.vertexAtTime.getVertices() {
+			if v, ok := verticesAtDeparture[vertex.getEdge()]; ok {
+				alt := u.dist + travelBackDist(u.vertexAtTime.getEdge(), v.vertexAtTime.getEdge())
+				if alt < v.dist || alt == v.dist && u.hops+1 <= v.hops && u.vertexAtTime.earlierConnectionWithSameDist(u, v) {
 					v.dist = alt
 					v.hops = u.hops + 1
-					v.previous = u.vertexAtDeparture
+
+					v.toTarget = u.vertexAtTime.getEdge()
 				}
 			}
 		}
 	}
 }
 
-func buildVertexSetByDestination(edgeToDestination *Edge) map[*Edge]*dijkstra {
-	verticesAtDeparture := map[*Edge]*dijkstra{}
-	verticesAtDeparture[edgeToDestination] = &dijkstra{
-		vertexAtDeparture: edgeToDestination,
-		dist:              int(edgeToDestination.Actual.Arrival.Sub(edgeToDestination.Actual.Departure).Minutes()),
-		hops:              0,
-		previous:          nil,
+func buildVertexSetByTarget(edgeToTarget dijkstraVertex) map[*Edge]*dijkstra {
+	verticesAtTime := map[*Edge]*dijkstra{}
+	verticesAtTime[edgeToTarget.getEdge()] = &dijkstra{
+		vertexAtTime: edgeToTarget,
+		dist:         int(edgeToTarget.getEdge().Actual.Arrival.Sub(edgeToTarget.getEdge().Actual.Departure).Minutes()),
+		hops:         0,
+		toTarget:     nil,
 	}
-	buildVertexSet(verticesAtDeparture, edgeToDestination, edgeToDestination.To)
-	return verticesAtDeparture
+	buildVertexSet(verticesAtTime, edgeToTarget, edgeToTarget.getEdge())
+	return verticesAtTime
 }
 
-func buildVertexSet(verticesAtDeparture map[*Edge]*dijkstra, vertexAtDeparture *Edge, destination *Station) {
-	for _, edge := range vertexAtDeparture.From.Arrivals {
-		if edge.ShortestPath != nil {
+func buildVertexSet(verticesAtTime map[*Edge]*dijkstra, vertexAtTime dijkstraVertex, targetEdge *Edge) {
+	for _, edge := range vertexAtTime.getVertices() {
+		if edge.getShortestPath() != nil {
 			continue
 		}
-		if vertexAtDeparture.Actual.Departure.Before(edge.Actual.Arrival) {
+		if vertexAtTime.getEdge().Actual.Departure.Before(edge.getEdge().Actual.Arrival) {
 			continue
 		}
-		if edge.To == destination {
+		if edge.isTargetEdge(targetEdge) {
 			continue
 		}
-		if _, ok := verticesAtDeparture[edge]; ok {
+		if _, ok := verticesAtTime[edge.getEdge()]; ok {
 			continue
 		}
-		verticesAtDeparture[edge] = &dijkstra{
-			vertexAtDeparture: edge,
-			dist:              inf,
-			hops:              inf,
-			previous:          nil,
+		verticesAtTime[edge.getEdge()] = &dijkstra{
+			vertexAtTime: edge,
+			dist:         inf,
+			hops:         inf,
+			toTarget:     nil,
 		}
-		buildVertexSet(verticesAtDeparture, edge, destination)
+		buildVertexSet(verticesAtTime, edge, targetEdge)
 	}
 }
 
-func minDist(verticesAtDeparture map[*Edge]*dijkstra) *dijkstra {
+func minDist(verticesAtTime map[*Edge]*dijkstra) *dijkstra {
 	var minVertex *dijkstra
-	for _, vertex := range verticesAtDeparture {
+	for _, vertex := range verticesAtTime {
 		if minVertex == nil || vertex.dist < minVertex.dist {
 			minVertex = vertex
 		}
@@ -90,23 +151,20 @@ func minDist(verticesAtDeparture map[*Edge]*dijkstra) *dijkstra {
 	return minVertex
 }
 
-func travelBackDist(next *Edge, previous *Edge) int {
-	return positiveDeltaMinutes(previous.Actual.Departure, next.Actual.Departure)
+func travelBackDist(fixedEdge *Edge, looseEdge *Edge) int {
+	return positiveDeltaMinutes(looseEdge.Actual.Departure, fixedEdge.Actual.Departure)
 }
 
-func positiveDeltaMinutes(previous time.Time, next time.Time) int {
-	min := int(next.Sub(previous).Minutes())
+func travelForwardDist(fixedEdge *Edge, looseEdge *Edge) int {
+	return positiveDeltaMinutes(fixedEdge.Actual.Arrival, looseEdge.Actual.Arrival)
+}
+
+func positiveDeltaMinutes(from time.Time, to time.Time) int {
+	min := int(to.Sub(from).Minutes())
 	if min < 0 {
 		return inf
 	}
 	return min
-}
-
-func earlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
-	departingEarlier := positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, u.vertexAtDeparture.Actual.Departure) < positiveDeltaMinutes(v.vertexAtDeparture.Actual.Arrival, v.previous.Actual.Departure)
-	arrivingEarlierIfSameDestination := u.vertexAtDeparture.To != v.previous.To || u.vertexAtDeparture.Actual.Arrival.Before(v.previous.Actual.Arrival)
-
-	return departingEarlier && arrivingEarlierIfSameDestination
 }
 
 func markEdgesAsRedundant(stations map[int]*Station, destination *Station) {
@@ -153,13 +211,13 @@ func calculateTravelLength(startEdge *Edge, destination *Station) (hops int32, a
 }
 
 func markAsRedundantIfRevisitsSameStation(edge *dijkstra) {
-	from := edge.vertexAtDeparture.From.EvaNumber
-	nextEdge := edge.vertexAtDeparture
+	from := edge.vertexAtTime.getEdge().From.EvaNumber
+	nextEdge := edge.vertexAtTime
 	for {
-		if nextEdge.ShortestPath != nil {
-			nextEdge = nextEdge.ShortestPath
-			if nextEdge.To.EvaNumber == from {
-				edge.vertexAtDeparture.Redundant = true
+		if nextEdge.getShortestPath() != nil {
+			nextEdge = nextEdge.getShortestPath()
+			if nextEdge.getEdge().To.EvaNumber == from {
+				edge.vertexAtTime.getEdge().Redundant = true
 				break
 			}
 		} else {
