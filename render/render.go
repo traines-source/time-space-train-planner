@@ -206,6 +206,9 @@ func (p *EdgePath) Label() string {
 	} else {
 		label = e.Line.ID
 	}
+	if e.Message != "" {
+		label += " (" + e.Message + ")"
+	}
 	if e.Line.Type == "Foot" {
 		return "🚶 " + label
 	}
@@ -228,7 +231,7 @@ func (p *EdgePath) Departure() string {
 	var label string
 	label = simpleTime(e.Actual.Departure) + delay(e.Current.Departure, e.Planned.Departure)
 	if e.Planned.DepartureTrack != "" {
-		label += e.Planned.DepartureTrack
+		label += "Pl." + e.Planned.DepartureTrack
 	}
 	return label
 }
@@ -240,7 +243,7 @@ func (p *EdgePath) Arrival() string {
 	}
 	label := simpleTime(e.Actual.Arrival) + delay(e.Current.Arrival, e.Planned.Arrival)
 	if e.Planned.ArrivalTrack != "" {
-		label += e.Planned.ArrivalTrack
+		label += "Pl." + e.Planned.ArrivalTrack
 	}
 	return label
 }
@@ -255,7 +258,7 @@ func simpleTime(t time.Time) string {
 
 func delay(current time.Time, planned time.Time) string {
 	if !current.IsZero() {
-		return " (" + fmt.Sprintf("%+.0f", current.Sub(planned).Minutes()) + ")"
+		return " (" + fmt.Sprintf("%+.0f", current.Sub(planned).Minutes()) + ") "
 	}
 	return ""
 }

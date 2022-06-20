@@ -66,7 +66,8 @@ func (p *DbRest) requestStation(station providers.ProviderStation) {
 func (p *DbRest) requestDeparturesAndArrivals() {
 	stations := p.consumer.Stations()
 	for i, station := range stations {
-		if i > 10 {
+		if i > 20 {
+			log.Print("Aborting station retrieval, maximum station count exceeded.")
 			break
 		}
 		from, to := p.consumer.RequestStationDataBetween(&station)
@@ -183,7 +184,13 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 			current.DepartureTrack = *stop.Platform
 		}
 	}
-	p.consumer.UpsertLineStop(providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned, Current: current})
+	pls := providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned, Current: current}
+	if len(stop.Remarks) > 0 {
+		for _, remark := range stop.Remarks {
+			pls.Message += remark.Text + " "
+		}
+	}
+	p.consumer.UpsertLineStop(pls)
 }
 
 func (p *DbRest) requestJourneys() {

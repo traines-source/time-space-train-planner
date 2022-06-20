@@ -6,6 +6,9 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+	"strconv"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -52,7 +55,7 @@ type DepartureArrival struct {
 
 	// remarks
 	// Required: true
-	Remarks []interface{} `json:"remarks"`
+	Remarks []*DepartureArrivalRemarksItems0 `json:"remarks"`
 
 	// stop
 	// Required: true
@@ -154,6 +157,8 @@ func (m *DepartureArrival) validateLine(formats strfmt.Registry) error {
 		if err := m.Line.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line")
 			}
 			return err
 		}
@@ -213,6 +218,24 @@ func (m *DepartureArrival) validateRemarks(formats strfmt.Registry) error {
 		return err
 	}
 
+	for i := 0; i < len(m.Remarks); i++ {
+		if swag.IsZero(m.Remarks[i]) { // not required
+			continue
+		}
+
+		if m.Remarks[i] != nil {
+			if err := m.Remarks[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("remarks" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("remarks" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -226,6 +249,8 @@ func (m *DepartureArrival) validateStop(formats strfmt.Registry) error {
 		if err := m.Stop.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stop")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("stop")
 			}
 			return err
 		}
@@ -251,6 +276,80 @@ func (m *DepartureArrival) validateWhen(formats strfmt.Registry) error {
 
 	if err := validate.FormatOf("when", "body", "date-time", m.When.String(), formats); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this departure arrival based on the context it is used
+func (m *DepartureArrival) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateLine(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateRemarks(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateStop(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DepartureArrival) contextValidateLine(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Line != nil {
+		if err := m.Line.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("line")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *DepartureArrival) contextValidateRemarks(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Remarks); i++ {
+
+		if m.Remarks[i] != nil {
+			if err := m.Remarks[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("remarks" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("remarks" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *DepartureArrival) contextValidateStop(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Stop != nil {
+		if err := m.Stop.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("stop")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("stop")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -425,6 +524,8 @@ func (m *DepartureArrivalLine) validateOperator(formats strfmt.Registry) error {
 		if err := m.Operator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line" + "." + "operator")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line" + "." + "operator")
 			}
 			return err
 		}
@@ -464,6 +565,36 @@ func (m *DepartureArrivalLine) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"type", "body", m.Type); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this departure arrival line based on the context it is used
+func (m *DepartureArrivalLine) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateOperator(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DepartureArrivalLine) contextValidateOperator(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Operator != nil {
+		if err := m.Operator.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("line" + "." + "operator")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line" + "." + "operator")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -554,6 +685,11 @@ func (m *DepartureArrivalLineOperator) validateType(formats strfmt.Registry) err
 	return nil
 }
 
+// ContextValidate validates this departure arrival line operator based on context it is used
+func (m *DepartureArrivalLineOperator) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (m *DepartureArrivalLineOperator) MarshalBinary() ([]byte, error) {
 	if m == nil {
@@ -565,6 +701,43 @@ func (m *DepartureArrivalLineOperator) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *DepartureArrivalLineOperator) UnmarshalBinary(b []byte) error {
 	var res DepartureArrivalLineOperator
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// DepartureArrivalRemarksItems0 departure arrival remarks items0
+//
+// swagger:model DepartureArrivalRemarksItems0
+type DepartureArrivalRemarksItems0 struct {
+
+	// text
+	Text string `json:"text,omitempty"`
+}
+
+// Validate validates this departure arrival remarks items0
+func (m *DepartureArrivalRemarksItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this departure arrival remarks items0 based on context it is used
+func (m *DepartureArrivalRemarksItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *DepartureArrivalRemarksItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *DepartureArrivalRemarksItems0) UnmarshalBinary(b []byte) error {
+	var res DepartureArrivalRemarksItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -647,6 +820,8 @@ func (m *DepartureArrivalStop) validateLocation(formats strfmt.Registry) error {
 		if err := m.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stop" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("stop" + "." + "location")
 			}
 			return err
 		}
@@ -674,6 +849,8 @@ func (m *DepartureArrivalStop) validateProducts(formats strfmt.Registry) error {
 		if err := m.Products.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stop" + "." + "products")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("stop" + "." + "products")
 			}
 			return err
 		}
@@ -686,6 +863,56 @@ func (m *DepartureArrivalStop) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("stop"+"."+"type", "body", m.Type); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validate this departure arrival stop based on the context it is used
+func (m *DepartureArrivalStop) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateLocation(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateProducts(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DepartureArrivalStop) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Location != nil {
+		if err := m.Location.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("stop" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("stop" + "." + "location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *DepartureArrivalStop) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Products != nil {
+		if err := m.Products.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("stop" + "." + "products")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("stop" + "." + "products")
+			}
+			return err
+		}
 	}
 
 	return nil
@@ -790,6 +1017,11 @@ func (m *DepartureArrivalStopLocation) validateType(formats strfmt.Registry) err
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this departure arrival stop location based on context it is used
+func (m *DepartureArrivalStopLocation) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -994,6 +1226,11 @@ func (m *DepartureArrivalStopProducts) validateTram(formats strfmt.Registry) err
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this departure arrival stop products based on context it is used
+func (m *DepartureArrivalStopProducts) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

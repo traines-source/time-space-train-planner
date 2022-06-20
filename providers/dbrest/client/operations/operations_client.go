@@ -25,17 +25,20 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	GetJourneys(params *GetJourneysParams) (*GetJourneysOK, error)
+	GetJourneys(params *GetJourneysParams, opts ...ClientOption) (*GetJourneysOK, error)
 
-	GetLocations(params *GetLocationsParams) (*GetLocationsOK, error)
+	GetLocations(params *GetLocationsParams, opts ...ClientOption) (*GetLocationsOK, error)
 
-	GetStationsID(params *GetStationsIDParams) (*GetStationsIDOK, error)
+	GetStationsID(params *GetStationsIDParams, opts ...ClientOption) (*GetStationsIDOK, error)
 
-	GetStopsIDArrivals(params *GetStopsIDArrivalsParams) (*GetStopsIDArrivalsOK, error)
+	GetStopsIDArrivals(params *GetStopsIDArrivalsParams, opts ...ClientOption) (*GetStopsIDArrivalsOK, error)
 
-	GetStopsIDDepartures(params *GetStopsIDDeparturesParams) (*GetStopsIDDeparturesOK, error)
+	GetStopsIDDepartures(params *GetStopsIDDeparturesParams, opts ...ClientOption) (*GetStopsIDDeparturesOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -45,13 +48,12 @@ type ClientService interface {
 
   Uses [`hafasClient.journeys()`](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md) to **find journeys from A (`from`) to B (`to`)**.
 */
-func (a *Client) GetJourneys(params *GetJourneysParams) (*GetJourneysOK, error) {
+func (a *Client) GetJourneys(params *GetJourneysParams, opts ...ClientOption) (*GetJourneysOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetJourneysParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "GetJourneys",
 		Method:             "GET",
 		PathPattern:        "/journeys",
@@ -62,7 +64,12 @@ func (a *Client) GetJourneys(params *GetJourneysParams) (*GetJourneysOK, error) 
 		Reader:             &GetJourneysReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -81,13 +88,12 @@ func (a *Client) GetJourneys(params *GetJourneysParams) (*GetJourneysOK, error) 
 
   Uses [`hafasClient.locations()`](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md) to **find stops/stations, POIs and addresses matching `query`**.
 */
-func (a *Client) GetLocations(params *GetLocationsParams) (*GetLocationsOK, error) {
+func (a *Client) GetLocations(params *GetLocationsParams, opts ...ClientOption) (*GetLocationsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetLocationsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "GetLocations",
 		Method:             "GET",
 		PathPattern:        "/locations",
@@ -98,7 +104,12 @@ func (a *Client) GetLocations(params *GetLocationsParams) (*GetLocationsOK, erro
 		Reader:             &GetLocationsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -117,13 +128,12 @@ func (a *Client) GetLocations(params *GetLocationsParams) (*GetLocationsOK, erro
 
   Returns a stop/station from [db-stations](https://npmjs.com/package/db-stations).
 */
-func (a *Client) GetStationsID(params *GetStationsIDParams) (*GetStationsIDOK, error) {
+func (a *Client) GetStationsID(params *GetStationsIDParams, opts ...ClientOption) (*GetStationsIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetStationsIDParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "GetStationsID",
 		Method:             "GET",
 		PathPattern:        "/stations/{id}",
@@ -134,7 +144,12 @@ func (a *Client) GetStationsID(params *GetStationsIDParams) (*GetStationsIDOK, e
 		Reader:             &GetStationsIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -153,13 +168,12 @@ func (a *Client) GetStationsID(params *GetStationsIDParams) (*GetStationsIDOK, e
 
   Works like `/stops/{id}/departures`, except that it uses [`hafasClient.arrivals()`](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md) to **query arrivals at a stop/station**.
 */
-func (a *Client) GetStopsIDArrivals(params *GetStopsIDArrivalsParams) (*GetStopsIDArrivalsOK, error) {
+func (a *Client) GetStopsIDArrivals(params *GetStopsIDArrivalsParams, opts ...ClientOption) (*GetStopsIDArrivalsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetStopsIDArrivalsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "GetStopsIDArrivals",
 		Method:             "GET",
 		PathPattern:        "/stops/{id}/arrivals",
@@ -170,7 +184,12 @@ func (a *Client) GetStopsIDArrivals(params *GetStopsIDArrivalsParams) (*GetStops
 		Reader:             &GetStopsIDArrivalsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -189,13 +208,12 @@ func (a *Client) GetStopsIDArrivals(params *GetStopsIDArrivalsParams) (*GetStops
 
   Uses [`hafasClient.departures()`](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md) to **query departures at a stop/station**.
 */
-func (a *Client) GetStopsIDDepartures(params *GetStopsIDDeparturesParams) (*GetStopsIDDeparturesOK, error) {
+func (a *Client) GetStopsIDDepartures(params *GetStopsIDDeparturesParams, opts ...ClientOption) (*GetStopsIDDeparturesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetStopsIDDeparturesParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "GetStopsIDDepartures",
 		Method:             "GET",
 		PathPattern:        "/stops/{id}/departures",
@@ -206,7 +224,12 @@ func (a *Client) GetStopsIDDepartures(params *GetStopsIDDeparturesParams) (*GetS
 		Reader:             &GetStopsIDDeparturesReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}

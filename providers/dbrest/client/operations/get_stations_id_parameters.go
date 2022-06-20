@@ -16,59 +16,73 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewGetStationsIDParams creates a new GetStationsIDParams object
-// with the default values initialized.
+// NewGetStationsIDParams creates a new GetStationsIDParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetStationsIDParams() *GetStationsIDParams {
-	var ()
 	return &GetStationsIDParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetStationsIDParamsWithTimeout creates a new GetStationsIDParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetStationsIDParamsWithTimeout(timeout time.Duration) *GetStationsIDParams {
-	var ()
 	return &GetStationsIDParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewGetStationsIDParamsWithContext creates a new GetStationsIDParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetStationsIDParamsWithContext(ctx context.Context) *GetStationsIDParams {
-	var ()
 	return &GetStationsIDParams{
-
 		Context: ctx,
 	}
 }
 
 // NewGetStationsIDParamsWithHTTPClient creates a new GetStationsIDParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetStationsIDParamsWithHTTPClient(client *http.Client) *GetStationsIDParams {
-	var ()
 	return &GetStationsIDParams{
 		HTTPClient: client,
 	}
 }
 
-/*GetStationsIDParams contains all the parameters to send to the API endpoint
-for the get stations ID operation typically these are written to a http.Request
+/* GetStationsIDParams contains all the parameters to send to the API endpoint
+   for the get stations ID operation.
+
+   Typically these are written to a http.Request.
 */
 type GetStationsIDParams struct {
 
-	/*ID
-	  Stop/station ID.
+	/* ID.
 
+	   Stop/station ID.
 	*/
 	ID string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get stations ID params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetStationsIDParams) WithDefaults() *GetStationsIDParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get stations ID params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetStationsIDParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the get stations ID params

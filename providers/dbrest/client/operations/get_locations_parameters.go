@@ -17,154 +17,156 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetLocationsParams creates a new GetLocationsParams object
-// with the default values initialized.
+// NewGetLocationsParams creates a new GetLocationsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetLocationsParams() *GetLocationsParams {
-	var (
-		addressesDefault    = bool(true)
-		fuzzyDefault        = bool(true)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		poiDefault          = bool(true)
-		resultsDefault      = int64(10)
-		stopsDefault        = bool(true)
-	)
 	return &GetLocationsParams{
-		Addresses:    &addressesDefault,
-		Fuzzy:        &fuzzyDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Poi:          &poiDefault,
-		Results:      &resultsDefault,
-		Stops:        &stopsDefault,
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetLocationsParamsWithTimeout creates a new GetLocationsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetLocationsParamsWithTimeout(timeout time.Duration) *GetLocationsParams {
-	var (
-		addressesDefault    = bool(true)
-		fuzzyDefault        = bool(true)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		poiDefault          = bool(true)
-		resultsDefault      = int64(10)
-		stopsDefault        = bool(true)
-	)
 	return &GetLocationsParams{
-		Addresses:    &addressesDefault,
-		Fuzzy:        &fuzzyDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Poi:          &poiDefault,
-		Results:      &resultsDefault,
-		Stops:        &stopsDefault,
-
 		timeout: timeout,
 	}
 }
 
 // NewGetLocationsParamsWithContext creates a new GetLocationsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetLocationsParamsWithContext(ctx context.Context) *GetLocationsParams {
-	var (
-		addressesDefault    = bool(true)
-		fuzzyDefault        = bool(true)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		poiDefault          = bool(true)
-		resultsDefault      = int64(10)
-		stopsDefault        = bool(true)
-	)
 	return &GetLocationsParams{
-		Addresses:    &addressesDefault,
-		Fuzzy:        &fuzzyDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Poi:          &poiDefault,
-		Results:      &resultsDefault,
-		Stops:        &stopsDefault,
-
 		Context: ctx,
 	}
 }
 
 // NewGetLocationsParamsWithHTTPClient creates a new GetLocationsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetLocationsParamsWithHTTPClient(client *http.Client) *GetLocationsParams {
-	var (
-		addressesDefault    = bool(true)
-		fuzzyDefault        = bool(true)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		poiDefault          = bool(true)
-		resultsDefault      = int64(10)
-		stopsDefault        = bool(true)
-	)
 	return &GetLocationsParams{
-		Addresses:    &addressesDefault,
-		Fuzzy:        &fuzzyDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Poi:          &poiDefault,
-		Results:      &resultsDefault,
-		Stops:        &stopsDefault,
-		HTTPClient:   client,
+		HTTPClient: client,
 	}
 }
 
-/*GetLocationsParams contains all the parameters to send to the API endpoint
-for the get locations operation typically these are written to a http.Request
+/* GetLocationsParams contains all the parameters to send to the API endpoint
+   for the get locations operation.
+
+   Typically these are written to a http.Request.
 */
 type GetLocationsParams struct {
 
-	/*Addresses
-	  Show points of interest?
+	/* Addresses.
 
+	   Show points of interest?
+
+	   Default: true
 	*/
 	Addresses *bool
-	/*Fuzzy
-	  Find more than exact matches?
 
+	/* Fuzzy.
+
+	   Find more than exact matches?
+
+	   Default: true
 	*/
 	Fuzzy *bool
-	/*Language
-	  Language of the results.
 
+	/* Language.
+
+	   Language of the results.
+
+	   Default: "en"
 	*/
 	Language *string
-	/*LinesOfStops
-	  Parse & return lines of each stop/station?
 
+	/* LinesOfStops.
+
+	   Parse & return lines of each stop/station?
 	*/
 	LinesOfStops *bool
-	/*Poi
-	  Show addresses?
 
+	/* Poi.
+
+	   Show addresses?
+
+	   Default: true
 	*/
 	Poi *bool
-	/*Query
-	  The term to search for.
 
+	/* Query.
+
+	   The term to search for.
 	*/
 	Query string
-	/*Results
-	  How many stations shall be shown?
 
+	/* Results.
+
+	   How many stations shall be shown?
+
+	   Default: 10
 	*/
 	Results *int64
-	/*Stops
-	  Show stops/stations?
 
+	/* Stops.
+
+	   Show stops/stations?
+
+	   Default: true
 	*/
 	Stops *bool
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get locations params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetLocationsParams) WithDefaults() *GetLocationsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get locations params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetLocationsParams) SetDefaults() {
+	var (
+		addressesDefault = bool(true)
+
+		fuzzyDefault = bool(true)
+
+		languageDefault = string("en")
+
+		linesOfStopsDefault = bool(false)
+
+		poiDefault = bool(true)
+
+		resultsDefault = int64(10)
+
+		stopsDefault = bool(true)
+	)
+
+	val := GetLocationsParams{
+		Addresses:    &addressesDefault,
+		Fuzzy:        &fuzzyDefault,
+		Language:     &languageDefault,
+		LinesOfStops: &linesOfStopsDefault,
+		Poi:          &poiDefault,
+		Results:      &resultsDefault,
+		Stops:        &stopsDefault,
+	}
+
+	val.timeout = o.timeout
+	val.Context = o.Context
+	val.HTTPClient = o.HTTPClient
+	*o = val
 }
 
 // WithTimeout adds the timeout to the get locations params
@@ -300,86 +302,92 @@ func (o *GetLocationsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 		// query param addresses
 		var qrAddresses bool
+
 		if o.Addresses != nil {
 			qrAddresses = *o.Addresses
 		}
 		qAddresses := swag.FormatBool(qrAddresses)
 		if qAddresses != "" {
+
 			if err := r.SetQueryParam("addresses", qAddresses); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Fuzzy != nil {
 
 		// query param fuzzy
 		var qrFuzzy bool
+
 		if o.Fuzzy != nil {
 			qrFuzzy = *o.Fuzzy
 		}
 		qFuzzy := swag.FormatBool(qrFuzzy)
 		if qFuzzy != "" {
+
 			if err := r.SetQueryParam("fuzzy", qFuzzy); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Language != nil {
 
 		// query param language
 		var qrLanguage string
+
 		if o.Language != nil {
 			qrLanguage = *o.Language
 		}
 		qLanguage := qrLanguage
 		if qLanguage != "" {
+
 			if err := r.SetQueryParam("language", qLanguage); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.LinesOfStops != nil {
 
 		// query param linesOfStops
 		var qrLinesOfStops bool
+
 		if o.LinesOfStops != nil {
 			qrLinesOfStops = *o.LinesOfStops
 		}
 		qLinesOfStops := swag.FormatBool(qrLinesOfStops)
 		if qLinesOfStops != "" {
+
 			if err := r.SetQueryParam("linesOfStops", qLinesOfStops); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Poi != nil {
 
 		// query param poi
 		var qrPoi bool
+
 		if o.Poi != nil {
 			qrPoi = *o.Poi
 		}
 		qPoi := swag.FormatBool(qrPoi)
 		if qPoi != "" {
+
 			if err := r.SetQueryParam("poi", qPoi); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// query param query
 	qrQuery := o.Query
 	qQuery := qrQuery
 	if qQuery != "" {
+
 		if err := r.SetQueryParam("query", qQuery); err != nil {
 			return err
 		}
@@ -389,32 +397,34 @@ func (o *GetLocationsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 
 		// query param results
 		var qrResults int64
+
 		if o.Results != nil {
 			qrResults = *o.Results
 		}
 		qResults := swag.FormatInt64(qrResults)
 		if qResults != "" {
+
 			if err := r.SetQueryParam("results", qResults); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Stops != nil {
 
 		// query param stops
 		var qrStops bool
+
 		if o.Stops != nil {
 			qrStops = *o.Stops
 		}
 		qStops := swag.FormatBool(qrStops)
 		if qStops != "" {
+
 			if err := r.SetQueryParam("stops", qStops); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

@@ -6,6 +6,7 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strconv"
@@ -31,9 +32,8 @@ func (o *GetJourneysReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -42,7 +42,7 @@ func NewGetJourneysOK() *GetJourneysOK {
 	return &GetJourneysOK{}
 }
 
-/*GetJourneysOK handles this case with default header values.
+/* GetJourneysOK describes a response with status code 200, with default header values.
 
 An array of journeys, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md).
 */
@@ -53,7 +53,6 @@ type GetJourneysOK struct {
 func (o *GetJourneysOK) Error() string {
 	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK  %+v", 200, o.Payload)
 }
-
 func (o *GetJourneysOK) GetPayload() *GetJourneysOKBody {
 	return o.Payload
 }
@@ -79,7 +78,7 @@ type GetJourneysOKBody struct {
 	EarlierRef string `json:"earlierRef,omitempty"`
 
 	// journeys
-	Journeys []*JourneysItems0 `json:"journeys"`
+	Journeys []*GetJourneysOKBodyJourneysItems0 `json:"journeys"`
 
 	// later ref
 	LaterRef string `json:"laterRef,omitempty"`
@@ -100,7 +99,6 @@ func (o *GetJourneysOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *GetJourneysOKBody) validateJourneys(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Journeys) { // not required
 		return nil
 	}
@@ -114,6 +112,42 @@ func (o *GetJourneysOKBody) validateJourneys(formats strfmt.Registry) error {
 			if err := o.Journeys[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getJourneysOK" + "." + "journeys" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getJourneysOK" + "." + "journeys" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this get journeys o k body based on the context it is used
+func (o *GetJourneysOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateJourneys(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBody) contextValidateJourneys(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Journeys); i++ {
+
+		if o.Journeys[i] != nil {
+			if err := o.Journeys[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getJourneysOK" + "." + "journeys" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getJourneysOK" + "." + "journeys" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -142,18 +176,18 @@ func (o *GetJourneysOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0 journeys items0
-swagger:model JourneysItems0
+/*GetJourneysOKBodyJourneysItems0 get journeys o k body journeys items0
+swagger:model GetJourneysOKBodyJourneysItems0
 */
-type JourneysItems0 struct {
+type GetJourneysOKBodyJourneysItems0 struct {
 
 	// cycle
 	// Required: true
-	Cycle *JourneysItems0Cycle `json:"cycle"`
+	Cycle *GetJourneysOKBodyJourneysItems0Cycle `json:"cycle"`
 
 	// legs
 	// Required: true
-	Legs []*JourneysItems0LegsItems0 `json:"legs"`
+	Legs []*GetJourneysOKBodyJourneysItems0LegsItems0 `json:"legs"`
 
 	// price
 	// Required: true
@@ -168,8 +202,8 @@ type JourneysItems0 struct {
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0
-func (o *JourneysItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0
+func (o *GetJourneysOKBodyJourneysItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateCycle(formats); err != nil {
@@ -198,7 +232,7 @@ func (o *JourneysItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0) validateCycle(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0) validateCycle(formats strfmt.Registry) error {
 
 	if err := validate.Required("cycle", "body", o.Cycle); err != nil {
 		return err
@@ -208,6 +242,8 @@ func (o *JourneysItems0) validateCycle(formats strfmt.Registry) error {
 		if err := o.Cycle.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cycle")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("cycle")
 			}
 			return err
 		}
@@ -216,7 +252,7 @@ func (o *JourneysItems0) validateCycle(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0) validateLegs(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0) validateLegs(formats strfmt.Registry) error {
 
 	if err := validate.Required("legs", "body", o.Legs); err != nil {
 		return err
@@ -231,6 +267,8 @@ func (o *JourneysItems0) validateLegs(formats strfmt.Registry) error {
 			if err := o.Legs[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("legs" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("legs" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -241,12 +279,12 @@ func (o *JourneysItems0) validateLegs(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0) validatePrice(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0) validatePrice(formats strfmt.Registry) error {
 
 	return nil
 }
 
-func (o *JourneysItems0) validateRefreshToken(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0) validateRefreshToken(formats strfmt.Registry) error {
 
 	if err := validate.Required("refreshToken", "body", o.RefreshToken); err != nil {
 		return err
@@ -255,7 +293,7 @@ func (o *JourneysItems0) validateRefreshToken(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("type", "body", o.Type); err != nil {
 		return err
@@ -264,8 +302,62 @@ func (o *JourneysItems0) validateType(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validate this get journeys o k body journeys items0 based on the context it is used
+func (o *GetJourneysOKBodyJourneysItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateCycle(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateLegs(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0) contextValidateCycle(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Cycle != nil {
+		if err := o.Cycle.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cycle")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("cycle")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0) contextValidateLegs(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Legs); i++ {
+
+		if o.Legs[i] != nil {
+			if err := o.Legs[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("legs" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("legs" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -273,8 +365,8 @@ func (o *JourneysItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0
+func (o *GetJourneysOKBodyJourneysItems0) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -282,18 +374,18 @@ func (o *JourneysItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0Cycle journeys items0 cycle
-swagger:model JourneysItems0Cycle
+/*GetJourneysOKBodyJourneysItems0Cycle get journeys o k body journeys items0 cycle
+swagger:model GetJourneysOKBodyJourneysItems0Cycle
 */
-type JourneysItems0Cycle struct {
+type GetJourneysOKBodyJourneysItems0Cycle struct {
 
 	// min
 	// Required: true
 	Min *int64 `json:"min"`
 }
 
-// Validate validates this journeys items0 cycle
-func (o *JourneysItems0Cycle) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 cycle
+func (o *GetJourneysOKBodyJourneysItems0Cycle) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateMin(formats); err != nil {
@@ -306,7 +398,7 @@ func (o *JourneysItems0Cycle) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0Cycle) validateMin(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0Cycle) validateMin(formats strfmt.Registry) error {
 
 	if err := validate.Required("cycle"+"."+"min", "body", o.Min); err != nil {
 		return err
@@ -315,8 +407,13 @@ func (o *JourneysItems0Cycle) validateMin(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 cycle based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0Cycle) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0Cycle) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0Cycle) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -324,8 +421,8 @@ func (o *JourneysItems0Cycle) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0Cycle) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0Cycle
+func (o *GetJourneysOKBodyJourneysItems0Cycle) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0Cycle
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -333,10 +430,10 @@ func (o *JourneysItems0Cycle) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0 journeys items0 legs items0
-swagger:model JourneysItems0LegsItems0
+/*GetJourneysOKBodyJourneysItems0LegsItems0 get journeys o k body journeys items0 legs items0
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0
 */
-type JourneysItems0LegsItems0 struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0 struct {
 
 	// arrival
 	// Required: true
@@ -353,7 +450,7 @@ type JourneysItems0LegsItems0 struct {
 
 	// cycle
 	// Required: true
-	Cycle *JourneysItems0LegsItems0Cycle `json:"cycle"`
+	Cycle *GetJourneysOKBodyJourneysItems0LegsItems0Cycle `json:"cycle"`
 
 	// departure
 	// Required: true
@@ -370,7 +467,7 @@ type JourneysItems0LegsItems0 struct {
 
 	// destination
 	// Required: true
-	Destination *JourneysItems0LegsItems0Destination `json:"destination"`
+	Destination *GetJourneysOKBodyJourneysItems0LegsItems0Destination `json:"destination"`
 
 	// direction
 	// Required: true
@@ -378,11 +475,11 @@ type JourneysItems0LegsItems0 struct {
 
 	// line
 	// Required: true
-	Line *JourneysItems0LegsItems0Line `json:"line"`
+	Line *GetJourneysOKBodyJourneysItems0LegsItems0Line `json:"line"`
 
 	// origin
 	// Required: true
-	Origin *JourneysItems0LegsItems0Origin `json:"origin"`
+	Origin *GetJourneysOKBodyJourneysItems0LegsItems0Origin `json:"origin"`
 
 	// planned arrival
 	// Required: true
@@ -411,8 +508,8 @@ type JourneysItems0LegsItems0 struct {
 	TripID *string `json:"tripId"`
 }
 
-// Validate validates this journeys items0 legs items0
-func (o *JourneysItems0LegsItems0) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateArrival(formats); err != nil {
@@ -489,7 +586,7 @@ func (o *JourneysItems0LegsItems0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateArrival(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateArrival(formats strfmt.Registry) error {
 
 	if err := validate.Required("arrival", "body", o.Arrival); err != nil {
 		return err
@@ -502,12 +599,12 @@ func (o *JourneysItems0LegsItems0) validateArrival(formats strfmt.Registry) erro
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateArrivalDelay(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateArrivalDelay(formats strfmt.Registry) error {
 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateArrivalPlatform(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateArrivalPlatform(formats strfmt.Registry) error {
 
 	if err := validate.Required("arrivalPlatform", "body", o.ArrivalPlatform); err != nil {
 		return err
@@ -516,7 +613,7 @@ func (o *JourneysItems0LegsItems0) validateArrivalPlatform(formats strfmt.Regist
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateCycle(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateCycle(formats strfmt.Registry) error {
 
 	if err := validate.Required("cycle", "body", o.Cycle); err != nil {
 		return err
@@ -526,6 +623,8 @@ func (o *JourneysItems0LegsItems0) validateCycle(formats strfmt.Registry) error 
 		if err := o.Cycle.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cycle")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("cycle")
 			}
 			return err
 		}
@@ -534,7 +633,7 @@ func (o *JourneysItems0LegsItems0) validateCycle(formats strfmt.Registry) error 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateDeparture(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateDeparture(formats strfmt.Registry) error {
 
 	if err := validate.Required("departure", "body", o.Departure); err != nil {
 		return err
@@ -547,12 +646,12 @@ func (o *JourneysItems0LegsItems0) validateDeparture(formats strfmt.Registry) er
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateDepartureDelay(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateDepartureDelay(formats strfmt.Registry) error {
 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateDeparturePlatform(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateDeparturePlatform(formats strfmt.Registry) error {
 
 	if err := validate.Required("departurePlatform", "body", o.DeparturePlatform); err != nil {
 		return err
@@ -561,7 +660,7 @@ func (o *JourneysItems0LegsItems0) validateDeparturePlatform(formats strfmt.Regi
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateDestination(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateDestination(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination", "body", o.Destination); err != nil {
 		return err
@@ -571,6 +670,8 @@ func (o *JourneysItems0LegsItems0) validateDestination(formats strfmt.Registry) 
 		if err := o.Destination.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("destination")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("destination")
 			}
 			return err
 		}
@@ -579,7 +680,7 @@ func (o *JourneysItems0LegsItems0) validateDestination(formats strfmt.Registry) 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateDirection(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateDirection(formats strfmt.Registry) error {
 
 	if err := validate.Required("direction", "body", o.Direction); err != nil {
 		return err
@@ -588,7 +689,7 @@ func (o *JourneysItems0LegsItems0) validateDirection(formats strfmt.Registry) er
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateLine(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateLine(formats strfmt.Registry) error {
 
 	if err := validate.Required("line", "body", o.Line); err != nil {
 		return err
@@ -598,6 +699,8 @@ func (o *JourneysItems0LegsItems0) validateLine(formats strfmt.Registry) error {
 		if err := o.Line.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line")
 			}
 			return err
 		}
@@ -606,7 +709,7 @@ func (o *JourneysItems0LegsItems0) validateLine(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateOrigin(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateOrigin(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin", "body", o.Origin); err != nil {
 		return err
@@ -616,6 +719,8 @@ func (o *JourneysItems0LegsItems0) validateOrigin(formats strfmt.Registry) error
 		if err := o.Origin.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("origin")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("origin")
 			}
 			return err
 		}
@@ -624,7 +729,7 @@ func (o *JourneysItems0LegsItems0) validateOrigin(formats strfmt.Registry) error
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validatePlannedArrival(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validatePlannedArrival(formats strfmt.Registry) error {
 
 	if err := validate.Required("plannedArrival", "body", o.PlannedArrival); err != nil {
 		return err
@@ -637,7 +742,7 @@ func (o *JourneysItems0LegsItems0) validatePlannedArrival(formats strfmt.Registr
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validatePlannedArrivalPlatform(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validatePlannedArrivalPlatform(formats strfmt.Registry) error {
 
 	if err := validate.Required("plannedArrivalPlatform", "body", o.PlannedArrivalPlatform); err != nil {
 		return err
@@ -646,7 +751,7 @@ func (o *JourneysItems0LegsItems0) validatePlannedArrivalPlatform(formats strfmt
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validatePlannedDeparture(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validatePlannedDeparture(formats strfmt.Registry) error {
 
 	if err := validate.Required("plannedDeparture", "body", o.PlannedDeparture); err != nil {
 		return err
@@ -659,7 +764,7 @@ func (o *JourneysItems0LegsItems0) validatePlannedDeparture(formats strfmt.Regis
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validatePlannedDeparturePlatform(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validatePlannedDeparturePlatform(formats strfmt.Registry) error {
 
 	if err := validate.Required("plannedDeparturePlatform", "body", o.PlannedDeparturePlatform); err != nil {
 		return err
@@ -668,7 +773,7 @@ func (o *JourneysItems0LegsItems0) validatePlannedDeparturePlatform(formats strf
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateReachable(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateReachable(formats strfmt.Registry) error {
 
 	if err := validate.Required("reachable", "body", o.Reachable); err != nil {
 		return err
@@ -677,7 +782,7 @@ func (o *JourneysItems0LegsItems0) validateReachable(formats strfmt.Registry) er
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0) validateTripID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) validateTripID(formats strfmt.Registry) error {
 
 	if err := validate.Required("tripId", "body", o.TripID); err != nil {
 		return err
@@ -686,8 +791,98 @@ func (o *JourneysItems0LegsItems0) validateTripID(formats strfmt.Registry) error
 	return nil
 }
 
+// ContextValidate validate this get journeys o k body journeys items0 legs items0 based on the context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateCycle(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateDestination(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateLine(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateOrigin(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateCycle(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Cycle != nil {
+		if err := o.Cycle.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cycle")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("cycle")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateDestination(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Destination != nil {
+		if err := o.Destination.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("destination")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("destination")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateLine(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Line != nil {
+		if err := o.Line.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("line")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateOrigin(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Origin != nil {
+		if err := o.Origin.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("origin")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("origin")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -695,8 +890,8 @@ func (o *JourneysItems0LegsItems0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -704,10 +899,10 @@ func (o *JourneysItems0LegsItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0Cycle journeys items0 legs items0 cycle
-swagger:model JourneysItems0LegsItems0Cycle
+/*GetJourneysOKBodyJourneysItems0LegsItems0Cycle get journeys o k body journeys items0 legs items0 cycle
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Cycle
 */
-type JourneysItems0LegsItems0Cycle struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0Cycle struct {
 
 	// max
 	// Required: true
@@ -722,8 +917,8 @@ type JourneysItems0LegsItems0Cycle struct {
 	Nr *int64 `json:"nr"`
 }
 
-// Validate validates this journeys items0 legs items0 cycle
-func (o *JourneysItems0LegsItems0Cycle) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 cycle
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateMax(formats); err != nil {
@@ -744,7 +939,7 @@ func (o *JourneysItems0LegsItems0Cycle) Validate(formats strfmt.Registry) error 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Cycle) validateMax(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) validateMax(formats strfmt.Registry) error {
 
 	if err := validate.Required("cycle"+"."+"max", "body", o.Max); err != nil {
 		return err
@@ -753,7 +948,7 @@ func (o *JourneysItems0LegsItems0Cycle) validateMax(formats strfmt.Registry) err
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Cycle) validateMin(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) validateMin(formats strfmt.Registry) error {
 
 	if err := validate.Required("cycle"+"."+"min", "body", o.Min); err != nil {
 		return err
@@ -762,7 +957,7 @@ func (o *JourneysItems0LegsItems0Cycle) validateMin(formats strfmt.Registry) err
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Cycle) validateNr(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) validateNr(formats strfmt.Registry) error {
 
 	if err := validate.Required("cycle"+"."+"nr", "body", o.Nr); err != nil {
 		return err
@@ -771,8 +966,13 @@ func (o *JourneysItems0LegsItems0Cycle) validateNr(formats strfmt.Registry) erro
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 legs items0 cycle based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Cycle) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -780,8 +980,8 @@ func (o *JourneysItems0LegsItems0Cycle) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Cycle) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0Cycle
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0Cycle
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -789,10 +989,10 @@ func (o *JourneysItems0LegsItems0Cycle) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0Destination journeys items0 legs items0 destination
-swagger:model JourneysItems0LegsItems0Destination
+/*GetJourneysOKBodyJourneysItems0LegsItems0Destination get journeys o k body journeys items0 legs items0 destination
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Destination
 */
-type JourneysItems0LegsItems0Destination struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0Destination struct {
 
 	// id
 	// Required: true
@@ -800,7 +1000,7 @@ type JourneysItems0LegsItems0Destination struct {
 
 	// location
 	// Required: true
-	Location *JourneysItems0LegsItems0DestinationLocation `json:"location"`
+	Location *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation `json:"location"`
 
 	// name
 	// Required: true
@@ -808,15 +1008,15 @@ type JourneysItems0LegsItems0Destination struct {
 
 	// products
 	// Required: true
-	Products *JourneysItems0LegsItems0DestinationProducts `json:"products"`
+	Products *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts `json:"products"`
 
 	// type
 	// Required: true
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0 legs items0 destination
-func (o *JourneysItems0LegsItems0Destination) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 destination
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
@@ -845,7 +1045,7 @@ func (o *JourneysItems0LegsItems0Destination) Validate(formats strfmt.Registry) 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Destination) validateID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"id", "body", o.ID); err != nil {
 		return err
@@ -854,7 +1054,7 @@ func (o *JourneysItems0LegsItems0Destination) validateID(formats strfmt.Registry
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Destination) validateLocation(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) validateLocation(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"location", "body", o.Location); err != nil {
 		return err
@@ -864,6 +1064,8 @@ func (o *JourneysItems0LegsItems0Destination) validateLocation(formats strfmt.Re
 		if err := o.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("destination" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("destination" + "." + "location")
 			}
 			return err
 		}
@@ -872,7 +1074,7 @@ func (o *JourneysItems0LegsItems0Destination) validateLocation(formats strfmt.Re
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Destination) validateName(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"name", "body", o.Name); err != nil {
 		return err
@@ -881,7 +1083,7 @@ func (o *JourneysItems0LegsItems0Destination) validateName(formats strfmt.Regist
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Destination) validateProducts(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) validateProducts(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products", "body", o.Products); err != nil {
 		return err
@@ -891,6 +1093,8 @@ func (o *JourneysItems0LegsItems0Destination) validateProducts(formats strfmt.Re
 		if err := o.Products.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("destination" + "." + "products")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("destination" + "." + "products")
 			}
 			return err
 		}
@@ -899,7 +1103,7 @@ func (o *JourneysItems0LegsItems0Destination) validateProducts(formats strfmt.Re
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Destination) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"type", "body", o.Type); err != nil {
 		return err
@@ -908,8 +1112,58 @@ func (o *JourneysItems0LegsItems0Destination) validateType(formats strfmt.Regist
 	return nil
 }
 
+// ContextValidate validate this get journeys o k body journeys items0 legs items0 destination based on the context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateLocation(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateProducts(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Location != nil {
+		if err := o.Location.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("destination" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("destination" + "." + "location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Products != nil {
+		if err := o.Products.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("destination" + "." + "products")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("destination" + "." + "products")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Destination) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -917,8 +1171,8 @@ func (o *JourneysItems0LegsItems0Destination) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Destination) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0Destination
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0Destination
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -926,10 +1180,10 @@ func (o *JourneysItems0LegsItems0Destination) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0DestinationLocation journeys items0 legs items0 destination location
-swagger:model JourneysItems0LegsItems0DestinationLocation
+/*GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation get journeys o k body journeys items0 legs items0 destination location
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation
 */
-type JourneysItems0LegsItems0DestinationLocation struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation struct {
 
 	// id
 	// Required: true
@@ -948,8 +1202,8 @@ type JourneysItems0LegsItems0DestinationLocation struct {
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0 legs items0 destination location
-func (o *JourneysItems0LegsItems0DestinationLocation) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 destination location
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
@@ -974,7 +1228,7 @@ func (o *JourneysItems0LegsItems0DestinationLocation) Validate(formats strfmt.Re
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationLocation) validateID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"location"+"."+"id", "body", o.ID); err != nil {
 		return err
@@ -983,7 +1237,7 @@ func (o *JourneysItems0LegsItems0DestinationLocation) validateID(formats strfmt.
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationLocation) validateLatitude(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) validateLatitude(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"location"+"."+"latitude", "body", o.Latitude); err != nil {
 		return err
@@ -992,7 +1246,7 @@ func (o *JourneysItems0LegsItems0DestinationLocation) validateLatitude(formats s
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationLocation) validateLongitude(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) validateLongitude(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"location"+"."+"longitude", "body", o.Longitude); err != nil {
 		return err
@@ -1001,7 +1255,7 @@ func (o *JourneysItems0LegsItems0DestinationLocation) validateLongitude(formats 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationLocation) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"location"+"."+"type", "body", o.Type); err != nil {
 		return err
@@ -1010,8 +1264,13 @@ func (o *JourneysItems0LegsItems0DestinationLocation) validateType(formats strfm
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 legs items0 destination location based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0DestinationLocation) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1019,8 +1278,8 @@ func (o *JourneysItems0LegsItems0DestinationLocation) MarshalBinary() ([]byte, e
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0DestinationLocation) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0DestinationLocation
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -1028,10 +1287,10 @@ func (o *JourneysItems0LegsItems0DestinationLocation) UnmarshalBinary(b []byte) 
 	return nil
 }
 
-/*JourneysItems0LegsItems0DestinationProducts journeys items0 legs items0 destination products
-swagger:model JourneysItems0LegsItems0DestinationProducts
+/*GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts get journeys o k body journeys items0 legs items0 destination products
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts
 */
-type JourneysItems0LegsItems0DestinationProducts struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts struct {
 
 	// bus
 	// Required: true
@@ -1074,8 +1333,8 @@ type JourneysItems0LegsItems0DestinationProducts struct {
 	Tram *bool `json:"tram"`
 }
 
-// Validate validates this journeys items0 legs items0 destination products
-func (o *JourneysItems0LegsItems0DestinationProducts) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 destination products
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateBus(formats); err != nil {
@@ -1124,7 +1383,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) Validate(formats strfmt.Re
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateBus(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateBus(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"bus", "body", o.Bus); err != nil {
 		return err
@@ -1133,7 +1392,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateBus(formats strfmt
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateFerry(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateFerry(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"ferry", "body", o.Ferry); err != nil {
 		return err
@@ -1142,7 +1401,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateFerry(formats strf
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateNational(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateNational(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"national", "body", o.National); err != nil {
 		return err
@@ -1151,7 +1410,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateNational(formats s
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateNationalExpress(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateNationalExpress(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"nationalExpress", "body", o.NationalExpress); err != nil {
 		return err
@@ -1160,7 +1419,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateNationalExpress(fo
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateRegional(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateRegional(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"regional", "body", o.Regional); err != nil {
 		return err
@@ -1169,7 +1428,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateRegional(formats s
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateRegionalExp(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateRegionalExp(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"regionalExp", "body", o.RegionalExp); err != nil {
 		return err
@@ -1178,7 +1437,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateRegionalExp(format
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateSuburban(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateSuburban(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"suburban", "body", o.Suburban); err != nil {
 		return err
@@ -1187,7 +1446,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateSuburban(formats s
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateSubway(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateSubway(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"subway", "body", o.Subway); err != nil {
 		return err
@@ -1196,7 +1455,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateSubway(formats str
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateTaxi(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateTaxi(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"taxi", "body", o.Taxi); err != nil {
 		return err
@@ -1205,7 +1464,7 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateTaxi(formats strfm
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0DestinationProducts) validateTram(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) validateTram(formats strfmt.Registry) error {
 
 	if err := validate.Required("destination"+"."+"products"+"."+"tram", "body", o.Tram); err != nil {
 		return err
@@ -1214,8 +1473,13 @@ func (o *JourneysItems0LegsItems0DestinationProducts) validateTram(formats strfm
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 legs items0 destination products based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0DestinationProducts) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1223,8 +1487,8 @@ func (o *JourneysItems0LegsItems0DestinationProducts) MarshalBinary() ([]byte, e
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0DestinationProducts) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0DestinationProducts
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -1232,10 +1496,10 @@ func (o *JourneysItems0LegsItems0DestinationProducts) UnmarshalBinary(b []byte) 
 	return nil
 }
 
-/*JourneysItems0LegsItems0Line journeys items0 legs items0 line
-swagger:model JourneysItems0LegsItems0Line
+/*GetJourneysOKBodyJourneysItems0LegsItems0Line get journeys o k body journeys items0 legs items0 line
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Line
 */
-type JourneysItems0LegsItems0Line struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0Line struct {
 
 	// admin code
 	// Required: true
@@ -1259,7 +1523,7 @@ type JourneysItems0LegsItems0Line struct {
 
 	// operator
 	// Required: true
-	Operator *JourneysItems0LegsItems0LineOperator `json:"operator"`
+	Operator *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator `json:"operator"`
 
 	// product
 	// Required: true
@@ -1274,8 +1538,8 @@ type JourneysItems0LegsItems0Line struct {
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0 legs items0 line
-func (o *JourneysItems0LegsItems0Line) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 line
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateAdminCode(formats); err != nil {
@@ -1320,7 +1584,7 @@ func (o *JourneysItems0LegsItems0Line) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateAdminCode(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateAdminCode(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"adminCode", "body", o.AdminCode); err != nil {
 		return err
@@ -1329,7 +1593,7 @@ func (o *JourneysItems0LegsItems0Line) validateAdminCode(formats strfmt.Registry
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateFahrtNr(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateFahrtNr(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"fahrtNr", "body", o.FahrtNr); err != nil {
 		return err
@@ -1338,7 +1602,7 @@ func (o *JourneysItems0LegsItems0Line) validateFahrtNr(formats strfmt.Registry) 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"id", "body", o.ID); err != nil {
 		return err
@@ -1347,7 +1611,7 @@ func (o *JourneysItems0LegsItems0Line) validateID(formats strfmt.Registry) error
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateMode(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateMode(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"mode", "body", o.Mode); err != nil {
 		return err
@@ -1356,7 +1620,7 @@ func (o *JourneysItems0LegsItems0Line) validateMode(formats strfmt.Registry) err
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateName(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"name", "body", o.Name); err != nil {
 		return err
@@ -1365,7 +1629,7 @@ func (o *JourneysItems0LegsItems0Line) validateName(formats strfmt.Registry) err
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateOperator(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateOperator(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"operator", "body", o.Operator); err != nil {
 		return err
@@ -1375,6 +1639,8 @@ func (o *JourneysItems0LegsItems0Line) validateOperator(formats strfmt.Registry)
 		if err := o.Operator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line" + "." + "operator")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line" + "." + "operator")
 			}
 			return err
 		}
@@ -1383,7 +1649,7 @@ func (o *JourneysItems0LegsItems0Line) validateOperator(formats strfmt.Registry)
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateProduct(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateProduct(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"product", "body", o.Product); err != nil {
 		return err
@@ -1392,7 +1658,7 @@ func (o *JourneysItems0LegsItems0Line) validateProduct(formats strfmt.Registry) 
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validatePublic(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validatePublic(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"public", "body", o.Public); err != nil {
 		return err
@@ -1401,7 +1667,7 @@ func (o *JourneysItems0LegsItems0Line) validatePublic(formats strfmt.Registry) e
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Line) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"type", "body", o.Type); err != nil {
 		return err
@@ -1410,8 +1676,38 @@ func (o *JourneysItems0LegsItems0Line) validateType(formats strfmt.Registry) err
 	return nil
 }
 
+// ContextValidate validate this get journeys o k body journeys items0 legs items0 line based on the context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateOperator(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) contextValidateOperator(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Operator != nil {
+		if err := o.Operator.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("line" + "." + "operator")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("line" + "." + "operator")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Line) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1419,8 +1715,8 @@ func (o *JourneysItems0LegsItems0Line) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Line) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0Line
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0Line
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -1428,10 +1724,10 @@ func (o *JourneysItems0LegsItems0Line) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0LineOperator journeys items0 legs items0 line operator
-swagger:model JourneysItems0LegsItems0LineOperator
+/*GetJourneysOKBodyJourneysItems0LegsItems0LineOperator get journeys o k body journeys items0 legs items0 line operator
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0LineOperator
 */
-type JourneysItems0LegsItems0LineOperator struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0LineOperator struct {
 
 	// id
 	// Required: true
@@ -1446,8 +1742,8 @@ type JourneysItems0LegsItems0LineOperator struct {
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0 legs items0 line operator
-func (o *JourneysItems0LegsItems0LineOperator) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 line operator
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
@@ -1468,7 +1764,7 @@ func (o *JourneysItems0LegsItems0LineOperator) Validate(formats strfmt.Registry)
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0LineOperator) validateID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"operator"+"."+"id", "body", o.ID); err != nil {
 		return err
@@ -1477,7 +1773,7 @@ func (o *JourneysItems0LegsItems0LineOperator) validateID(formats strfmt.Registr
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0LineOperator) validateName(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"operator"+"."+"name", "body", o.Name); err != nil {
 		return err
@@ -1486,7 +1782,7 @@ func (o *JourneysItems0LegsItems0LineOperator) validateName(formats strfmt.Regis
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0LineOperator) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"operator"+"."+"type", "body", o.Type); err != nil {
 		return err
@@ -1495,8 +1791,13 @@ func (o *JourneysItems0LegsItems0LineOperator) validateType(formats strfmt.Regis
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 legs items0 line operator based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0LineOperator) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1504,8 +1805,8 @@ func (o *JourneysItems0LegsItems0LineOperator) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0LineOperator) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0LineOperator
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0LineOperator
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -1513,10 +1814,10 @@ func (o *JourneysItems0LegsItems0LineOperator) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0Origin journeys items0 legs items0 origin
-swagger:model JourneysItems0LegsItems0Origin
+/*GetJourneysOKBodyJourneysItems0LegsItems0Origin get journeys o k body journeys items0 legs items0 origin
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Origin
 */
-type JourneysItems0LegsItems0Origin struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0Origin struct {
 
 	// id
 	// Required: true
@@ -1524,7 +1825,7 @@ type JourneysItems0LegsItems0Origin struct {
 
 	// location
 	// Required: true
-	Location *JourneysItems0LegsItems0OriginLocation `json:"location"`
+	Location *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation `json:"location"`
 
 	// name
 	// Required: true
@@ -1532,15 +1833,15 @@ type JourneysItems0LegsItems0Origin struct {
 
 	// products
 	// Required: true
-	Products *JourneysItems0LegsItems0OriginProducts `json:"products"`
+	Products *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts `json:"products"`
 
 	// type
 	// Required: true
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0 legs items0 origin
-func (o *JourneysItems0LegsItems0Origin) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 origin
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
@@ -1569,7 +1870,7 @@ func (o *JourneysItems0LegsItems0Origin) Validate(formats strfmt.Registry) error
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Origin) validateID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"id", "body", o.ID); err != nil {
 		return err
@@ -1578,7 +1879,7 @@ func (o *JourneysItems0LegsItems0Origin) validateID(formats strfmt.Registry) err
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Origin) validateLocation(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) validateLocation(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"location", "body", o.Location); err != nil {
 		return err
@@ -1588,6 +1889,8 @@ func (o *JourneysItems0LegsItems0Origin) validateLocation(formats strfmt.Registr
 		if err := o.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("origin" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("origin" + "." + "location")
 			}
 			return err
 		}
@@ -1596,7 +1899,7 @@ func (o *JourneysItems0LegsItems0Origin) validateLocation(formats strfmt.Registr
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Origin) validateName(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"name", "body", o.Name); err != nil {
 		return err
@@ -1605,7 +1908,7 @@ func (o *JourneysItems0LegsItems0Origin) validateName(formats strfmt.Registry) e
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Origin) validateProducts(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) validateProducts(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products", "body", o.Products); err != nil {
 		return err
@@ -1615,6 +1918,8 @@ func (o *JourneysItems0LegsItems0Origin) validateProducts(formats strfmt.Registr
 		if err := o.Products.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("origin" + "." + "products")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("origin" + "." + "products")
 			}
 			return err
 		}
@@ -1623,7 +1928,7 @@ func (o *JourneysItems0LegsItems0Origin) validateProducts(formats strfmt.Registr
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0Origin) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"type", "body", o.Type); err != nil {
 		return err
@@ -1632,8 +1937,58 @@ func (o *JourneysItems0LegsItems0Origin) validateType(formats strfmt.Registry) e
 	return nil
 }
 
+// ContextValidate validate this get journeys o k body journeys items0 legs items0 origin based on the context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateLocation(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateProducts(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Location != nil {
+		if err := o.Location.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("origin" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("origin" + "." + "location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Products != nil {
+		if err := o.Products.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("origin" + "." + "products")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("origin" + "." + "products")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Origin) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1641,8 +1996,8 @@ func (o *JourneysItems0LegsItems0Origin) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0Origin) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0Origin
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0Origin
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -1650,10 +2005,10 @@ func (o *JourneysItems0LegsItems0Origin) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*JourneysItems0LegsItems0OriginLocation journeys items0 legs items0 origin location
-swagger:model JourneysItems0LegsItems0OriginLocation
+/*GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation get journeys o k body journeys items0 legs items0 origin location
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation
 */
-type JourneysItems0LegsItems0OriginLocation struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation struct {
 
 	// id
 	// Required: true
@@ -1672,8 +2027,8 @@ type JourneysItems0LegsItems0OriginLocation struct {
 	Type *string `json:"type"`
 }
 
-// Validate validates this journeys items0 legs items0 origin location
-func (o *JourneysItems0LegsItems0OriginLocation) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 origin location
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateID(formats); err != nil {
@@ -1698,7 +2053,7 @@ func (o *JourneysItems0LegsItems0OriginLocation) Validate(formats strfmt.Registr
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginLocation) validateID(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"location"+"."+"id", "body", o.ID); err != nil {
 		return err
@@ -1707,7 +2062,7 @@ func (o *JourneysItems0LegsItems0OriginLocation) validateID(formats strfmt.Regis
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginLocation) validateLatitude(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) validateLatitude(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"location"+"."+"latitude", "body", o.Latitude); err != nil {
 		return err
@@ -1716,7 +2071,7 @@ func (o *JourneysItems0LegsItems0OriginLocation) validateLatitude(formats strfmt
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginLocation) validateLongitude(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) validateLongitude(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"location"+"."+"longitude", "body", o.Longitude); err != nil {
 		return err
@@ -1725,7 +2080,7 @@ func (o *JourneysItems0LegsItems0OriginLocation) validateLongitude(formats strfm
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginLocation) validateType(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"location"+"."+"type", "body", o.Type); err != nil {
 		return err
@@ -1734,8 +2089,13 @@ func (o *JourneysItems0LegsItems0OriginLocation) validateType(formats strfmt.Reg
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 legs items0 origin location based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0OriginLocation) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1743,8 +2103,8 @@ func (o *JourneysItems0LegsItems0OriginLocation) MarshalBinary() ([]byte, error)
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0OriginLocation) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0OriginLocation
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
@@ -1752,10 +2112,10 @@ func (o *JourneysItems0LegsItems0OriginLocation) UnmarshalBinary(b []byte) error
 	return nil
 }
 
-/*JourneysItems0LegsItems0OriginProducts journeys items0 legs items0 origin products
-swagger:model JourneysItems0LegsItems0OriginProducts
+/*GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts get journeys o k body journeys items0 legs items0 origin products
+swagger:model GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts
 */
-type JourneysItems0LegsItems0OriginProducts struct {
+type GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts struct {
 
 	// bus
 	// Required: true
@@ -1798,8 +2158,8 @@ type JourneysItems0LegsItems0OriginProducts struct {
 	Tram *bool `json:"tram"`
 }
 
-// Validate validates this journeys items0 legs items0 origin products
-func (o *JourneysItems0LegsItems0OriginProducts) Validate(formats strfmt.Registry) error {
+// Validate validates this get journeys o k body journeys items0 legs items0 origin products
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := o.validateBus(formats); err != nil {
@@ -1848,7 +2208,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) Validate(formats strfmt.Registr
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateBus(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateBus(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"bus", "body", o.Bus); err != nil {
 		return err
@@ -1857,7 +2217,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateBus(formats strfmt.Regi
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateFerry(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateFerry(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"ferry", "body", o.Ferry); err != nil {
 		return err
@@ -1866,7 +2226,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateFerry(formats strfmt.Re
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateNational(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateNational(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"national", "body", o.National); err != nil {
 		return err
@@ -1875,7 +2235,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateNational(formats strfmt
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateNationalExpress(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateNationalExpress(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"nationalExpress", "body", o.NationalExpress); err != nil {
 		return err
@@ -1884,7 +2244,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateNationalExpress(formats
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateRegional(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateRegional(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"regional", "body", o.Regional); err != nil {
 		return err
@@ -1893,7 +2253,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateRegional(formats strfmt
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateRegionalExp(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateRegionalExp(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"regionalExp", "body", o.RegionalExp); err != nil {
 		return err
@@ -1902,7 +2262,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateRegionalExp(formats str
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateSuburban(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateSuburban(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"suburban", "body", o.Suburban); err != nil {
 		return err
@@ -1911,7 +2271,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateSuburban(formats strfmt
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateSubway(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateSubway(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"subway", "body", o.Subway); err != nil {
 		return err
@@ -1920,7 +2280,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateSubway(formats strfmt.R
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateTaxi(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateTaxi(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"taxi", "body", o.Taxi); err != nil {
 		return err
@@ -1929,7 +2289,7 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateTaxi(formats strfmt.Reg
 	return nil
 }
 
-func (o *JourneysItems0LegsItems0OriginProducts) validateTram(formats strfmt.Registry) error {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) validateTram(formats strfmt.Registry) error {
 
 	if err := validate.Required("origin"+"."+"products"+"."+"tram", "body", o.Tram); err != nil {
 		return err
@@ -1938,8 +2298,13 @@ func (o *JourneysItems0LegsItems0OriginProducts) validateTram(formats strfmt.Reg
 	return nil
 }
 
+// ContextValidate validates this get journeys o k body journeys items0 legs items0 origin products based on context it is used
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0OriginProducts) MarshalBinary() ([]byte, error) {
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -1947,8 +2312,8 @@ func (o *JourneysItems0LegsItems0OriginProducts) MarshalBinary() ([]byte, error)
 }
 
 // UnmarshalBinary interface implementation
-func (o *JourneysItems0LegsItems0OriginProducts) UnmarshalBinary(b []byte) error {
-	var res JourneysItems0LegsItems0OriginProducts
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts) UnmarshalBinary(b []byte) error {
+	var res GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

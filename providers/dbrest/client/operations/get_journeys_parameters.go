@@ -17,235 +17,230 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetJourneysParams creates a new GetJourneysParams object
-// with the default values initialized.
+// NewGetJourneysParams creates a new GetJourneysParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetJourneysParams() *GetJourneysParams {
-	var (
-		bikeDefault             = bool(false)
-		languageDefault         = string("en")
-		polylinesDefault        = bool(false)
-		remarksDefault          = bool(true)
-		resultsDefault          = int64(3)
-		scheduledDaysDefault    = bool(false)
-		startWithWalkingDefault = bool(true)
-		stopoversDefault        = bool(false)
-		ticketsDefault          = bool(false)
-		transferTimeDefault     = int64(0)
-		walkingSpeedDefault     = string("normal")
-	)
 	return &GetJourneysParams{
-		Bike:             &bikeDefault,
-		Language:         &languageDefault,
-		Polylines:        &polylinesDefault,
-		Remarks:          &remarksDefault,
-		Results:          &resultsDefault,
-		ScheduledDays:    &scheduledDaysDefault,
-		StartWithWalking: &startWithWalkingDefault,
-		Stopovers:        &stopoversDefault,
-		Tickets:          &ticketsDefault,
-		TransferTime:     &transferTimeDefault,
-		WalkingSpeed:     &walkingSpeedDefault,
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetJourneysParamsWithTimeout creates a new GetJourneysParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetJourneysParamsWithTimeout(timeout time.Duration) *GetJourneysParams {
-	var (
-		bikeDefault             = bool(false)
-		languageDefault         = string("en")
-		polylinesDefault        = bool(false)
-		remarksDefault          = bool(true)
-		resultsDefault          = int64(3)
-		scheduledDaysDefault    = bool(false)
-		startWithWalkingDefault = bool(true)
-		stopoversDefault        = bool(false)
-		ticketsDefault          = bool(false)
-		transferTimeDefault     = int64(0)
-		walkingSpeedDefault     = string("normal")
-	)
 	return &GetJourneysParams{
-		Bike:             &bikeDefault,
-		Language:         &languageDefault,
-		Polylines:        &polylinesDefault,
-		Remarks:          &remarksDefault,
-		Results:          &resultsDefault,
-		ScheduledDays:    &scheduledDaysDefault,
-		StartWithWalking: &startWithWalkingDefault,
-		Stopovers:        &stopoversDefault,
-		Tickets:          &ticketsDefault,
-		TransferTime:     &transferTimeDefault,
-		WalkingSpeed:     &walkingSpeedDefault,
-
 		timeout: timeout,
 	}
 }
 
 // NewGetJourneysParamsWithContext creates a new GetJourneysParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetJourneysParamsWithContext(ctx context.Context) *GetJourneysParams {
-	var (
-		bikeDefault             = bool(false)
-		languageDefault         = string("en")
-		polylinesDefault        = bool(false)
-		remarksDefault          = bool(true)
-		resultsDefault          = int64(3)
-		scheduledDaysDefault    = bool(false)
-		startWithWalkingDefault = bool(true)
-		stopoversDefault        = bool(false)
-		ticketsDefault          = bool(false)
-		transferTimeDefault     = int64(0)
-		walkingSpeedDefault     = string("normal")
-	)
 	return &GetJourneysParams{
-		Bike:             &bikeDefault,
-		Language:         &languageDefault,
-		Polylines:        &polylinesDefault,
-		Remarks:          &remarksDefault,
-		Results:          &resultsDefault,
-		ScheduledDays:    &scheduledDaysDefault,
-		StartWithWalking: &startWithWalkingDefault,
-		Stopovers:        &stopoversDefault,
-		Tickets:          &ticketsDefault,
-		TransferTime:     &transferTimeDefault,
-		WalkingSpeed:     &walkingSpeedDefault,
-
 		Context: ctx,
 	}
 }
 
 // NewGetJourneysParamsWithHTTPClient creates a new GetJourneysParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetJourneysParamsWithHTTPClient(client *http.Client) *GetJourneysParams {
-	var (
-		bikeDefault             = bool(false)
-		languageDefault         = string("en")
-		polylinesDefault        = bool(false)
-		remarksDefault          = bool(true)
-		resultsDefault          = int64(3)
-		scheduledDaysDefault    = bool(false)
-		startWithWalkingDefault = bool(true)
-		stopoversDefault        = bool(false)
-		ticketsDefault          = bool(false)
-		transferTimeDefault     = int64(0)
-		walkingSpeedDefault     = string("normal")
-	)
 	return &GetJourneysParams{
-		Bike:             &bikeDefault,
-		Language:         &languageDefault,
-		Polylines:        &polylinesDefault,
-		Remarks:          &remarksDefault,
-		Results:          &resultsDefault,
-		ScheduledDays:    &scheduledDaysDefault,
-		StartWithWalking: &startWithWalkingDefault,
-		Stopovers:        &stopoversDefault,
-		Tickets:          &ticketsDefault,
-		TransferTime:     &transferTimeDefault,
-		WalkingSpeed:     &walkingSpeedDefault,
-		HTTPClient:       client,
+		HTTPClient: client,
 	}
 }
 
-/*GetJourneysParams contains all the parameters to send to the API endpoint
-for the get journeys operation typically these are written to a http.Request
+/* GetJourneysParams contains all the parameters to send to the API endpoint
+   for the get journeys operation.
+
+   Typically these are written to a http.Request.
 */
 type GetJourneysParams struct {
 
-	/*Accessibility
-	  `partial` or `complete`. – Default: *not accessible*
+	/* Accessibility.
 
+	   `partial` or `complete`. – Default: *not accessible*
 	*/
 	Accessibility *string
-	/*Arrival
-	  Compute journeys arriving at this date/time. Mutually exclusive with `departure`. – Default: *now*
 
+	/* Arrival.
+
+	   Compute journeys arriving at this date/time. Mutually exclusive with `departure`. – Default: *now*
+
+	   Format: date-time
 	*/
 	Arrival *strfmt.DateTime
-	/*Bike
-	  Compute only bike-friendly journeys?
 
+	/* Bike.
+
+	   Compute only bike-friendly journeys?
 	*/
 	Bike *bool
-	/*Departure
-	  Compute journeys departing at this date/time. Mutually exclusive with `arrival`. – Default: *now*
 
+	/* Departure.
+
+	   Compute journeys departing at this date/time. Mutually exclusive with `arrival`. – Default: *now*
+
+	   Format: date-time
 	*/
 	Departure *strfmt.DateTime
-	/*EarlierThan
-	  Compute journeys "before" an `ealierRef`.
 
+	/* EarlierThan.
+
+	   Compute journeys "before" an `ealierRef`.
 	*/
 	EarlierThan *string
-	/*From*/
-	From *string
-	/*Language
-	  Language of the results.
 
+	// From.
+	From *string
+
+	/* Language.
+
+	   Language of the results.
+
+	   Default: "en"
 	*/
 	Language *string
-	/*LaterThan
-	  Compute journeys "after" an `laterRef`.
 
+	/* LaterThan.
+
+	   Compute journeys "after" an `laterRef`.
 	*/
 	LaterThan *string
-	/*Polylines
-	  Fetch & parse a shape for each journey leg?
 
+	/* Polylines.
+
+	   Fetch & parse a shape for each journey leg?
 	*/
 	Polylines *bool
-	/*Remarks
-	  Parse & return hints & warnings?
 
+	/* Remarks.
+
+	   Parse & return hints & warnings?
+
+	   Default: true
 	*/
 	Remarks *bool
-	/*Results
-	  Max. number of journeys.
 
+	/* Results.
+
+	   Max. number of journeys.
+
+	   Default: 3
 	*/
 	Results *int64
-	/*ScheduledDays
-	  Parse & return dates each journey is valid on?
 
+	/* ScheduledDays.
+
+	   Parse & return dates each journey is valid on?
 	*/
 	ScheduledDays *bool
-	/*StartWithWalking
-	  Consider walking to nearby stations at the beginning of a journey?
 
+	/* StartWithWalking.
+
+	   Consider walking to nearby stations at the beginning of a journey?
+
+	   Default: true
 	*/
 	StartWithWalking *bool
-	/*Stopovers
-	  Fetch & parse stopovers on the way?
 
+	/* Stopovers.
+
+	   Fetch & parse stopovers on the way?
 	*/
 	Stopovers *bool
-	/*Tickets
-	  Return information about available tickets?
 
+	/* Tickets.
+
+	   Return information about available tickets?
 	*/
 	Tickets *bool
-	/*To*/
-	To *string
-	/*TransferTime
-	  Minimum time in minutes for a single transfer.
 
+	// To.
+	To *string
+
+	/* TransferTime.
+
+	   Minimum time in minutes for a single transfer.
 	*/
 	TransferTime *int64
-	/*Transfers
-	  Maximum number of transfers. – Default: *let HAFAS decide*
 
+	/* Transfers.
+
+	   Maximum number of transfers. – Default: *let HAFAS decide*
 	*/
 	Transfers *int64
-	/*WalkingSpeed
-	  `slow`, `normal` or `fast`.
 
+	/* WalkingSpeed.
+
+	   `slow`, `normal` or `fast`.
+
+	   Default: "normal"
 	*/
 	WalkingSpeed *string
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get journeys params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetJourneysParams) WithDefaults() *GetJourneysParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get journeys params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetJourneysParams) SetDefaults() {
+	var (
+		bikeDefault = bool(false)
+
+		languageDefault = string("en")
+
+		polylinesDefault = bool(false)
+
+		remarksDefault = bool(true)
+
+		resultsDefault = int64(3)
+
+		scheduledDaysDefault = bool(false)
+
+		startWithWalkingDefault = bool(true)
+
+		stopoversDefault = bool(false)
+
+		ticketsDefault = bool(false)
+
+		transferTimeDefault = int64(0)
+
+		walkingSpeedDefault = string("normal")
+	)
+
+	val := GetJourneysParams{
+		Bike:             &bikeDefault,
+		Language:         &languageDefault,
+		Polylines:        &polylinesDefault,
+		Remarks:          &remarksDefault,
+		Results:          &resultsDefault,
+		ScheduledDays:    &scheduledDaysDefault,
+		StartWithWalking: &startWithWalkingDefault,
+		Stopovers:        &stopoversDefault,
+		Tickets:          &ticketsDefault,
+		TransferTime:     &transferTimeDefault,
+		WalkingSpeed:     &walkingSpeedDefault,
+	}
+
+	val.timeout = o.timeout
+	val.Context = o.Context
+	val.HTTPClient = o.HTTPClient
+	*o = val
 }
 
 // WithTimeout adds the timeout to the get journeys params
@@ -502,304 +497,323 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 
 		// query param accessibility
 		var qrAccessibility string
+
 		if o.Accessibility != nil {
 			qrAccessibility = *o.Accessibility
 		}
 		qAccessibility := qrAccessibility
 		if qAccessibility != "" {
+
 			if err := r.SetQueryParam("accessibility", qAccessibility); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Arrival != nil {
 
 		// query param arrival
 		var qrArrival strfmt.DateTime
+
 		if o.Arrival != nil {
 			qrArrival = *o.Arrival
 		}
 		qArrival := qrArrival.String()
 		if qArrival != "" {
+
 			if err := r.SetQueryParam("arrival", qArrival); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Bike != nil {
 
 		// query param bike
 		var qrBike bool
+
 		if o.Bike != nil {
 			qrBike = *o.Bike
 		}
 		qBike := swag.FormatBool(qrBike)
 		if qBike != "" {
+
 			if err := r.SetQueryParam("bike", qBike); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Departure != nil {
 
 		// query param departure
 		var qrDeparture strfmt.DateTime
+
 		if o.Departure != nil {
 			qrDeparture = *o.Departure
 		}
 		qDeparture := qrDeparture.String()
 		if qDeparture != "" {
+
 			if err := r.SetQueryParam("departure", qDeparture); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.EarlierThan != nil {
 
 		// query param earlierThan
 		var qrEarlierThan string
+
 		if o.EarlierThan != nil {
 			qrEarlierThan = *o.EarlierThan
 		}
 		qEarlierThan := qrEarlierThan
 		if qEarlierThan != "" {
+
 			if err := r.SetQueryParam("earlierThan", qEarlierThan); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.From != nil {
 
 		// query param from
 		var qrFrom string
+
 		if o.From != nil {
 			qrFrom = *o.From
 		}
 		qFrom := qrFrom
 		if qFrom != "" {
+
 			if err := r.SetQueryParam("from", qFrom); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Language != nil {
 
 		// query param language
 		var qrLanguage string
+
 		if o.Language != nil {
 			qrLanguage = *o.Language
 		}
 		qLanguage := qrLanguage
 		if qLanguage != "" {
+
 			if err := r.SetQueryParam("language", qLanguage); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.LaterThan != nil {
 
 		// query param laterThan
 		var qrLaterThan string
+
 		if o.LaterThan != nil {
 			qrLaterThan = *o.LaterThan
 		}
 		qLaterThan := qrLaterThan
 		if qLaterThan != "" {
+
 			if err := r.SetQueryParam("laterThan", qLaterThan); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Polylines != nil {
 
 		// query param polylines
 		var qrPolylines bool
+
 		if o.Polylines != nil {
 			qrPolylines = *o.Polylines
 		}
 		qPolylines := swag.FormatBool(qrPolylines)
 		if qPolylines != "" {
+
 			if err := r.SetQueryParam("polylines", qPolylines); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Remarks != nil {
 
 		// query param remarks
 		var qrRemarks bool
+
 		if o.Remarks != nil {
 			qrRemarks = *o.Remarks
 		}
 		qRemarks := swag.FormatBool(qrRemarks)
 		if qRemarks != "" {
+
 			if err := r.SetQueryParam("remarks", qRemarks); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Results != nil {
 
 		// query param results
 		var qrResults int64
+
 		if o.Results != nil {
 			qrResults = *o.Results
 		}
 		qResults := swag.FormatInt64(qrResults)
 		if qResults != "" {
+
 			if err := r.SetQueryParam("results", qResults); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.ScheduledDays != nil {
 
 		// query param scheduledDays
 		var qrScheduledDays bool
+
 		if o.ScheduledDays != nil {
 			qrScheduledDays = *o.ScheduledDays
 		}
 		qScheduledDays := swag.FormatBool(qrScheduledDays)
 		if qScheduledDays != "" {
+
 			if err := r.SetQueryParam("scheduledDays", qScheduledDays); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.StartWithWalking != nil {
 
 		// query param startWithWalking
 		var qrStartWithWalking bool
+
 		if o.StartWithWalking != nil {
 			qrStartWithWalking = *o.StartWithWalking
 		}
 		qStartWithWalking := swag.FormatBool(qrStartWithWalking)
 		if qStartWithWalking != "" {
+
 			if err := r.SetQueryParam("startWithWalking", qStartWithWalking); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Stopovers != nil {
 
 		// query param stopovers
 		var qrStopovers bool
+
 		if o.Stopovers != nil {
 			qrStopovers = *o.Stopovers
 		}
 		qStopovers := swag.FormatBool(qrStopovers)
 		if qStopovers != "" {
+
 			if err := r.SetQueryParam("stopovers", qStopovers); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Tickets != nil {
 
 		// query param tickets
 		var qrTickets bool
+
 		if o.Tickets != nil {
 			qrTickets = *o.Tickets
 		}
 		qTickets := swag.FormatBool(qrTickets)
 		if qTickets != "" {
+
 			if err := r.SetQueryParam("tickets", qTickets); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.To != nil {
 
 		// query param to
 		var qrTo string
+
 		if o.To != nil {
 			qrTo = *o.To
 		}
 		qTo := qrTo
 		if qTo != "" {
+
 			if err := r.SetQueryParam("to", qTo); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.TransferTime != nil {
 
 		// query param transferTime
 		var qrTransferTime int64
+
 		if o.TransferTime != nil {
 			qrTransferTime = *o.TransferTime
 		}
 		qTransferTime := swag.FormatInt64(qrTransferTime)
 		if qTransferTime != "" {
+
 			if err := r.SetQueryParam("transferTime", qTransferTime); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Transfers != nil {
 
 		// query param transfers
 		var qrTransfers int64
+
 		if o.Transfers != nil {
 			qrTransfers = *o.Transfers
 		}
 		qTransfers := swag.FormatInt64(qrTransfers)
 		if qTransfers != "" {
+
 			if err := r.SetQueryParam("transfers", qTransfers); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.WalkingSpeed != nil {
 
 		// query param walkingSpeed
 		var qrWalkingSpeed string
+
 		if o.WalkingSpeed != nil {
 			qrWalkingSpeed = *o.WalkingSpeed
 		}
 		qWalkingSpeed := qrWalkingSpeed
 		if qWalkingSpeed != "" {
+
 			if err := r.SetQueryParam("walkingSpeed", qWalkingSpeed); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {

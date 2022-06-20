@@ -6,6 +6,7 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -29,9 +30,8 @@ func (o *GetStationsIDReader) ReadResponse(response runtime.ClientResponse, cons
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -40,7 +40,7 @@ func NewGetStationsIDOK() *GetStationsIDOK {
 	return &GetStationsIDOK{}
 }
 
-/*GetStationsIDOK handles this case with default header values.
+/* GetStationsIDOK describes a response with status code 200, with default header values.
 
 A stop/station, in the [db-stations format](https://github.com/derhuerst/db-stations/blob/master/readme.md).
 */
@@ -51,7 +51,6 @@ type GetStationsIDOK struct {
 func (o *GetStationsIDOK) Error() string {
 	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK  %+v", 200, o.Payload)
 }
-
 func (o *GetStationsIDOK) GetPayload() *GetStationsIDOKBody {
 	return o.Payload
 }
@@ -124,7 +123,6 @@ func (o *GetStationsIDOKBody) Validate(formats strfmt.Registry) error {
 }
 
 func (o *GetStationsIDOKBody) validateAddress(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Address) { // not required
 		return nil
 	}
@@ -133,6 +131,8 @@ func (o *GetStationsIDOKBody) validateAddress(formats strfmt.Registry) error {
 		if err := o.Address.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getStationsIdOK" + "." + "address")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("getStationsIdOK" + "." + "address")
 			}
 			return err
 		}
@@ -142,7 +142,6 @@ func (o *GetStationsIDOKBody) validateAddress(formats strfmt.Registry) error {
 }
 
 func (o *GetStationsIDOKBody) validateLocation(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Location) { // not required
 		return nil
 	}
@@ -151,6 +150,8 @@ func (o *GetStationsIDOKBody) validateLocation(formats strfmt.Registry) error {
 		if err := o.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getStationsIdOK" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("getStationsIdOK" + "." + "location")
 			}
 			return err
 		}
@@ -160,7 +161,6 @@ func (o *GetStationsIDOKBody) validateLocation(formats strfmt.Registry) error {
 }
 
 func (o *GetStationsIDOKBody) validateOperator(formats strfmt.Registry) error {
-
 	if swag.IsZero(o.Operator) { // not required
 		return nil
 	}
@@ -169,6 +169,78 @@ func (o *GetStationsIDOKBody) validateOperator(formats strfmt.Registry) error {
 		if err := o.Operator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getStationsIdOK" + "." + "operator")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("getStationsIdOK" + "." + "operator")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this get stations ID o k body based on the context it is used
+func (o *GetStationsIDOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.contextValidateAddress(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateLocation(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.contextValidateOperator(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetStationsIDOKBody) contextValidateAddress(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Address != nil {
+		if err := o.Address.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("getStationsIdOK" + "." + "address")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("getStationsIdOK" + "." + "address")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetStationsIDOKBody) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Location != nil {
+		if err := o.Location.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("getStationsIdOK" + "." + "location")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("getStationsIdOK" + "." + "location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *GetStationsIDOKBody) contextValidateOperator(ctx context.Context, formats strfmt.Registry) error {
+
+	if o.Operator != nil {
+		if err := o.Operator.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("getStationsIdOK" + "." + "operator")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("getStationsIdOK" + "." + "operator")
 			}
 			return err
 		}
@@ -215,6 +287,11 @@ func (o *GetStationsIDOKBodyAddress) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this get stations ID o k body address based on context it is used
+func (o *GetStationsIDOKBodyAddress) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *GetStationsIDOKBodyAddress) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -253,6 +330,11 @@ func (o *GetStationsIDOKBodyLocation) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this get stations ID o k body location based on context it is used
+func (o *GetStationsIDOKBodyLocation) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *GetStationsIDOKBodyLocation) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -288,6 +370,11 @@ type GetStationsIDOKBodyOperator struct {
 
 // Validate validates this get stations ID o k body operator
 func (o *GetStationsIDOKBodyOperator) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get stations ID o k body operator based on context it is used
+func (o *GetStationsIDOKBodyOperator) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -1087,7 +1087,14 @@
         },
         "remarks": {
           "type": "array",
-          "items": {}
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              }
+            }
+          }
         },
         "loadFactor": {
           "type": "string"

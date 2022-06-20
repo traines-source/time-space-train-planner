@@ -1,1 +1,1 @@
-swagger generate client -A dbrest -f dbrest.json 
+docker run --rm -it  --user $(id -u):$(id -g) -e GOPATH=$(go env GOPATH):/go -v $(pwd):/go/src/dbrest -w /go/src/dbrest quay.io/goswagger/swagger generate client -A dbrest -f dbrest.json 

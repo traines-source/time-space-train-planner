@@ -17,130 +17,143 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewGetStopsIDDeparturesParams creates a new GetStopsIDDeparturesParams object
-// with the default values initialized.
+// NewGetStopsIDDeparturesParams creates a new GetStopsIDDeparturesParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewGetStopsIDDeparturesParams() *GetStopsIDDeparturesParams {
-	var (
-		durationDefault     = int64(10)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		remarksDefault      = bool(true)
-	)
 	return &GetStopsIDDeparturesParams{
-		Duration:     &durationDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Remarks:      &remarksDefault,
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewGetStopsIDDeparturesParamsWithTimeout creates a new GetStopsIDDeparturesParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewGetStopsIDDeparturesParamsWithTimeout(timeout time.Duration) *GetStopsIDDeparturesParams {
-	var (
-		durationDefault     = int64(10)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		remarksDefault      = bool(true)
-	)
 	return &GetStopsIDDeparturesParams{
-		Duration:     &durationDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Remarks:      &remarksDefault,
-
 		timeout: timeout,
 	}
 }
 
 // NewGetStopsIDDeparturesParamsWithContext creates a new GetStopsIDDeparturesParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewGetStopsIDDeparturesParamsWithContext(ctx context.Context) *GetStopsIDDeparturesParams {
-	var (
-		durationDefault     = int64(10)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		remarksDefault      = bool(true)
-	)
 	return &GetStopsIDDeparturesParams{
-		Duration:     &durationDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Remarks:      &remarksDefault,
-
 		Context: ctx,
 	}
 }
 
 // NewGetStopsIDDeparturesParamsWithHTTPClient creates a new GetStopsIDDeparturesParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewGetStopsIDDeparturesParamsWithHTTPClient(client *http.Client) *GetStopsIDDeparturesParams {
-	var (
-		durationDefault     = int64(10)
-		languageDefault     = string("en")
-		linesOfStopsDefault = bool(false)
-		remarksDefault      = bool(true)
-	)
 	return &GetStopsIDDeparturesParams{
-		Duration:     &durationDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Remarks:      &remarksDefault,
-		HTTPClient:   client,
+		HTTPClient: client,
 	}
 }
 
-/*GetStopsIDDeparturesParams contains all the parameters to send to the API endpoint
-for the get stops ID departures operation typically these are written to a http.Request
+/* GetStopsIDDeparturesParams contains all the parameters to send to the API endpoint
+   for the get stops ID departures operation.
+
+   Typically these are written to a http.Request.
 */
 type GetStopsIDDeparturesParams struct {
 
-	/*Direction
-	  Filter departures by direction.
+	/* Direction.
 
+	   Filter departures by direction.
 	*/
 	Direction *string
-	/*Duration
-	  Show departures for how many minutes?
 
+	/* Duration.
+
+	   Show departures for how many minutes?
+
+	   Default: 10
 	*/
 	Duration *int64
-	/*ID
-	  stop/station ID to show departures for
 
+	/* ID.
+
+	   stop/station ID to show departures for
 	*/
 	ID string
-	/*Language
-	  Language of the results.
 
+	/* Language.
+
+	   Language of the results.
+
+	   Default: "en"
 	*/
 	Language *string
-	/*LinesOfStops
-	  Parse & return lines of each stop/station?
 
+	/* LinesOfStops.
+
+	   Parse & return lines of each stop/station?
 	*/
 	LinesOfStops *bool
-	/*Remarks
-	  Parse & return hints & warnings?
 
+	/* Remarks.
+
+	   Parse & return hints & warnings?
+
+	   Default: true
 	*/
 	Remarks *bool
-	/*Results
-	  Max. number of departures. – Default: *whatever HAFAS wants
 
+	/* Results.
+
+	   Max. number of departures. – Default: *whatever HAFAS wants
 	*/
 	Results *int64
-	/*When
-	  Date & time to get departures for. – Default: *now*
 
+	/* When.
+
+	   Date & time to get departures for. – Default: *now*
+
+	   Format: date-time
 	*/
 	When *strfmt.DateTime
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the get stops ID departures params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetStopsIDDeparturesParams) WithDefaults() *GetStopsIDDeparturesParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the get stops ID departures params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *GetStopsIDDeparturesParams) SetDefaults() {
+	var (
+		durationDefault = int64(10)
+
+		languageDefault = string("en")
+
+		linesOfStopsDefault = bool(false)
+
+		remarksDefault = bool(true)
+	)
+
+	val := GetStopsIDDeparturesParams{
+		Duration:     &durationDefault,
+		Language:     &languageDefault,
+		LinesOfStops: &linesOfStopsDefault,
+		Remarks:      &remarksDefault,
+	}
+
+	val.timeout = o.timeout
+	val.Context = o.Context
+	val.HTTPClient = o.HTTPClient
+	*o = val
 }
 
 // WithTimeout adds the timeout to the get stops ID departures params
@@ -276,32 +289,34 @@ func (o *GetStopsIDDeparturesParams) WriteToRequest(r runtime.ClientRequest, reg
 
 		// query param direction
 		var qrDirection string
+
 		if o.Direction != nil {
 			qrDirection = *o.Direction
 		}
 		qDirection := qrDirection
 		if qDirection != "" {
+
 			if err := r.SetQueryParam("direction", qDirection); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Duration != nil {
 
 		// query param duration
 		var qrDuration int64
+
 		if o.Duration != nil {
 			qrDuration = *o.Duration
 		}
 		qDuration := swag.FormatInt64(qrDuration)
 		if qDuration != "" {
+
 			if err := r.SetQueryParam("duration", qDuration); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	// path param id
@@ -313,80 +328,85 @@ func (o *GetStopsIDDeparturesParams) WriteToRequest(r runtime.ClientRequest, reg
 
 		// query param language
 		var qrLanguage string
+
 		if o.Language != nil {
 			qrLanguage = *o.Language
 		}
 		qLanguage := qrLanguage
 		if qLanguage != "" {
+
 			if err := r.SetQueryParam("language", qLanguage); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.LinesOfStops != nil {
 
 		// query param linesOfStops
 		var qrLinesOfStops bool
+
 		if o.LinesOfStops != nil {
 			qrLinesOfStops = *o.LinesOfStops
 		}
 		qLinesOfStops := swag.FormatBool(qrLinesOfStops)
 		if qLinesOfStops != "" {
+
 			if err := r.SetQueryParam("linesOfStops", qLinesOfStops); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Remarks != nil {
 
 		// query param remarks
 		var qrRemarks bool
+
 		if o.Remarks != nil {
 			qrRemarks = *o.Remarks
 		}
 		qRemarks := swag.FormatBool(qrRemarks)
 		if qRemarks != "" {
+
 			if err := r.SetQueryParam("remarks", qRemarks); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.Results != nil {
 
 		// query param results
 		var qrResults int64
+
 		if o.Results != nil {
 			qrResults = *o.Results
 		}
 		qResults := swag.FormatInt64(qrResults)
 		if qResults != "" {
+
 			if err := r.SetQueryParam("results", qResults); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if o.When != nil {
 
 		// query param when
 		var qrWhen strfmt.DateTime
+
 		if o.When != nil {
 			qrWhen = *o.When
 		}
 		qWhen := qrWhen.String()
 		if qWhen != "" {
+
 			if err := r.SetQueryParam("when", qWhen); err != nil {
 				return err
 			}
 		}
-
 	}
 
 	if len(res) > 0 {
