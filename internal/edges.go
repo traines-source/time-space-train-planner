@@ -56,15 +56,9 @@ func (c *consumer) generateOnFootEdges(origin *Station, destination *Station) {
 			if dist > maxFootDistMeters {
 				continue
 			}
-			c.generateOnFootEdgesBetweenTwoStations(s1, s2, dist, origin, destination)
+			c.generateOnFootEdgesBetweenTwoStationsInDirection(s1, s2, dist, origin, destination)
 		}
 	}
-}
-
-func (c *consumer) generateOnFootEdgesBetweenTwoStations(s1 *Station, s2 *Station, dist float64, origin *Station, destination *Station) {
-
-	c.generateOnFootEdgesBetweenTwoStationsInDirection(s1, s2, dist, origin, destination)
-	c.generateOnFootEdgesBetweenTwoStationsInDirection(s2, s1, dist, origin, destination)
 }
 
 func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, origin *Station, destination *Station) {
@@ -76,22 +70,23 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 		correspondances = from.Arrivals
 	}
 	var duration = time.Minute * time.Duration(math.Ceil(dist/1000/footKmh*60))
-
 	for _, correspondance := range correspondances {
 		if correspondance.Line.Type == "Foot" {
 			continue
 		}
-
+		var departure time.Time
+		var arrival time.Time
 		if to == destination {
-			complementaryTime := correspondance.Actual.Arrival.Add(duration)
-			c.generateOnFootEdgeBetweenTwoStationsInDirection(from, to, dist, correspondance.Actual.Arrival, complementaryTime)
+			departure = correspondance.Actual.Arrival
+			arrival = correspondance.Actual.Arrival.Add(duration)
 		} else {
-			complementaryTime := correspondance.Actual.Departure.Add(-duration)
-			if len(from.Arrivals) == 0 || complementaryTime.Before(from.Arrivals[0].Actual.Arrival) {
+			departure = correspondance.Actual.Departure.Add(-duration)
+			arrival = correspondance.Actual.Departure
+			if len(from.Arrivals) == 0 || departure.Before(from.Arrivals[0].Actual.Arrival) {
 				continue
 			}
-			c.generateOnFootEdgeBetweenTwoStationsInDirection(from, to, dist, complementaryTime, correspondance.Actual.Departure)
 		}
+		c.generateOnFootEdgeBetweenTwoStationsInDirection(from, to, dist, departure, arrival)
 	}
 }
 
