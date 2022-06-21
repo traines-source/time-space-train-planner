@@ -258,7 +258,15 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		if forceI != -1 && forceJ != -1 {
 			return forceI < forceJ
 		}
-		return geoDistStations(origin, stationsSlice[i])-geoDistStations(destination, stationsSlice[i]) < geoDistStations(origin, stationsSlice[j])-geoDistStations(destination, stationsSlice[j])
+		stationI := stationsSlice[i]
+		if stationI.GroupNumber != nil {
+			stationI = c.stations[*stationI.GroupNumber]
+		}
+		stationJ := stationsSlice[j]
+		if stationJ.GroupNumber != nil {
+			stationJ = c.stations[*stationJ.GroupNumber]
+		}
+		return geoDistStations(origin, stationI)-geoDistStations(destination, stationI) < geoDistStations(origin, stationJ)-geoDistStations(destination, stationJ)
 	})
 	i := 0
 	for _, s := range stationsSlice {

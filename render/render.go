@@ -5,6 +5,7 @@ import (
 	"html"
 	"io"
 	"log"
+	"math"
 	"sort"
 	"text/template"
 	"time"
@@ -102,28 +103,30 @@ func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
 			lastProperArrival := ""
 			lastProperDeparture := ""
 			for i := 0; i < len(arrivals); i++ {
-				e := c.Edges[generateEdgeID(arrivals[i])]
-				if isEdgeInsideGroup(e) {
-					continue
+				if e, ok := c.Edges[generateEdgeID(arrivals[i])]; ok {
+					if isEdgeInsideGroup(e) {
+						continue
+					}
+					e.PreviousArrival = lastProperArrival
+					if i+1 < len(arrivals) && e.To.SpaceAxis.Station.Rank+1 == len(stations) {
+						e.NextArrival = generateEdgeID(arrivals[i+1])
+					}
+					lastProperArrival = generateEdgeID(arrivals[i])
 				}
-				e.PreviousArrival = lastProperArrival
-				if i+1 < len(arrivals) && e.To.SpaceAxis.Station.Rank+1 == len(stations) {
-					e.NextArrival = generateEdgeID(arrivals[i+1])
-				}
-				lastProperArrival = generateEdgeID(arrivals[i])
 			}
 			for i := 0; i < len(departures); i++ {
-				e := c.Edges[generateEdgeID(departures[i])]
-				if isEdgeInsideGroup(e) {
-					continue
+				if e, ok := c.Edges[generateEdgeID(departures[i])]; ok {
+					if isEdgeInsideGroup(e) {
+						continue
+					}
+					if e.From.SpaceAxis.Station.Rank == 0 {
+						e.PreviousDeparture = lastProperDeparture
+					}
+					if i+1 < len(departures) {
+						e.NextDeparture = generateEdgeID(departures[i+1])
+					}
+					lastProperDeparture = generateEdgeID(departures[i])
 				}
-				if e.From.SpaceAxis.Station.Rank == 0 {
-					e.PreviousDeparture = lastProperDeparture
-				}
-				if i+1 < len(departures) {
-					e.NextDeparture = generateEdgeID(departures[i+1])
-				}
-				lastProperDeparture = generateEdgeID(departures[i])
 			}
 
 			arrivals = []*internal.Edge{}
@@ -275,7 +278,7 @@ func (p *EdgePath) Label() string {
 		label = e.Line.ID
 	}
 	if e.Message != "" {
-		label += " (" + e.Message + ")"
+		label += " (" + e.Message[0:int(math.Min(float64(len(e.Message)), 30))] + "...)"
 	}
 	if e.Line.Type == "Foot" {
 		return "🚶 " + label

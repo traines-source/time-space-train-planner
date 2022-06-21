@@ -171,6 +171,66 @@
                           "type": "string",
               "default": "en"
 
+          },
+          {
+            "name": "nationalExpress",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "national",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "regionalExp",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "regional",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "suburban",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "bus",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "ferry",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "subway",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "tram",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "taxi",
+            "in": "query",
+            "type": "boolean",
+            "default": true
           }
         ],
         "responses": {
@@ -256,6 +316,66 @@
                           "type": "string",
               "default": "en"
 
+          },
+          {
+            "name": "nationalExpress",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "national",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "regionalExp",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "regional",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "suburban",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "bus",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "ferry",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "subway",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "tram",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "taxi",
+            "in": "query",
+            "type": "boolean",
+            "default": true
           }
         ],
         "responses": {

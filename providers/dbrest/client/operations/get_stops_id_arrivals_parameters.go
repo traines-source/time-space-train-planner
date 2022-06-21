@@ -60,6 +60,11 @@ func NewGetStopsIDArrivalsParamsWithHTTPClient(client *http.Client) *GetStopsIDA
 */
 type GetStopsIDArrivalsParams struct {
 
+	// Bus.
+	//
+	// Default: true
+	Bus *bool
+
 	/* Direction.
 
 	   Filter departures by direction.
@@ -73,6 +78,11 @@ type GetStopsIDArrivalsParams struct {
 	   Default: 10
 	*/
 	Duration *int64
+
+	// Ferry.
+	//
+	// Default: true
+	Ferry *bool
 
 	/* ID.
 
@@ -94,6 +104,26 @@ type GetStopsIDArrivalsParams struct {
 	*/
 	LinesOfStops *bool
 
+	// National.
+	//
+	// Default: true
+	National *bool
+
+	// NationalExpress.
+	//
+	// Default: true
+	NationalExpress *bool
+
+	// Regional.
+	//
+	// Default: true
+	Regional *bool
+
+	// RegionalExp.
+	//
+	// Default: true
+	RegionalExp *bool
+
 	/* Remarks.
 
 	   Parse & return hints & warnings?
@@ -107,6 +137,26 @@ type GetStopsIDArrivalsParams struct {
 	   Max. number of departures. – Default: *whatever HAFAS wants*
 	*/
 	Results *int64
+
+	// Suburban.
+	//
+	// Default: true
+	Suburban *bool
+
+	// Subway.
+	//
+	// Default: true
+	Subway *bool
+
+	// Taxi.
+	//
+	// Default: true
+	Taxi *bool
+
+	// Tram.
+	//
+	// Default: true
+	Tram *bool
 
 	/* When.
 
@@ -134,20 +184,50 @@ func (o *GetStopsIDArrivalsParams) WithDefaults() *GetStopsIDArrivalsParams {
 // All values with no default are reset to their zero value.
 func (o *GetStopsIDArrivalsParams) SetDefaults() {
 	var (
+		busDefault = bool(true)
+
 		durationDefault = int64(10)
+
+		ferryDefault = bool(true)
 
 		languageDefault = string("en")
 
 		linesOfStopsDefault = bool(false)
 
+		nationalDefault = bool(true)
+
+		nationalExpressDefault = bool(true)
+
+		regionalDefault = bool(true)
+
+		regionalExpDefault = bool(true)
+
 		remarksDefault = bool(true)
+
+		suburbanDefault = bool(true)
+
+		subwayDefault = bool(true)
+
+		taxiDefault = bool(true)
+
+		tramDefault = bool(true)
 	)
 
 	val := GetStopsIDArrivalsParams{
-		Duration:     &durationDefault,
-		Language:     &languageDefault,
-		LinesOfStops: &linesOfStopsDefault,
-		Remarks:      &remarksDefault,
+		Bus:             &busDefault,
+		Duration:        &durationDefault,
+		Ferry:           &ferryDefault,
+		Language:        &languageDefault,
+		LinesOfStops:    &linesOfStopsDefault,
+		National:        &nationalDefault,
+		NationalExpress: &nationalExpressDefault,
+		Regional:        &regionalDefault,
+		RegionalExp:     &regionalExpDefault,
+		Remarks:         &remarksDefault,
+		Suburban:        &suburbanDefault,
+		Subway:          &subwayDefault,
+		Taxi:            &taxiDefault,
+		Tram:            &tramDefault,
 	}
 
 	val.timeout = o.timeout
@@ -189,6 +269,17 @@ func (o *GetStopsIDArrivalsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithBus adds the bus to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithBus(bus *bool) *GetStopsIDArrivalsParams {
+	o.SetBus(bus)
+	return o
+}
+
+// SetBus adds the bus to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetBus(bus *bool) {
+	o.Bus = bus
+}
+
 // WithDirection adds the direction to the get stops ID arrivals params
 func (o *GetStopsIDArrivalsParams) WithDirection(direction *string) *GetStopsIDArrivalsParams {
 	o.SetDirection(direction)
@@ -209,6 +300,17 @@ func (o *GetStopsIDArrivalsParams) WithDuration(duration *int64) *GetStopsIDArri
 // SetDuration adds the duration to the get stops ID arrivals params
 func (o *GetStopsIDArrivalsParams) SetDuration(duration *int64) {
 	o.Duration = duration
+}
+
+// WithFerry adds the ferry to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithFerry(ferry *bool) *GetStopsIDArrivalsParams {
+	o.SetFerry(ferry)
+	return o
+}
+
+// SetFerry adds the ferry to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetFerry(ferry *bool) {
+	o.Ferry = ferry
 }
 
 // WithID adds the id to the get stops ID arrivals params
@@ -244,6 +346,50 @@ func (o *GetStopsIDArrivalsParams) SetLinesOfStops(linesOfStops *bool) {
 	o.LinesOfStops = linesOfStops
 }
 
+// WithNational adds the national to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithNational(national *bool) *GetStopsIDArrivalsParams {
+	o.SetNational(national)
+	return o
+}
+
+// SetNational adds the national to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetNational(national *bool) {
+	o.National = national
+}
+
+// WithNationalExpress adds the nationalExpress to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithNationalExpress(nationalExpress *bool) *GetStopsIDArrivalsParams {
+	o.SetNationalExpress(nationalExpress)
+	return o
+}
+
+// SetNationalExpress adds the nationalExpress to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetNationalExpress(nationalExpress *bool) {
+	o.NationalExpress = nationalExpress
+}
+
+// WithRegional adds the regional to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithRegional(regional *bool) *GetStopsIDArrivalsParams {
+	o.SetRegional(regional)
+	return o
+}
+
+// SetRegional adds the regional to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetRegional(regional *bool) {
+	o.Regional = regional
+}
+
+// WithRegionalExp adds the regionalExp to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithRegionalExp(regionalExp *bool) *GetStopsIDArrivalsParams {
+	o.SetRegionalExp(regionalExp)
+	return o
+}
+
+// SetRegionalExp adds the regionalExp to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetRegionalExp(regionalExp *bool) {
+	o.RegionalExp = regionalExp
+}
+
 // WithRemarks adds the remarks to the get stops ID arrivals params
 func (o *GetStopsIDArrivalsParams) WithRemarks(remarks *bool) *GetStopsIDArrivalsParams {
 	o.SetRemarks(remarks)
@@ -266,6 +412,50 @@ func (o *GetStopsIDArrivalsParams) SetResults(results *int64) {
 	o.Results = results
 }
 
+// WithSuburban adds the suburban to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithSuburban(suburban *bool) *GetStopsIDArrivalsParams {
+	o.SetSuburban(suburban)
+	return o
+}
+
+// SetSuburban adds the suburban to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetSuburban(suburban *bool) {
+	o.Suburban = suburban
+}
+
+// WithSubway adds the subway to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithSubway(subway *bool) *GetStopsIDArrivalsParams {
+	o.SetSubway(subway)
+	return o
+}
+
+// SetSubway adds the subway to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetSubway(subway *bool) {
+	o.Subway = subway
+}
+
+// WithTaxi adds the taxi to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithTaxi(taxi *bool) *GetStopsIDArrivalsParams {
+	o.SetTaxi(taxi)
+	return o
+}
+
+// SetTaxi adds the taxi to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetTaxi(taxi *bool) {
+	o.Taxi = taxi
+}
+
+// WithTram adds the tram to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) WithTram(tram *bool) *GetStopsIDArrivalsParams {
+	o.SetTram(tram)
+	return o
+}
+
+// SetTram adds the tram to the get stops ID arrivals params
+func (o *GetStopsIDArrivalsParams) SetTram(tram *bool) {
+	o.Tram = tram
+}
+
 // WithWhen adds the when to the get stops ID arrivals params
 func (o *GetStopsIDArrivalsParams) WithWhen(when *strfmt.DateTime) *GetStopsIDArrivalsParams {
 	o.SetWhen(when)
@@ -284,6 +474,23 @@ func (o *GetStopsIDArrivalsParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
+
+	if o.Bus != nil {
+
+		// query param bus
+		var qrBus bool
+
+		if o.Bus != nil {
+			qrBus = *o.Bus
+		}
+		qBus := swag.FormatBool(qrBus)
+		if qBus != "" {
+
+			if err := r.SetQueryParam("bus", qBus); err != nil {
+				return err
+			}
+		}
+	}
 
 	if o.Direction != nil {
 
@@ -314,6 +521,23 @@ func (o *GetStopsIDArrivalsParams) WriteToRequest(r runtime.ClientRequest, reg s
 		if qDuration != "" {
 
 			if err := r.SetQueryParam("duration", qDuration); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Ferry != nil {
+
+		// query param ferry
+		var qrFerry bool
+
+		if o.Ferry != nil {
+			qrFerry = *o.Ferry
+		}
+		qFerry := swag.FormatBool(qrFerry)
+		if qFerry != "" {
+
+			if err := r.SetQueryParam("ferry", qFerry); err != nil {
 				return err
 			}
 		}
@@ -358,6 +582,74 @@ func (o *GetStopsIDArrivalsParams) WriteToRequest(r runtime.ClientRequest, reg s
 		}
 	}
 
+	if o.National != nil {
+
+		// query param national
+		var qrNational bool
+
+		if o.National != nil {
+			qrNational = *o.National
+		}
+		qNational := swag.FormatBool(qrNational)
+		if qNational != "" {
+
+			if err := r.SetQueryParam("national", qNational); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.NationalExpress != nil {
+
+		// query param nationalExpress
+		var qrNationalExpress bool
+
+		if o.NationalExpress != nil {
+			qrNationalExpress = *o.NationalExpress
+		}
+		qNationalExpress := swag.FormatBool(qrNationalExpress)
+		if qNationalExpress != "" {
+
+			if err := r.SetQueryParam("nationalExpress", qNationalExpress); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Regional != nil {
+
+		// query param regional
+		var qrRegional bool
+
+		if o.Regional != nil {
+			qrRegional = *o.Regional
+		}
+		qRegional := swag.FormatBool(qrRegional)
+		if qRegional != "" {
+
+			if err := r.SetQueryParam("regional", qRegional); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.RegionalExp != nil {
+
+		// query param regionalExp
+		var qrRegionalExp bool
+
+		if o.RegionalExp != nil {
+			qrRegionalExp = *o.RegionalExp
+		}
+		qRegionalExp := swag.FormatBool(qrRegionalExp)
+		if qRegionalExp != "" {
+
+			if err := r.SetQueryParam("regionalExp", qRegionalExp); err != nil {
+				return err
+			}
+		}
+	}
+
 	if o.Remarks != nil {
 
 		// query param remarks
@@ -387,6 +679,74 @@ func (o *GetStopsIDArrivalsParams) WriteToRequest(r runtime.ClientRequest, reg s
 		if qResults != "" {
 
 			if err := r.SetQueryParam("results", qResults); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Suburban != nil {
+
+		// query param suburban
+		var qrSuburban bool
+
+		if o.Suburban != nil {
+			qrSuburban = *o.Suburban
+		}
+		qSuburban := swag.FormatBool(qrSuburban)
+		if qSuburban != "" {
+
+			if err := r.SetQueryParam("suburban", qSuburban); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Subway != nil {
+
+		// query param subway
+		var qrSubway bool
+
+		if o.Subway != nil {
+			qrSubway = *o.Subway
+		}
+		qSubway := swag.FormatBool(qrSubway)
+		if qSubway != "" {
+
+			if err := r.SetQueryParam("subway", qSubway); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Taxi != nil {
+
+		// query param taxi
+		var qrTaxi bool
+
+		if o.Taxi != nil {
+			qrTaxi = *o.Taxi
+		}
+		qTaxi := swag.FormatBool(qrTaxi)
+		if qTaxi != "" {
+
+			if err := r.SetQueryParam("taxi", qTaxi); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Tram != nil {
+
+		// query param tram
+		var qrTram bool
+
+		if o.Tram != nil {
+			qrTram = *o.Tram
+		}
+		qTram := swag.FormatBool(qrTram)
+		if qTram != "" {
+
+			if err := r.SetQueryParam("tram", qTram); err != nil {
 				return err
 			}
 		}

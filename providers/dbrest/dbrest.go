@@ -100,6 +100,13 @@ func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.T
 	r := int64(results)
 	params.Results = &r
 	params.When = (*strfmt.DateTime)(&when)
+	if station.NoLocalTransport {
+		f := false
+		params.Bus = &f
+		params.Subway = &f
+		params.Tram = &f
+		params.Taxi = &f
+	}
 
 	res, err := p.client.Operations.GetStopsIDDepartures(params)
 	if err != nil {
