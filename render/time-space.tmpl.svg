@@ -45,5 +45,10 @@
         {{.Departure}}
     </text>
 {{end}}
+    <a xlink:href="?{{.Query}}&amp;form">
+        <text x="10" y="1450" class="ui-link">
+            Modify query
+        </text>
+    </a>
     <script xlink:href="res/client.js" />
 </svg>

@@ -95,3 +95,9 @@ svg {
     cursor: pointer;
     font-size: 200%;
 }
+
+.ui-link {
+    text-anchor: middle;
+    font-weight: bold;
+    fill: #01579B;
+}

@@ -2,6 +2,7 @@ package render
 
 import (
 	"fmt"
+	"html"
 	"io"
 	"log"
 	"sort"
@@ -22,6 +23,7 @@ type container struct {
 	TimeIndicators   []time.Time
 	TimeAxisSize     int
 	SpaceAxisSize    int
+	Query            string
 }
 
 const (
@@ -31,8 +33,8 @@ const (
 	minTimeIndicatorDistance = "15m"
 )
 
-func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer) {
-	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[string]*EdgePath{}}
+func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
+	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[string]*EdgePath{}, Query: html.EscapeString(query)}
 	c.setupStations(stations)
 	c.setupEdges(lines)
 	c.setupPreviousAndNext(stations)
@@ -304,7 +306,7 @@ func (p *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackRes
 	}
 	label := simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned))
 	if trackResolver(e.Planned) != "" {
-		label += "Gl." + trackResolver(e.Planned)
+		label += "Pl." + trackResolver(e.Planned)
 	}
 	return label
 }
