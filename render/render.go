@@ -14,17 +14,18 @@ import (
 )
 
 type container struct {
-	Stations         map[*internal.Station]*StationLabel
-	Edges            map[string]*EdgePath
-	SortedEdges      []*EdgePath
-	MinTime          time.Time
-	MaxTime          time.Time
-	maxSpace         int
-	timeAxisDistance float32
-	TimeIndicators   []time.Time
-	TimeAxisSize     int
-	SpaceAxisSize    int
-	Query            string
+	Stations            map[*internal.Station]*StationLabel
+	Edges               map[string]*EdgePath
+	SortedEdges         []*EdgePath
+	MinTime             time.Time
+	MaxTime             time.Time
+	maxSpace            int
+	timeAxisDistance    float32
+	TimeIndicators      []time.Time
+	TimeAxisSize        int
+	SpaceAxisSize       int
+	Query               string
+	DefaultShortestPath *EdgePath
 }
 
 const (
@@ -96,6 +97,7 @@ func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
 	sort.Slice(stationsSlice, func(i, j int) bool {
 		return stationsSlice[i].Rank < stationsSlice[j].Rank
 	})
+	c.preselectShortestPath(stationsSlice[len(stationsSlice)-1])
 	var arrivals []*internal.Edge
 	var departures []*internal.Edge
 	var lastGroup *int
@@ -153,6 +155,17 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 			}
 			nextDepartureToFill = &e.NextDeparture
 			lastProperDeparture = generateEdgeID(departures[i])
+		}
+	}
+}
+
+func (c *container) preselectShortestPath(destination *internal.Station) {
+	for _, s := range destination.Arrivals {
+		if s.ReverseShortestPath != nil {
+			if e, ok := c.Edges[generateEdgeID(s)]; ok {
+				c.DefaultShortestPath = e
+			}
+			break
 		}
 	}
 }

@@ -50,5 +50,35 @@
             Modify query
         </text>
     </a>
+    <path d="M 100,1460 L300,1460" class="edge selected redundant-false" />
+    <text x="100" y="1450">
+        Fastest route (transfer time >= 0 min)
+    </text>
+    <path d="M 350,1460 L550,1460" class="edge provider-shortest-path redundant-false" />
+    <text x="350" y="1450">
+        Route recommended by DB/HAFAS
+    </text>
+    <path d="M 600,1460 L800,1460" class="edge redundant-true" />
+    <text x="600" y="1450">
+        Connections deemed redundant
+    </text>
+    <path d="M 850,1460 L950,1460" class="edge type-nationalExpress redundant-false" />
+    <text x="850" y="1450">
+        ICE, IC, etc.
+    </text>
+    <path d="M 1000,1460 L1100,1460" class="edge type-regional redundant-false" />
+    <text x="1000" y="1450">
+        RE, RB, S, etc.
+    </text>
+    <path d="M 1150,1460 L1250,1460" class="edge type-bus redundant-false" />
+    <text x="1150" y="1450">
+        Bus, Tram, etc.
+    </text>
+    <path d="M 1300,1460 L1400,1460" class="edge type-Foot redundant-false" />
+    <text x="1300" y="1450">
+        On Foot
+    </text>
+   
     <script xlink:href="res/client.js" />
+    <script>selectEdge('{{.DefaultShortestPath.ID}}');</script>
 </svg>

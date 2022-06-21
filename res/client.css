@@ -91,7 +91,7 @@ svg {
 .previous-next-arrow {
     opacity: 0.5;
     text-anchor: middle;
-    dominant-baseline: central;
+    dominant-baseline: middle;
     cursor: pointer;
     font-size: 200%;
 }
