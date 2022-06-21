@@ -22,9 +22,8 @@
 {{end}}
 {{range .SortedEdges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-        marker-start="url(#dot-redundant-{{.Redundant}})" marker-end="url(#dot-redundant-{{.Redundant}})"
         data-pd="{{.PreviousDeparture}}" data-nd="{{.NextDeparture}}" data-pa="{{.PreviousArrival}}" data-na="{{.NextArrival}}"
-        class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
+        class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} sp-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
         />
     <path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         class="edge-toucharea"
@@ -33,16 +32,16 @@
 {{range .SortedEdges}}
     <text>
         <textPath href="#{{.ID}}" id="{{.ID}}-label" startOffset="50%" text-anchor="middle"
-            class="label type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
+            class="label type-{{.Type}} label-{{.ID}}">
             {{.Label}}
         </textPath>
     </text>
     <text x="{{$.X .To}}" y="{{$.Y .To}}" id="{{.ID}}-arrival" text-anchor="end"
-        class="arrival type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
+        class="arrival type-{{.Type}} label-{{.ID}}">
         {{.Arrival}}
     </text>
     <text x="{{$.X .From}}" y="{{$.Y .From}}" id="{{.ID}}-departure" text-anchor="start" 
-        class="departure type-{{.Type}} shortest-path-{{.ID}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }}">
+        class="departure type-{{.Type}} label-{{.ID}}">
         {{.Departure}}
     </text>
 {{end}}

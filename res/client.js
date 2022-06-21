@@ -12,10 +12,17 @@ function setSelectedForDependents(edgeId, selected) {
         return;
     }
     setSelectedForElement(document.getElementById(edgeId), selected);
-    const dependents = document.getElementsByClassName('shortest-path-'+edgeId);
+    const dependents = document.getElementsByClassName('sp-'+edgeId);
     for(let i=0;i<dependents.length;i++) {
-        setSelectedForElement(dependents[i], selected);
+        setSelectedForElementWithLabels(dependents[i], selected);
         setPreviousNextForElement(dependents[i], selected);
+    }
+}
+function setSelectedForElementWithLabels(element, selected) {
+    setSelectedForElement(element, selected);
+    const labels = document.getElementsByClassName('label-'+element.id);
+    for(let i=0;i<labels.length;i++) {
+        setSelectedForElement(labels[i], selected);
     }
 }
 
@@ -23,8 +30,8 @@ function setSelectedForElement(element, selected) {
     if (selected) {
         element.className.baseVal += " selected";
     } else {
-        element.className.baseVal = element.className.baseVal.replace(" selected", "");
-    }
+        element.className.baseVal =  element.className.baseVal.replace(" selected", "");
+    }    
 }
 
 function setPreviousNextForElement(element, selected) {

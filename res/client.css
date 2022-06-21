@@ -20,6 +20,13 @@ svg {
 
 .redundant-true {
     stroke: #dbdbdb;
+    marker-start: url(#dot-redundant-true);
+    marker-end: url(#dot-redundant-true);
+}
+
+.redundant-false {
+    marker-start: url(#dot-redundant-false);
+    marker-end: url(#dot-redundant-false);
 }
 
 #dot-redundant-true circle {
