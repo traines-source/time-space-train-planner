@@ -187,7 +187,11 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 	pls := providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned, Current: current}
 	if len(stop.Remarks) > 0 {
 		for _, remark := range stop.Remarks {
-			pls.Message += remark.Text + " "
+			if pls.Message != "" {
+				pls.Message += ", " + remark.Text
+			} else {
+				pls.Message = remark.Text
+			}
 		}
 	}
 	p.consumer.UpsertLineStop(pls)

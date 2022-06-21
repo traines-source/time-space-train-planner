@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"log"
 	"time"
 )
 
@@ -117,20 +116,11 @@ func (edge *dijkstraToOrigin) earlierConnectionWithSameDist(fixedEdge *dijkstra,
 	return false
 }
 
-/*
-func TODOearlierConnectionWithSameDist(u *dijkstra, v *dijkstra) bool {
-	arrivingLater := positiveDeltaMinutes(u.vertexAtTime.Actual.Arrival, v.vertexAtTime.Actual.Departure) < positiveDeltaMinutes(v.toTarget.Actual.Arrival, v.vertexAtTime.Actual.Departure)
-	departingLaterIfSameOrigin := u.vertexAtTime.From != v.toTarget.From || v.toTarget.Actual.Departure.Before(u.vertexAtTime.Actual.Departure)
-
-	return arrivingLater && departingLaterIfSameOrigin
-}*/
-
 func shortestPaths(stations map[int]*Station, origin *Station, destination *Station) {
 
 	for _, edgeToDestination := range destination.Arrivals {
 		shortestPathsToTarget(stations, &dijkstraToDestination{edgeToDestination})
 	}
-	log.Print("reverse")
 	if origin != nil {
 		for i := len(origin.Departures) - 1; i >= 0; i-- {
 			shortestPathsToTarget(stations, &dijkstraToOrigin{origin.Departures[i]})

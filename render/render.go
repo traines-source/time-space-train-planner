@@ -35,6 +35,7 @@ func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Li
 	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[string]*EdgePath{}}
 	c.setupStations(stations)
 	c.setupEdges(lines)
+	c.setupPreviousAndNext(stations)
 	c.gravitate()
 	c.render(wr)
 }
@@ -82,6 +83,58 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			}
 		}
 	}
+}
+
+func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
+	var arrivals []*internal.Edge
+	var departures []*internal.Edge
+	var lastGroup *int
+	for _, s := range stations {
+		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
+			sort.Slice(arrivals, func(i, j int) bool {
+				return arrivals[i].Actual.Arrival.Before(arrivals[j].Actual.Arrival)
+			})
+			sort.Slice(departures, func(i, j int) bool {
+				return departures[i].Actual.Departure.Before(departures[j].Actual.Departure)
+			})
+			lastProperArrival := ""
+			lastProperDeparture := ""
+			for i := 0; i < len(arrivals); i++ {
+				e := c.Edges[generateEdgeID(arrivals[i])]
+				if isEdgeInsideGroup(e) {
+					continue
+				}
+				e.PreviousArrival = lastProperArrival
+				if i+1 < len(arrivals) && e.To.SpaceAxis.Station.Rank+1 == len(stations) {
+					e.NextArrival = generateEdgeID(arrivals[i+1])
+				}
+				lastProperArrival = generateEdgeID(arrivals[i])
+			}
+			for i := 0; i < len(departures); i++ {
+				e := c.Edges[generateEdgeID(departures[i])]
+				if isEdgeInsideGroup(e) {
+					continue
+				}
+				if e.From.SpaceAxis.Station.Rank == 0 {
+					e.PreviousDeparture = lastProperDeparture
+				}
+				if i+1 < len(departures) {
+					e.NextDeparture = generateEdgeID(departures[i+1])
+				}
+				lastProperDeparture = generateEdgeID(departures[i])
+			}
+
+			arrivals = []*internal.Edge{}
+			departures = []*internal.Edge{}
+			lastGroup = s.GroupNumber
+		}
+		arrivals = append(arrivals, s.Arrivals...)
+		departures = append(departures, s.Departures...)
+	}
+}
+
+func isEdgeInsideGroup(e *EdgePath) bool {
+	return e.From.SpaceAxis.GroupNumber != nil && e.To.SpaceAxis.GroupNumber != nil && *e.From.SpaceAxis.GroupNumber == *e.To.SpaceAxis.GroupNumber
 }
 
 func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, lastEdge *internal.Edge) {
@@ -237,26 +290,21 @@ func (p *EdgePath) Type() string {
 }
 
 func (p *EdgePath) Departure() string {
-	e := p.Edge
-	if e.Line == nil {
-		return ""
-	}
-	var label string
-	label = simpleTime(e.Actual.Departure) + delay(e.Current.Departure, e.Planned.Departure)
-	if e.Planned.DepartureTrack != "" {
-		label += "Pl." + e.Planned.DepartureTrack
-	}
-	return label
+	return p.time(func(stop internal.StopInfo) time.Time { return stop.Departure }, func(stop internal.StopInfo) string { return stop.DepartureTrack })
 }
 
 func (p *EdgePath) Arrival() string {
+	return p.time(func(stop internal.StopInfo) time.Time { return stop.Arrival }, func(stop internal.StopInfo) string { return stop.ArrivalTrack })
+}
+
+func (p *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackResolver func(internal.StopInfo) string) string {
 	e := p.Edge
 	if e.Line == nil {
 		return ""
 	}
-	label := simpleTime(e.Actual.Arrival) + delay(e.Current.Arrival, e.Planned.Arrival)
-	if e.Planned.ArrivalTrack != "" {
-		label += "Pl." + e.Planned.ArrivalTrack
+	label := simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned))
+	if trackResolver(e.Planned) != "" {
+		label += "Gl." + trackResolver(e.Planned)
 	}
 	return label
 }

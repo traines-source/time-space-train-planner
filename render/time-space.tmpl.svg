@@ -6,7 +6,7 @@
             markerWidth="4" markerHeight="4" filter="none">
             <circle cx="5" cy="5" r="3" />
         </marker>
-         <marker id="dot-redundant-true" viewBox="0 0 10 10" refX="5" refY="5"
+        <marker id="dot-redundant-true" viewBox="0 0 10 10" refX="5" refY="5"
             markerWidth="4" markerHeight="4" filter="none">
             <circle cx="5" cy="5" r="3" />
         </marker>
@@ -23,17 +23,12 @@
 {{range .SortedEdges}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         marker-start="url(#dot-redundant-{{.Redundant}})" marker-end="url(#dot-redundant-{{.Redundant}})"
+        data-pd="{{.PreviousDeparture}}" data-nd="{{.NextDeparture}}" data-pa="{{.PreviousArrival}}" data-na="{{.NextArrival}}"
         class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} shortest-path-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
         />
     <path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         class="edge-toucharea"
         />
-    {{if and (not .Redundant) (ne .Type "Foot")}}
-    <rect data-station="{{.ID}}-0" x="{{$.X .From}}" y="{{$.Y .From}}" />
-    <rect data-station="{{.ID}}-1" x="{{$.X .To}}" y="{{$.Y .To}}" />
-    <path data-line="{{.ID}}-line" data-stops="{{.ID}}-0 {{.ID}}-1" data-from="16 0 noanim-keepzoom" />
-    <path data-train="{{.ID}}-line" data-stops="{{.ID}}-0 +{{$.Minutes .Actual.Departure}}+{{$.Minutes .Actual.Arrival}} {{.ID}}-1" class="train-{{.Type}}" data-from="16 0 keepzoom-autoshow" />
-    {{end}}
 {{end}}
 {{range .SortedEdges}}
     <text>

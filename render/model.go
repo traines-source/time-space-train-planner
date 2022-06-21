@@ -19,6 +19,10 @@ type EdgePath struct {
 	ShortestPathFor []*EdgePath
 	From            Coord
 	To              Coord
+	PreviousDeparture string
+	NextDeparture string
+	PreviousArrival string
+	NextArrival string
 }
 
 type Coord struct {

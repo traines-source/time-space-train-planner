@@ -1,3 +1,5 @@
+const xmlns = "http://www.w3.org/2000/svg";
+
 currentSelected = undefined;
 function selectEdge(edgeId) {
     setSelectedForDependents(currentSelected, false);
@@ -13,6 +15,7 @@ function setSelectedForDependents(edgeId, selected) {
     const dependents = document.getElementsByClassName('shortest-path-'+edgeId);
     for(let i=0;i<dependents.length;i++) {
         setSelectedForElement(dependents[i], selected);
+        setPreviousNextForElement(dependents[i], selected);
     }
 }
 
@@ -24,12 +27,52 @@ function setSelectedForElement(element, selected) {
     }
 }
 
+function setPreviousNextForElement(element, selected) {
+    if (selected) {
+        if (!element.getAttribute('d')) {
+            return;
+        }
+        const coords = element.getAttribute('d').split(/[^0-9]+/);
+        console.log(coords);
+        const from = {x: parseFloat(coords[1]), y: parseFloat(coords[2])};
+        const to = {x: parseFloat(coords[3]), y: parseFloat(coords[4])};
+        const margin = 25;
+        createArrow(element, true, element.dataset.pa, to.x, to.y-margin);
+        createArrow(element, true, element.dataset.pd, from.x, from.y-margin);
+        createArrow(element, false, element.dataset.na, to.x, to.y+margin);
+        createArrow(element, false, element.dataset.nd, from.x, from.y+margin);
+
+    } else {
+        const arrows = document.getElementsByClassName('previous-next-arrow');
+        for(let i=0;i<arrows.length;i++) {
+            arrows[i].remove();
+        }
+    }
+}
+
+function createArrow(parent, previous, targetId, x, y) {
+    if (targetId == undefined || targetId == '') {
+        return;
+    }
+    const e = document.createElementNS(xmlns, 'text');
+    e.className.baseVal = 'previous-next-arrow';
+    e.setAttribute('x', x);
+    e.setAttribute('y', y);
+    e.innerHTML = previous ? '▲' : '▼';
+    e.onclick = function (evt) {
+        console.log('arrow select ', targetId);
+        selectEdge(targetId);
+    };
+    parent.parentNode.appendChild(e);
+}
+
+function selectListener(evt) {
+    const id = this.id.replace('-toucharea', '');
+    console.log('selected ', id);
+    selectEdge(id);
+}
 
 const edges = document.getElementsByClassName('edge-toucharea');
 for(let i=0;i<edges.length;i++) {
-    edges[i].onclick = function (evt) {
-        const id = this.id.replace('-toucharea', '');
-        console.log('selected ', id);
-        selectEdge(id);
-    }
+    edges[i].onclick = selectListener; 
 }

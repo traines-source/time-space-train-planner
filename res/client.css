@@ -15,6 +15,7 @@ svg {
 .edge-toucharea {
     stroke-width: 20px;
     stroke: transparent;
+    cursor: pointer;
 }
 
 .redundant-true {
@@ -80,3 +81,10 @@ svg {
     stroke-width: 1px;
 }
 
+.previous-next-arrow {
+    opacity: 0.5;
+    text-anchor: middle;
+    dominant-baseline: central;
+    cursor: pointer;
+    font-size: 200%;
+}
