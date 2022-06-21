@@ -11,7 +11,6 @@ function setSelectedForDependents(edgeId, selected) {
     if (edgeId == undefined) {
         return;
     }
-    setSelectedForElement(document.getElementById(edgeId), selected);
     const dependents = document.getElementsByClassName('sp-'+edgeId);
     for(let i=0;i<dependents.length;i++) {
         setSelectedForElementWithLabels(dependents[i], selected);
@@ -40,7 +39,6 @@ function setPreviousNextForElement(element, selected) {
             return;
         }
         const coords = element.getAttribute('d').split(/[^0-9]+/);
-        console.log(coords);
         const from = {x: parseFloat(coords[1]), y: parseFloat(coords[2])};
         const to = {x: parseFloat(coords[3]), y: parseFloat(coords[4])};
         const margin = 25;
@@ -48,10 +46,9 @@ function setPreviousNextForElement(element, selected) {
         createArrow(element, true, element.dataset.pd, from.x, from.y-margin);
         createArrow(element, false, element.dataset.na, to.x, to.y+margin);
         createArrow(element, false, element.dataset.nd, from.x, from.y+margin);
-
-    } else {
+    } else {        
         const arrows = document.getElementsByClassName('previous-next-arrow');
-        for(let i=0;i<arrows.length;i++) {
+        for(let i=arrows.length-1;i>=0;i--) {
             arrows[i].remove();
         }
     }
