@@ -89,52 +89,71 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 }
 
 func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
+	var stationsSlice []*internal.Station
+	for _, s := range stations {
+		stationsSlice = append(stationsSlice, s)
+	}
+	sort.Slice(stationsSlice, func(i, j int) bool {
+		return stationsSlice[i].Rank < stationsSlice[j].Rank
+	})
 	var arrivals []*internal.Edge
 	var departures []*internal.Edge
 	var lastGroup *int
-	for _, s := range stations {
+	for _, s := range stationsSlice {
 		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
-			sort.Slice(arrivals, func(i, j int) bool {
-				return arrivals[i].Actual.Arrival.Before(arrivals[j].Actual.Arrival)
-			})
-			sort.Slice(departures, func(i, j int) bool {
-				return departures[i].Actual.Departure.Before(departures[j].Actual.Departure)
-			})
-			lastProperArrival := ""
-			lastProperDeparture := ""
-			for i := 0; i < len(arrivals); i++ {
-				if e, ok := c.Edges[generateEdgeID(arrivals[i])]; ok {
-					if isEdgeInsideGroup(e) {
-						continue
-					}
-					e.PreviousArrival = lastProperArrival
-					if i+1 < len(arrivals) && e.To.SpaceAxis.Station.Rank+1 == len(stations) {
-						e.NextArrival = generateEdgeID(arrivals[i+1])
-					}
-					lastProperArrival = generateEdgeID(arrivals[i])
-				}
-			}
-			for i := 0; i < len(departures); i++ {
-				if e, ok := c.Edges[generateEdgeID(departures[i])]; ok {
-					if isEdgeInsideGroup(e) {
-						continue
-					}
-					if e.From.SpaceAxis.Station.Rank == 0 {
-						e.PreviousDeparture = lastProperDeparture
-					}
-					if i+1 < len(departures) {
-						e.NextDeparture = generateEdgeID(departures[i+1])
-					}
-					lastProperDeparture = generateEdgeID(departures[i])
-				}
-			}
-
+			c.flushStationGroup(stations, departures, arrivals)
 			arrivals = []*internal.Edge{}
 			departures = []*internal.Edge{}
 			lastGroup = s.GroupNumber
 		}
 		arrivals = append(arrivals, s.Arrivals...)
 		departures = append(departures, s.Departures...)
+	}
+	c.flushStationGroup(stations, departures, arrivals)
+}
+
+func (c *container) flushStationGroup(stations map[int]*internal.Station, departures []*internal.Edge, arrivals []*internal.Edge) {
+	sort.SliceStable(arrivals, func(i, j int) bool {
+		return arrivals[i].Actual.Arrival.Before(arrivals[j].Actual.Arrival)
+	})
+	sort.SliceStable(departures, func(i, j int) bool {
+		return departures[i].Actual.Departure.Before(departures[j].Actual.Departure)
+	})
+	lastProperArrival := ""
+	lastProperDeparture := ""
+	var nextArrivalToFill *string = nil
+	var nextDepartureToFill *string = nil
+	for i := 0; i < len(arrivals); i++ {
+		if e, ok := c.Edges[generateEdgeID(arrivals[i])]; ok {
+			if isEdgeInsideGroup(e) {
+				continue
+			}
+			if nextArrivalToFill != nil {
+				*nextArrivalToFill = generateEdgeID(arrivals[i])
+				nextArrivalToFill = nil
+			}
+			e.PreviousArrival = lastProperArrival
+			if i+1 < len(arrivals) && e.To.SpaceAxis.Station.GroupNumber != nil && stations[*e.To.SpaceAxis.Station.GroupNumber].Rank+1 == len(stations) {
+				nextArrivalToFill = &e.NextArrival
+			}
+			lastProperArrival = generateEdgeID(arrivals[i])
+		}
+	}
+	for i := 0; i < len(departures); i++ {
+		if e, ok := c.Edges[generateEdgeID(departures[i])]; ok {
+			if isEdgeInsideGroup(e) {
+				continue
+			}
+			if nextDepartureToFill != nil {
+				*nextDepartureToFill = generateEdgeID(departures[i])
+				nextDepartureToFill = nil
+			}
+			if e.From.SpaceAxis.Station.GroupNumber != nil && stations[*e.From.SpaceAxis.Station.GroupNumber].Rank == 0 {
+				e.PreviousDeparture = lastProperDeparture
+			}
+			nextDepartureToFill = &e.NextDeparture
+			lastProperDeparture = generateEdgeID(departures[i])
+		}
 	}
 }
 
@@ -150,6 +169,7 @@ func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edg
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
 	}
 }
+
 func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 	if min.Before(c.MinTime) || c.MinTime.IsZero() {
 		c.MinTime = min
@@ -172,7 +192,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 }
 
 func generateEdgeID(e *internal.Edge) string {
-	return fmt.Sprintf("%s_%d_%d", e.Line.ID, e.From.EvaNumber, e.Actual.Departure.Unix())
+	return fmt.Sprintf("%p", e)
 }
 
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
@@ -200,7 +220,7 @@ func generateStationEdgeID(last *internal.Edge, this *internal.Edge) string {
 	if last == nil {
 		return "undefined"
 	}
-	return fmt.Sprintf("%s_%d_%d_station", this.Line.ID, this.From.EvaNumber, last.Actual.Arrival.Unix())
+	return fmt.Sprintf("%p_%p_station", last, this)
 }
 
 func (c *container) gravitate() {
