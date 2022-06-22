@@ -24,7 +24,9 @@ type Edge struct {
 	ShortestPath         *Edge
 	ReverseShortestPath  *Edge
 	ProviderShortestPath bool
+	ShortestPathFor      map[*Edge]struct{}
 	Redundant            bool
+	Discarded            bool
 }
 
 type StopInfo struct {

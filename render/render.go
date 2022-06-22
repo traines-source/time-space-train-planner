@@ -77,11 +77,11 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			if originEdgePath, ok := c.Edges[generateEdgeID(origin)]; ok {
 				var lastEdge *internal.Edge
 				for e := origin; e != nil; e = e.ShortestPath {
-					c.setShortestPathFor(originEdgePath, e, lastEdge)
+					c.setShortestPathFor(originEdgePath, e, lastEdge, e)
 					lastEdge = e
 				}
 				for e := origin; e != nil; e = e.ReverseShortestPath {
-					c.setShortestPathFor(originEdgePath, e, lastEdge)
+					c.setShortestPathFor(originEdgePath, e, e, lastEdge)
 					lastEdge = e
 				}
 			}
@@ -174,11 +174,11 @@ func isEdgeInsideGroup(e *EdgePath) bool {
 	return e.From.SpaceAxis.GroupNumber != nil && e.To.SpaceAxis.GroupNumber != nil && *e.From.SpaceAxis.GroupNumber == *e.To.SpaceAxis.GroupNumber
 }
 
-func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, lastEdge *internal.Edge) {
+func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, start *internal.Edge, end *internal.Edge) {
 	if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
 	}
-	if edgePath, ok := c.Edges[generateStationEdgeID(lastEdge, e)]; ok {
+	if edgePath, ok := c.Edges[generateStationEdgeID(start, end)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
 	}
 }

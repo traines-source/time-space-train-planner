@@ -21,7 +21,7 @@
     </text>
 {{end}}
 {{range .SortedEdges}}
-    {{if not .Hidden}}
+    {{if not .Discarded}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
         data-pd="{{.PreviousDeparture}}" data-nd="{{.NextDeparture}}" data-pa="{{.PreviousArrival}}" data-na="{{.NextArrival}}"
         class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} sp-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
@@ -32,7 +32,7 @@
     {{end}}
 {{end}}
 {{range .SortedEdges}}
-    {{if not .Hidden}}
+    {{if not .Discarded}}
     <text id="{{.ID}}-label" class="label type-{{.Type}} label-{{.ID}}">
         <textPath href="#{{.ID}}" startOffset="50%">
             {{.Label}}

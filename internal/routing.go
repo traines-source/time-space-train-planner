@@ -126,8 +126,8 @@ func shortestPaths(stations map[int]*Station, origin *Station, destination *Stat
 			shortestPathsToTarget(stations, &dijkstraToOrigin{origin.Departures[i]})
 		}
 	}
-	//markAsRedundantIfNoShortestPath(stations, destination)
-	markEdgesAsRedundant(stations, destination)
+	followShortestPaths(stations)
+	markEdgesAsRedundant(stations, origin, destination)
 }
 
 func shortestPathsToTarget(stations map[int]*Station, edgeToTarget dijkstraVertex) {
@@ -136,7 +136,6 @@ func shortestPathsToTarget(stations map[int]*Station, edgeToTarget dijkstraVerte
 	for len(verticesAtTime) != 0 {
 		u := minDist(verticesAtTime)
 		u.vertexAtTime.setShortestPath(u.toTarget)
-		markAsRedundantIfRevisitsSameStation(u)
 		delete(verticesAtTime, u.vertexAtTime.getEdge())
 
 		for _, vertex := range u.vertexAtTime.getVertices() {
@@ -206,19 +205,47 @@ func positiveDeltaMinutes(from time.Time, to time.Time) int {
 	return min
 }
 
-func markEdgesAsRedundant(stations map[int]*Station, destination *Station) {
+func markEdgesAsRedundant(stations map[int]*Station, origin *Station, destination *Station) {
 	for _, station := range stations {
 		for _, departure := range station.Departures {
-			markEdgeAsRedundant(departure, destination)
+			markEdgeAsRedundant(departure, origin, destination)
+			markEdgeAsDiscarded(departure)
 		}
 	}
 }
 
-func markEdgeAsRedundant(edge *Edge, destination *Station) {
-	hopsByEdge, arrivalByEdge := calculateTravelLength(edge, destination)
-	if hopsByEdge == -1 {
+func markEdgeAsRedundant(edge *Edge, origin *Station, destination *Station) {
+	if edge.ShortestPath == nil && edge.To != destination || edge.ReverseShortestPath == nil && edge.From != origin {
 		edge.Redundant = true
 		return
+	}
+	if revisitsSameStation(edge) {
+		edge.Redundant = true
+		return
+	}
+	if len(edge.ShortestPathFor) > 1 {
+		edge.Redundant = false
+		return
+	} else if edge.Line.Type == "Foot" {
+		edge.Redundant = true
+		return
+	}
+	if existsLaterDepartureWithEarlierArrival(edge, destination) {
+		edge.Redundant = true
+		return
+	}
+}
+
+func markEdgeAsDiscarded(edge *Edge) {
+	if edge.Redundant && edge.From.GroupNumber != nil && edge.To.GroupNumber != nil && *edge.From.GroupNumber == *edge.To.GroupNumber {
+		edge.Discarded = true
+	}
+}
+
+func existsLaterDepartureWithEarlierArrival(edge *Edge, destination *Station) bool {
+	hopsByEdge, arrivalByEdge := calculateTravelLength(edge, destination)
+	if hopsByEdge == -1 {
+		return true
 	}
 
 	for _, departure := range edge.From.Departures {
@@ -227,10 +254,10 @@ func markEdgeAsRedundant(edge *Edge, destination *Station) {
 		}
 		hops, arrival := calculateTravelLength(departure, destination)
 		if hops != -1 && (arrival.Before(arrivalByEdge)) {
-			edge.Redundant = true
-			break
+			return true
 		}
 	}
+	return false
 }
 
 func calculateTravelLength(startEdge *Edge, destination *Station) (hops int32, arrival time.Time) {
@@ -249,31 +276,37 @@ func calculateTravelLength(startEdge *Edge, destination *Station) (hops int32, a
 	return -1, time.Time{}
 }
 
-func markAsRedundantIfRevisitsSameStation(edge *dijkstra) {
-	if edge.vertexAtTime.getShortestPath() == nil || edge.vertexAtTime.getShortestPath().getEdge() != edge.vertexAtTime.getEdge().ShortestPath {
-		return
-	}
-	from := edge.vertexAtTime.getEdge().From.EvaNumber
-	nextEdge := edge.vertexAtTime
+func revisitsSameStation(edge *Edge) bool {
+	from := edge.From.EvaNumber
+	nextEdge := edge
 	for {
-		if nextEdge.getShortestPath() != nil {
-			nextEdge = nextEdge.getShortestPath()
-			if nextEdge.getEdge().To.EvaNumber == from {
-				edge.vertexAtTime.getEdge().Redundant = true
-				break
+		if nextEdge.ShortestPath != nil {
+			nextEdge = nextEdge.ShortestPath
+			if nextEdge.To.EvaNumber == from {
+				return true
 			}
 		} else {
-			break
+			return false
 		}
 	}
 }
 
-func markAsRedundantIfNoShortestPath(stations map[int]*Station, destination *Station) {
-	for _, station := range stations {
-		for _, departure := range station.Departures {
-			if departure.ShortestPath == nil && departure.To != destination {
-				departure.Redundant = true
+func followShortestPaths(stations map[int]*Station) {
+	for _, l := range stations {
+		for _, origin := range l.Departures {
+			for e := origin; e != nil; e = e.ShortestPath {
+				setShortestPathFor(origin, e)
+			}
+			for e := origin; e != nil; e = e.ReverseShortestPath {
+				setShortestPathFor(origin, e)
 			}
 		}
 	}
+}
+
+func setShortestPathFor(origin *Edge, e *Edge) {
+	if e.ShortestPathFor == nil {
+		e.ShortestPathFor = map[*Edge]struct{}{}
+	}
+	e.ShortestPathFor[origin] = struct{}{}
 }
