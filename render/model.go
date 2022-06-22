@@ -15,14 +15,15 @@ type StationLabel struct {
 
 type EdgePath struct {
 	internal.Edge
-	ID              string
-	ShortestPathFor []*EdgePath
-	From            Coord
-	To              Coord
+	ID                string
+	ShortestPathFor   []*EdgePath
+	Hidden            bool
+	From              Coord
+	To                Coord
 	PreviousDeparture string
-	NextDeparture string
-	PreviousArrival string
-	NextArrival string
+	NextDeparture     string
+	PreviousArrival   string
+	NextArrival       string
 }
 
 type Coord struct {

@@ -52,6 +52,18 @@ svg {
     font-weight: bold;
 }
 
+.arrival {
+    text-anchor: end;
+}
+
+.departure {
+    text-anchor: start;
+}
+
+.label {
+    text-anchor: middle;
+}
+
 .arrival.selected, .departure.selected, .label.selected {
     visibility: visible;
 }

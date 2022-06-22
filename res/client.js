@@ -7,6 +7,16 @@ function selectEdge(edgeId) {
     currentSelected = edgeId;
 }
 
+function setActive(edgeId) {
+    document.getElementById('details').innerHTML = document.getElementById(edgeId+'-label').children[1].innerHTML;
+    document.getElementById('legend').style.display = 'none';
+}
+
+function setInactive() {
+    document.getElementById('details').innerHTML = '';
+    document.getElementById('legend').style.display = 'block';
+}
+
 function setSelectedForDependents(edgeId, selected) {
     if (edgeId == undefined) {
         return;
@@ -17,6 +27,7 @@ function setSelectedForDependents(edgeId, selected) {
         setPreviousNextForElement(dependents[i], selected);
     }
 }
+
 function setSelectedForElementWithLabels(element, selected) {
     setSelectedForElement(element, selected);
     const labels = document.getElementsByClassName('label-'+element.id);
@@ -66,6 +77,7 @@ function createArrow(parent, previous, targetId, x, y) {
     e.onclick = function (evt) {
         console.log('arrow select ', targetId);
         selectEdge(targetId);
+        //setActive(targetId);
     };
     parent.parentNode.appendChild(e);
 }
@@ -74,6 +86,7 @@ function selectListener(evt) {
     const id = this.id.replace('-toucharea', '');
     console.log('selected ', id);
     selectEdge(id);
+    //setActive(id);
 }
 
 const edges = document.getElementsByClassName('edge-toucharea');
