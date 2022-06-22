@@ -21,7 +21,7 @@ type container struct {
 	MaxTime             time.Time
 	maxSpace            int
 	timeAxisDistance    float32
-	TimeIndicators      []time.Time
+	TimeIndicators      []Coord
 	TimeAxisSize        int
 	SpaceAxisSize       int
 	Query               string
@@ -29,10 +29,8 @@ type container struct {
 }
 
 const (
-	timeAxisSize             = 1500
-	spaceAxisSize            = 1500
-	maxTimeIndicators        = 5
-	minTimeIndicatorDistance = "15m"
+	timeAxisSize      = 1500
+	spaceAxisSize     = 1500
 )
 
 func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
@@ -275,8 +273,10 @@ func (c *container) layoutStations() {
 func (c *container) indicateTimes() {
 	delta := c.MaxTime.Unix() - c.MinTime.Unix()
 	c.timeAxisDistance = float32(delta)
-	//duration, _ := time.ParseDuration(fmt.Sprintf("%ds", delta/maxTimeIndicators))
-	//now := c.minTime
+	t := time.Date(c.MinTime.Year(), c.MinTime.Month(), c.MinTime.Day(), c.MinTime.Hour()+1, 0, 0, 0, c.MinTime.Location())
+	for ; t.Before(c.MaxTime); t = t.Add(time.Hour) {
+		c.TimeIndicators = append(c.TimeIndicators, Coord{TimeAxis: t})
+	}
 }
 
 func (c *container) render(wr io.Writer) {
@@ -288,6 +288,9 @@ func (c *container) render(wr io.Writer) {
 }
 
 func (c *container) X(coord Coord) int {
+	if coord.SpaceAxis == nil {
+		return 0
+	}
 	return int(float32(coord.SpaceAxis.SpaceAxis)/float32(c.maxSpace)*float32(c.SpaceAxisSize-100) + 50.0)
 }
 
@@ -376,6 +379,10 @@ func (c *container) Minutes(time time.Time) string {
 
 func simpleTime(t time.Time) string {
 	return fmt.Sprintf("%02d:%02d ", t.Hour(), t.Minute())
+}
+
+func (c *container) SimpleTime(t time.Time) string {
+	return simpleTime(t)
 }
 
 func delay(current time.Time, planned time.Time) string {

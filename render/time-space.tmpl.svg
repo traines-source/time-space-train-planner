@@ -20,6 +20,11 @@
         <title>{{.Station.EvaNumber}}</title>
     </text>
 {{end}}
+{{range .TimeIndicators}}
+    <text x="{{$.X .}}" y="{{$.Y .}}" class="time-label">
+        {{$.SimpleTime .TimeAxis}}
+    </text>
+{{end}}
 {{range .SortedEdges}}
     {{if not .Discarded}}
     <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
