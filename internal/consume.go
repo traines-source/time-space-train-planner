@@ -315,7 +315,9 @@ func (c *consumer) parseDate(dateTime string) {
 	t, err := time.ParseInLocation(layout, dateTime, loc)
 
 	if err != nil {
-		log.Panic(err)
+		t := time.Now()
+		c.dateTime = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
+	} else {
+		c.dateTime = t
 	}
-	c.dateTime = t
 }

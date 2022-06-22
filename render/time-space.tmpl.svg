@@ -40,11 +40,11 @@
         <title>{{.Label}}</title>
     </text>
     <text x="{{$.X .To}}" y="{{$.Y .To}}" id="{{.ID}}-arrival"
-        class="arrival type-{{.Type}} label-{{.ID}}">
+        class="arrival type-{{.Type}} label-{{.ID}} {{.LiveDataArrival}}">
         {{.Arrival}}
     </text>
     <text x="{{$.X .From}}" y="{{$.Y .From}}" id="{{.ID}}-departure"
-        class="departure type-{{.Type}} label-{{.ID}}">
+        class="departure type-{{.Type}} label-{{.ID}} {{.LiveDataDeparture}}">
         {{.Departure}}
     </text>
     {{end}}

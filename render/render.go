@@ -335,6 +335,14 @@ func (p *EdgePath) Arrival() string {
 	return p.time(func(stop internal.StopInfo) time.Time { return stop.Arrival }, func(stop internal.StopInfo) string { return stop.ArrivalTrack })
 }
 
+func (p *EdgePath) LiveDataDeparture() string {
+	return p.liveDataClass(func(stop internal.StopInfo) time.Time { return stop.Departure })
+}
+
+func (p *EdgePath) LiveDataArrival() string {
+	return p.liveDataClass(func(stop internal.StopInfo) time.Time { return stop.Arrival })
+}
+
 func (p *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackResolver func(internal.StopInfo) string) string {
 	e := p.Edge
 	if e.Line == nil {
@@ -345,6 +353,21 @@ func (p *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackRes
 		label += "Pl." + trackResolver(e.Planned)
 	}
 	return label
+}
+
+func (p *EdgePath) liveDataClass(timeResolver func(internal.StopInfo) time.Time) string {
+	e := p.Edge
+	if e.Line == nil {
+		return ""
+	}
+	current := timeResolver(e.Current)
+	if current.IsZero() {
+		return ""
+	}
+	if current.Sub(timeResolver(e.Planned)).Minutes() > 5 {
+		return "live-red"
+	}
+	return "live-green"
 }
 
 func (c *container) Minutes(time time.Time) string {

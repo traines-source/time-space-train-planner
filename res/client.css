@@ -64,6 +64,14 @@ svg {
     text-anchor: middle;
 }
 
+.live-red {
+    fill: #B71C1C;
+}
+
+.live-green {
+    fill: #019B92;
+}
+
 .arrival.selected, .departure.selected, .label.selected {
     visibility: visible;
 }
