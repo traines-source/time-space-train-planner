@@ -16,6 +16,7 @@ svg {
     stroke-width: 20px;
     stroke: transparent;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .redundant-true {
@@ -116,7 +117,14 @@ svg {
     font-size: 200%;
 }
 
+.button {
+    fill: #dbdbdb;
+    rx: 5;
+    ry: 5;
+}
+
 .ui-link {
+    dominant-baseline: middle;
     text-anchor: middle;
     font-weight: bold;
     fill: #01579B;

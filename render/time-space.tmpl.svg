@@ -1,98 +1,96 @@
-<?xml-stylesheet type="text/css" href="res/client.css" ?>
+<?xml-stylesheet type="text/css" href="res/client.css?v3" ?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
     viewBox="0 0 {{.SpaceAxisSize}} {{.TimeAxisSize}}">
-    <defs>
-        <marker id="dot-redundant-false" viewBox="0 0 10 10" refX="5" refY="5"
-            markerWidth="4" markerHeight="4" filter="none">
-            <circle cx="5" cy="5" r="3" />
-        </marker>
-        <marker id="dot-redundant-true" viewBox="0 0 10 10" refX="5" refY="5"
-            markerWidth="4" markerHeight="4" filter="none">
-            <circle cx="5" cy="5" r="3" />
-        </marker>
-        <filter id="erode">
-            <feMorphology operator="erode" radius="8"/>
-        </filter>
-    </defs>
+<defs>
+    <marker id="dot-redundant-false" viewBox="0 0 10 10" refX="5" refY="5"
+        markerWidth="4" markerHeight="4" filter="none">
+        <circle cx="5" cy="5" r="3" />
+    </marker>
+    <marker id="dot-redundant-true" viewBox="0 0 10 10" refX="5" refY="5"
+        markerWidth="4" markerHeight="4" filter="none">
+        <circle cx="5" cy="5" r="3" />
+    </marker>
+    <filter id="erode">
+        <feMorphology operator="erode" radius="8"/>
+    </filter>
+</defs>
 {{range .Stations}}
-    <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">
-        {{.Station.Name}}
-        <title>{{.Station.EvaNumber}}</title>
-    </text>
+<text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">
+    {{.Station.Name}}
+    <title>{{.Station.EvaNumber}}</title>
+</text>
 {{end}}
 {{range .TimeIndicators}}
-    <text x="{{$.X .}}" y="{{$.Y .}}" class="time-label">
-        {{$.SimpleTime .TimeAxis}}
-    </text>
+<text x="5" y="{{$.Y .}}" class="time-label">
+    {{$.SimpleTime .TimeAxis}}
+</text>
 {{end}}
-{{range .SortedEdges}}
-    {{if not .Discarded}}
-    <path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-        data-pd="{{.PreviousDeparture}}" data-nd="{{.NextDeparture}}" data-pa="{{.PreviousArrival}}" data-na="{{.NextArrival}}"
-        class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} sp-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
-        />
-    <path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-        class="edge-toucharea"
-        />
-    {{end}}
-{{end}}
-{{range .SortedEdges}}
-    {{if not .Discarded}}
-    <text id="{{.ID}}-label" class="label type-{{.Type}} label-{{.ID}}">
-        <textPath href="#{{.ID}}" startOffset="50%">
-            {{.Label}}
-        </textPath>
-        <title>{{.Label}}</title>
+{{range .SortedEdges}}{{if not .Discarded}}
+<path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
+    {{.PreviousDeparture}} {{.NextDeparture}} {{.PreviousArrival}} {{.NextArrival}}
+    class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} sp-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
+    />
+<path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
+    class="edge-toucharea"
+    />
+{{end}}{{end}}
+{{range .SortedEdges}}{{if not .Discarded}}
+<text id="{{.ID}}-label" class="label type-{{.Type}} label-{{.ID}}">
+    <textPath href="#{{.ID}}" startOffset="50%">
+        {{.Label}}
+    </textPath>
+</text>
+<text x="{{$.X .To}}" y="{{$.Y .To}}" id="{{.ID}}-arrival"
+    class="arrival type-{{.Type}} label-{{.ID}} {{.LiveDataArrival}}">
+    {{.Arrival}}
+</text>
+<text x="{{$.X .From}}" y="{{$.Y .From}}" id="{{.ID}}-departure"
+    class="departure type-{{.Type}} label-{{.ID}} {{.LiveDataDeparture}}">
+    {{.Departure}}
+</text>
+{{end}}{{end}}
+<a xlink:href="?{{.Query}}&amp;form">
+    <rect x="5" y="1430" width="100" height="40" class="button" />
+    <text x="55" y="1450" class="ui-link">
+        Modify query
     </text>
-    <text x="{{$.X .To}}" y="{{$.Y .To}}" id="{{.ID}}-arrival"
-        class="arrival type-{{.Type}} label-{{.ID}} {{.LiveDataArrival}}">
-        {{.Arrival}}
+</a>
+<text x="100" y="1450" id="details">
+    
+</text>
+<g id="legend">
+    <path d="M 150,1460 L350,1460" class="edge selected redundant-false" />
+    <text x="150" y="1450">
+        Fastest route (transfer time >= 0 min)
     </text>
-    <text x="{{$.X .From}}" y="{{$.Y .From}}" id="{{.ID}}-departure"
-        class="departure type-{{.Type}} label-{{.ID}} {{.LiveDataDeparture}}">
-        {{.Departure}}
+    <path d="M 400,1460 L600,1460" class="edge provider-shortest-path redundant-false" />
+    <text x="400" y="1450">
+        Route recommended by DB/HAFAS
     </text>
-    {{end}}
-{{end}}
-    <a xlink:href="?{{.Query}}&amp;form">
-        <text x="10" y="1450" class="ui-link">
-            Modify query
-        </text>
-    </a>
-    <text x="100" y="1450" id="details">
-        
+    <path d="M 650,1460 L850,1460" class="edge redundant-true" />
+    <text x="650" y="1450">
+        Connections deemed redundant
     </text>
-    <g id="legend">
-        <path d="M 100,1460 L300,1460" class="edge selected redundant-false" />
-        <text x="100" y="1450">
-            Fastest route (transfer time >= 0 min)
-        </text>
-        <path d="M 350,1460 L550,1460" class="edge provider-shortest-path redundant-false" />
-        <text x="350" y="1450">
-            Route recommended by DB/HAFAS
-        </text>
-        <path d="M 600,1460 L800,1460" class="edge redundant-true" />
-        <text x="600" y="1450">
-            Connections deemed redundant
-        </text>
-        <path d="M 850,1460 L950,1460" class="edge type-nationalExpress redundant-false" />
-        <text x="850" y="1450">
-            ICE, IC, etc.
-        </text>
-        <path d="M 1000,1460 L1100,1460" class="edge type-regional redundant-false" />
-        <text x="1000" y="1450">
-            RE, RB, S, etc.
-        </text>
-        <path d="M 1150,1460 L1250,1460" class="edge type-bus redundant-false" />
-        <text x="1150" y="1450">
-            Bus, Tram, etc.
-        </text>
-        <path d="M 1300,1460 L1400,1460" class="edge type-Foot redundant-false" />
-        <text x="1300" y="1450">
-            On Foot
-        </text>
-    </g>
-   
-    <script xlink:href="res/client.js" />
-    <script>selectEdge('{{.DefaultShortestPath.ID}}');</script>
+    <path d="M 900,1460 L980,1460" class="edge type-nationalExpress redundant-false" />
+    <text x="900" y="1450">
+        ICE, IC, etc.
+    </text>
+    <path d="M 1030,1460 L1110,1460" class="edge type-regional redundant-false" />
+    <text x="1030" y="1450">
+        RE, RB, S, etc.
+    </text>
+    <path d="M 1160,1460 L1240,1460" class="edge type-bus redundant-false" />
+    <text x="1160" y="1450">
+        Bus, Tram, etc.
+    </text>
+    <path d="M 1290,1460 L1370,1460" class="edge type-Foot redundant-false" />
+    <text x="1290" y="1450">
+        On Foot
+    </text>
+</g>
+
+<script xlink:href="res/client.js?v3" />
+
+<script>selectEdge('{{.DefaultShortestPathID}}');</script>
+
 </svg>

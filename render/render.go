@@ -25,12 +25,12 @@ type container struct {
 	TimeAxisSize        int
 	SpaceAxisSize       int
 	Query               string
-	DefaultShortestPath *EdgePath
+	DefaultShortestPathID string
 }
 
 const (
-	timeAxisSize      = 1500
-	spaceAxisSize     = 1500
+	timeAxisSize  = 1500
+	spaceAxisSize = 1500
 )
 
 func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
@@ -129,10 +129,10 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 				continue
 			}
 			if nextArrivalToFill != nil {
-				*nextArrivalToFill = generateEdgeID(arrivals[i])
+				*nextArrivalToFill = "data-na=\"" + generateEdgeID(arrivals[i]) + "\""
 				nextArrivalToFill = nil
 			}
-			e.PreviousArrival = lastProperArrival
+			e.PreviousArrival = "data-pa=\"" + lastProperArrival + "\""
 			if i+1 < len(arrivals) && e.To.SpaceAxis.Station.GroupNumber != nil && stations[*e.To.SpaceAxis.Station.GroupNumber].Rank+1 == len(stations) {
 				nextArrivalToFill = &e.NextArrival
 			}
@@ -145,11 +145,11 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 				continue
 			}
 			if nextDepartureToFill != nil {
-				*nextDepartureToFill = generateEdgeID(departures[i])
+				*nextDepartureToFill = "data-nd=\"" + generateEdgeID(departures[i]) + "\""
 				nextDepartureToFill = nil
 			}
 			if e.From.SpaceAxis.Station.GroupNumber != nil && stations[*e.From.SpaceAxis.Station.GroupNumber].Rank == 0 {
-				e.PreviousDeparture = lastProperDeparture
+				e.PreviousDeparture = "data-pd=\"" + lastProperDeparture + "\""
 			}
 			nextDepartureToFill = &e.NextDeparture
 			lastProperDeparture = generateEdgeID(departures[i])
@@ -161,7 +161,7 @@ func (c *container) preselectShortestPath(destination *internal.Station) {
 	for _, s := range destination.Arrivals {
 		if s.ReverseShortestPath != nil {
 			if e, ok := c.Edges[generateEdgeID(s)]; ok {
-				c.DefaultShortestPath = e
+				c.DefaultShortestPathID = e.ID
 			}
 			break
 		}
