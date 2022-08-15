@@ -240,6 +240,9 @@ func markEdgeAsDiscarded(edge *Edge) {
 	if edge.Redundant && edge.From.GroupNumber != nil && edge.To.GroupNumber != nil && *edge.From.GroupNumber == *edge.To.GroupNumber {
 		edge.Discarded = true
 	}
+	if edge.Redundant && edge.Line.Type == "Foot" {
+		edge.Discarded = true
+	}
 }
 
 func existsLaterDepartureWithEarlierArrival(edge *Edge, destination *Station) bool {
