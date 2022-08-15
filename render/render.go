@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"os"
 	"sort"
 	"text/template"
 	"time"
@@ -14,18 +15,19 @@ import (
 )
 
 type container struct {
-	Stations            map[*internal.Station]*StationLabel
-	Edges               map[string]*EdgePath
-	SortedEdges         []*EdgePath
-	MinTime             time.Time
-	MaxTime             time.Time
-	maxSpace            int
-	timeAxisDistance    float32
-	TimeIndicators      []Coord
-	TimeAxisSize        int
-	SpaceAxisSize       int
-	Query               string
+	Stations              map[*internal.Station]*StationLabel
+	Edges                 map[string]*EdgePath
+	SortedEdges           []*EdgePath
+	MinTime               time.Time
+	MaxTime               time.Time
+	maxSpace              int
+	timeAxisDistance      float32
+	TimeIndicators        []Coord
+	TimeAxisSize          int
+	SpaceAxisSize         int
+	Query                 string
 	DefaultShortestPathID string
+	LegalLink             string
 }
 
 const (
@@ -34,7 +36,12 @@ const (
 )
 
 func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
-	c := &container{Stations: map[*internal.Station]*StationLabel{}, Edges: map[string]*EdgePath{}, Query: html.EscapeString(query)}
+	c := &container{
+		Stations:  map[*internal.Station]*StationLabel{},
+		Edges:     map[string]*EdgePath{},
+		Query:     html.EscapeString(query),
+		LegalLink: os.Getenv("TSTP_LEGAL"),
+	}
 	c.setupStations(stations)
 	c.setupEdges(lines)
 	c.setupPreviousAndNext(stations)

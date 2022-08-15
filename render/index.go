@@ -2,6 +2,7 @@ package render
 
 import (
 	"io"
+	"os"
 	"sort"
 	"text/template"
 
@@ -11,25 +12,28 @@ import (
 const MAX_VIAS = 10
 
 type model struct {
-	From     *internal.Station
-	To       *internal.Station
-	Stations []*internal.Station
-	DateTime string
+	From      *internal.Station
+	To        *internal.Station
+	Stations  []*internal.Station
+	DateTime  string
+	LegalLink string
 }
 
 func Index(wr io.Writer) {
 	m := &model{
-		From: &internal.Station{},
-		To:   &internal.Station{},
+		LegalLink: os.Getenv("TSTP_LEGAL"),
+		From:      &internal.Station{},
+		To:        &internal.Station{},
 	}
 	m.template(wr)
 }
 
 func Vias(stations map[int]*internal.Station, from int, to int, dateTime string, wr io.Writer) {
 	m := &model{
-		From:     stations[from],
-		To:       stations[to],
-		DateTime: dateTime,
+		LegalLink: os.Getenv("TSTP_LEGAL"),
+		From:      stations[from],
+		To:        stations[to],
+		DateTime:  dateTime,
 	}
 	for _, s := range stations {
 		if s.EvaNumber == from || s.EvaNumber == to || s.GroupNumber != nil && *s.GroupNumber != s.EvaNumber {

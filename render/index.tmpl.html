@@ -1,29 +1,45 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>TSTP</title>
-  <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0">
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-  <script src="//code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script src="res/conf.js"></script>
-</head>
+    <meta charset="utf-8">
+    <title>TeSpace</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0">
+    <link href="https://traines.eu/favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://traines.eu/res/icon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://traines.eu/res/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://traines.eu/res/icon/favicon-16x16.png">
+    <link rel="stylesheet" href="res/client.css">
+    <link rel="stylesheet" href="res/vendor/jquery-ui.min.css">
+    <script src="res/vendor/jquery-3.6.0.min.js"></script>
+    <script src="res/vendor/jquery-ui.min.js"></script>
+    <script src="res/conf.js"></script>
+    </head>
 <body>
+<div id="header"><div>
+    <a href="/tstp"><h1>TeSpace</h1></a>
+</div></div>
+
+<div id="container">
+<p>
+    This tool allows you to plan your public transport journeys using an interactive time-space diagram, based on live timetable data (currently Germany only).    
+</p>
+<noscript>
+    JavaScript needs to be enabled to use this tool.
+</noscript>
 
 <form action="?" onsubmit="return prepareSubmit()">
 
 <div>
-    <input id="from-name" placeholder="From" class="station-autocomplete" value="{{.From.Name}}" {{if ne .From.EvaNumber 0}}disabled{{end}}>
+    <input id="from-name" placeholder="From" class="station-autocomplete" value="{{.From.Name}}">
     <input type="hidden" name="from" id="from" value="{{.From.EvaNumber}}">
 </div>
 <div>
-    <input id="to-name" placeholder="To" class="station-autocomplete" value="{{.To.Name}}" {{if ne .To.EvaNumber 0}}disabled{{end}}>
+    <input id="to-name" placeholder="To" class="station-autocomplete" value="{{.To.Name}}">
     <input type="hidden" name="to" id="to" value="{{.To.EvaNumber}}">
 </div>
 {{if .Stations}}
 <p>
-    You need to give via stations. Only direct connections between these stations will be used for route planning.
+    You need to enter relevant interchange stations (up to 10). Only direct connections between these stations will be found.
 </p>
 {{end}}
 {{range $idx, $e := .Stations}}
@@ -35,15 +51,21 @@
 
 <div>
     <input type="datetime-local" id="datetime" name="datetime" value="{{.DateTime}}">
-    <script>
-        
-    </script>
+    <p id="default-now">Default is Now</p>
 </div>
 
 
-<input type="submit" value="Submit">
+<div id="submit-container"><input type="submit" value="Submit" class="submit"><img src="res/icon/loading.gif" id="loading-indicator"></div>
+
+Data retrieval can take up to one minute.
 
 </form>
+
+<p id="footer">
+    <a href="https://github.com/traines-source/time-space-train-planner/issues">Report an issue</a>
+    <a href="{{.LegalLink}}">Imprint/Privacy</a>
+</p>
+</div>
  
 <script src="res/index.js"></script>
  

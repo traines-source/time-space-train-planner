@@ -1,11 +1,3 @@
-if (document.getElementById('datetime').value == "") {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    now.setSeconds(0);
-    now.setMilliseconds(0);
-    document.getElementById('datetime').value = now.toISOString().slice(0, -8);
-}
-
 var stationMap = {};
 $(".station-autocomplete").autocomplete({
     source: function( request, response ) {
@@ -27,6 +19,14 @@ $(".station-autocomplete").autocomplete({
 });
 
 function prepareSubmit() {
+    if (mapEvaNumbers()) {
+        document.getElementById('loading-indicator').style.display = 'block';
+        return true;
+    }
+    return false;
+}
+
+function mapEvaNumbers() {
     const inputs = document.getElementsByClassName('station-autocomplete');
     for (var i=0;i<inputs.length;i++) {
         if (!mapEvaNumber(inputs[i])) {
@@ -37,13 +37,10 @@ function prepareSubmit() {
 }
 
 function mapEvaNumber(inputField) {
-    if (inputField.disabled) {
-        return true;
-    }
     const evaNumber = stationMap[inputField.value];
     const id = inputField.id.replace('-name', '');
     if (evaNumber == undefined) {
-        if (id == 'from' || id == 'to') {
+        if ((id == 'from' || id == 'to') && !inputField.value) {
             inputField.value = '';
             return false
         }

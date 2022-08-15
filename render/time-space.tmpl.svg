@@ -88,6 +88,16 @@
         On Foot
     </text>
 </g>
+<a xlink:href="https://github.com/traines-source/time-space-train-planner/issues">
+    <text x="700" y="1480">
+        Report an issue
+    </text>
+</a>
+<a xlink:href="{{.LegalLink}}">
+    <text x="800" y="1480">
+        Imprint/Privacy
+    </text>
+</a>
 
 <script xlink:href="res/client.js?v3" />
 
