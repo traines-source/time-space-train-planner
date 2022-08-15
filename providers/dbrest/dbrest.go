@@ -275,6 +275,12 @@ func (p *DbRest) parseEdgesFromJourneys() {
 			}
 			hafas := true
 			planned := &providers.ProviderLineStopInfo{}
+			if leg.Departure != nil {
+				planned.Departure = time.Time(*leg.Departure)
+			}
+			if leg.Arrival != nil {
+				planned.Arrival = time.Time(*leg.Arrival)
+			}
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
 				EvaNumberFrom:        evaNumberFrom,
 				EvaNumberTo:          evaNumberTo,
@@ -282,12 +288,6 @@ func (p *DbRest) parseEdgesFromJourneys() {
 				ProviderShortestPath: &hafas,
 				Planned:              planned,
 			})
-			if leg.Departure != nil {
-				planned.Departure = time.Time(*leg.Departure)
-			}
-			if leg.Arrival != nil {
-				planned.Arrival = time.Time(*leg.Arrival)
-			}
 		}
 	}
 }

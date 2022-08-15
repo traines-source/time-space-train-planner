@@ -13,7 +13,9 @@ $(".station-autocomplete").autocomplete({
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            var list = data.map(station => {
+            var list = data
+            .filter(station => !station.isMeta)
+            .map(station => {
                 console.log(station.name, station["name"]);
                 stationMap[station.name] = station.id;
                 return station.name;

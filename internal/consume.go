@@ -176,7 +176,7 @@ func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 		}
 	}
 	if !foundEnd {
-		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID)
+		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s, Dep: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID, e.Planned.Departure)
 	}
 }
 

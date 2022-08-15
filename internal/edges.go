@@ -10,14 +10,18 @@ import (
 const maxFootDistMeters = 5000
 const footKmh = 6
 
+func actualDeparture(stop *LineStop) time.Time {
+	if !stop.Current.Departure.IsZero() {
+		return stop.Current.Departure
+	}
+	return stop.Planned.Departure
+}
+
 func (c *consumer) generateTimetableEdges() {
 	for _, line := range c.lines {
 		var stops []*LineStop = line.Stops
 		sort.Slice(stops, func(i, j int) bool {
-			if !stops[i].Current.Departure.IsZero() && !stops[j].Current.Departure.IsZero() {
-				return stops[i].Current.Departure.Before(stops[j].Current.Departure)
-			}
-			return stops[i].Planned.Departure.Before(stops[j].Planned.Departure)
+			return actualDeparture(stops[i]).Before(actualDeparture(stops[j]))
 		})
 		for i := 1; i < len(stops); i++ {
 			if geoDistStations(stops[i-1].Station, stops[i].Station) == 0 {
