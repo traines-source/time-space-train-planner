@@ -3,8 +3,8 @@ package providers
 import "time"
 
 type Provider interface {
-	Fetch(c Consumer)
-	Enrich(c Consumer)
+	Fetch(c Consumer) error
+	Enrich(c Consumer) error
 }
 
 type Consumer interface {

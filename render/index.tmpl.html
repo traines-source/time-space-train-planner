@@ -21,12 +21,14 @@
 
 <div id="container">
 <p>
-    This tool allows you to plan your public transport journeys using an interactive time-space diagram, based on live timetable data (currently Germany only).    
+    This tool allows you to plan your public transport journeys using an interactive time-space diagram, based on live timetable data (currently Germany only). This is an early Beta version and as such might stop working or return wrong data at any time.    
 </p>
 <noscript>
     JavaScript needs to be enabled to use this tool.
 </noscript>
-
+{{if .Error}}
+<p class="error">Error {{.Error.Error}}</p>
+{{else}}
 <form action="?" onsubmit="return prepareSubmit()">
 
 <div>
@@ -60,7 +62,7 @@
 Data retrieval can take up to one minute.
 
 </form>
-
+{{end}}
 <p id="footer">
     <a href="https://github.com/traines-source/time-space-train-planner/issues">Report an issue</a>
     <a href="{{.LegalLink}}">Imprint/Privacy</a>

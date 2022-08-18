@@ -17,6 +17,7 @@ type model struct {
 	Stations  []*internal.Station
 	DateTime  string
 	LegalLink string
+	Error     error
 }
 
 func Index(wr io.Writer) {
@@ -28,12 +29,13 @@ func Index(wr io.Writer) {
 	m.template(wr)
 }
 
-func Vias(stations map[int]*internal.Station, from int, to int, dateTime string, wr io.Writer) {
+func Vias(stations map[int]*internal.Station, from int, to int, dateTime string, wr io.Writer, err error) {
 	m := &model{
 		LegalLink: os.Getenv("TSTP_LEGAL"),
 		From:      stations[from],
 		To:        stations[to],
 		DateTime:  dateTime,
+		Error:     err,
 	}
 	for _, s := range stations {
 		if s.EvaNumber == from || s.EvaNumber == to || s.GroupNumber != nil && *s.GroupNumber != s.EvaNumber {

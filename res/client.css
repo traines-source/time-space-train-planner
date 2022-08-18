@@ -269,3 +269,8 @@ a text {
     color: #707070;
     text-align: center;
 }
+
+.error {
+    color: #B71C1C;
+    font-weight: 700;
+}

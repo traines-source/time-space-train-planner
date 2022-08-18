@@ -23,17 +23,22 @@ type DbRest struct {
 	cachedJourneys *operations.GetJourneysOKBody
 }
 
-func (p *DbRest) Fetch(c providers.Consumer) {
+func (p *DbRest) Fetch(c providers.Consumer) error {
 	p.consumer = c
 	p.prepareClient()
 	//p.requestStations()
-	p.requestJourneys()
-	p.requestDeparturesAndArrivals()
+	if err := p.requestJourneys(); err != nil {
+		return err
+	}
+	if err := p.requestDeparturesAndArrivals(); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p *DbRest) Enrich(c providers.Consumer) {
+func (p *DbRest) Enrich(c providers.Consumer) error {
 	p.consumer = c
-	p.requestJourneys()
+	return p.requestJourneys()
 }
 
 func (p *DbRest) prepareClient() {
@@ -41,29 +46,32 @@ func (p *DbRest) prepareClient() {
 	p.client = apiclient.New(r, strfmt.Default)
 }
 
-func (p *DbRest) requestStations() {
+func (p *DbRest) requestStations() error {
 	stations := p.consumer.Stations()
 	for _, station := range stations {
-		p.requestStation(station)
+		if err := p.requestStation(station); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (p *DbRest) requestStation(station providers.ProviderStation) {
+func (p *DbRest) requestStation(station providers.ProviderStation) error {
 	var params = operations.NewGetStationsIDParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	res, err := p.client.Operations.GetStationsID(params)
 	if err != nil {
-		log.Panic(err)
-		return
+		return err
 	}
 	p.consumer.UpsertStation(providers.ProviderStation{
 		EvaNumber: station.EvaNumber,
 		Lat:       float32(res.Payload.Location.Latitude),
 		Lon:       float32(res.Payload.Location.Longitude),
 	})
+	return nil
 }
 
-func (p *DbRest) requestDeparturesAndArrivals() {
+func (p *DbRest) requestDeparturesAndArrivals() error {
 	stations := p.consumer.Stations()
 	for i, station := range stations {
 		if i > 20 {
@@ -72,12 +80,17 @@ func (p *DbRest) requestDeparturesAndArrivals() {
 		}
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
-		p.requestArrival(station, from, int64(duration))
-		p.requestDeparture(station, from, int64(duration))
+		if err := p.requestArrival(station, from, int64(duration)); err != nil {
+			return err
+		}
+		if err := p.requestDeparture(station, from, int64(duration)); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Time, duration int64) {
+func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Time, duration int64) error {
 	var params = operations.NewGetStopsIDArrivalsParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	params.Duration = &duration
@@ -87,13 +100,13 @@ func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Tim
 
 	res, err := p.client.Operations.GetStopsIDArrivals(params)
 	if err != nil {
-		log.Panic(err)
-		return
+		return err
 	}
 	p.parseDepartureArrival(res.Payload, station.EvaNumber, true)
+	return nil
 }
 
-func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.Time, duration int64) {
+func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.Time, duration int64) error {
 	var params = operations.NewGetStopsIDDeparturesParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	params.Duration = &duration
@@ -110,10 +123,10 @@ func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.T
 
 	res, err := p.client.Operations.GetStopsIDDepartures(params)
 	if err != nil {
-		log.Panic(err)
-		return
+		return err
 	}
 	p.parseDepartureArrival(res.Payload, station.EvaNumber, false)
+	return nil
 }
 
 func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupNumber int, arrival bool) {
@@ -204,16 +217,19 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 	p.consumer.UpsertLineStop(pls)
 }
 
-func (p *DbRest) requestJourneys() {
+func (p *DbRest) requestJourneys() error {
 	if p.cachedJourneys == nil {
-		p.requestJourneysApi()
+		if err := p.requestJourneysApi(); err != nil {
+			return err
+		}
 		p.parseStationsFromJourneys()
 	} else {
 		p.parseEdgesFromJourneys()
 	}
+	return nil
 }
 
-func (p *DbRest) requestJourneysApi() {
+func (p *DbRest) requestJourneysApi() error {
 	stations := p.consumer.Stations()
 	departure, _ := p.consumer.RequestStationDataBetween(&stations[0])
 	var params = operations.NewGetJourneysParams()
@@ -224,10 +240,10 @@ func (p *DbRest) requestJourneysApi() {
 	params.Departure = (*strfmt.DateTime)(&departure)
 	res, err := p.client.Operations.GetJourneys(params)
 	if err != nil {
-		log.Panic(err)
-		return
+		return err
 	}
 	p.cachedJourneys = res.Payload
+	return nil
 }
 
 func (p *DbRest) parseStationsFromJourneys() {

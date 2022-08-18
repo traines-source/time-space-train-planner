@@ -1,4 +1,4 @@
-<?xml-stylesheet type="text/css" href="res/client.css?v3" ?>
+<?xml-stylesheet type="text/css" href="res/client.css" ?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
     viewBox="0 0 {{.SpaceAxisSize}} {{.TimeAxisSize}}">
 <defs>
@@ -99,7 +99,7 @@
     </text>
 </a>
 
-<script xlink:href="res/client.js?v3" />
+<script xlink:href="res/client.js" />
 
 <script>selectEdge('{{.DefaultShortestPathID}}');</script>
 

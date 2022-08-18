@@ -209,14 +209,21 @@ func (c *consumer) initializeProviders(evaNumbers []int) {
 	c.lines = map[string]*Line{}
 }
 
-func (c *consumer) callProviders(enrich bool) {
+func (c *consumer) callProviders(enrich bool) error {
 	for _, p := range c.providers {
 		if !enrich {
-			p.Fetch(c)
+			if err := p.Fetch(c); err != nil {
+				log.Print(err)
+				return &ErrorCode{Code: 502}
+			}
 		} else {
-			p.Enrich(c)
+			if err := p.Enrich(c); err != nil {
+				log.Print(err)
+				return &ErrorCode{Code: 502}
+			}
 		}
 	}
+	return nil
 }
 
 func defaultStations(evaNumbers []int) []providers.ProviderStation {
@@ -290,7 +297,7 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[string]*Line) {
+func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[string]*Line, error) {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
@@ -302,12 +309,18 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 
 	log.Print(evaNumbers)
 	c.initializeProviders(evaNumbers)
-	c.callProviders(false)
-	c.generateEdges(c.stations[from], c.stations[to])
+	if err := c.callProviders(false); err != nil {
+		return nil, nil, err
+	}
+	if err := c.generateEdges(c.stations[from], c.stations[to]); err != nil {
+		return nil, nil, err
+	}
 	shortestPaths(c.stations, c.stations[from], c.stations[to])
-	c.callProviders(true)
+	if err := c.callProviders(true); err != nil {
+		return nil, nil, err
+	}
 	c.rankStations(c.stations[from], c.stations[to])
-	return c.stations, c.lines
+	return c.stations, c.lines, nil
 }
 
 func (c *consumer) parseDate(dateTime string) {

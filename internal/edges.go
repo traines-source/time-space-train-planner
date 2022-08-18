@@ -153,9 +153,13 @@ func (c *consumer) sortEdges() {
 	}
 }
 
-func (c *consumer) generateEdges(from *Station, to *Station) {
+func (c *consumer) generateEdges(from *Station, to *Station) error {
+	if from == nil || to == nil {
+		return &ErrorCode{Code: 400, Msg: "Origin or destination does not exist or does not have any arrivals/departures"}
+	}
 	c.generateTimetableEdges()
 	c.sortEdges()
 	c.generateOnFootEdges(from, to)
 	c.sortEdges()
+	return nil
 }
