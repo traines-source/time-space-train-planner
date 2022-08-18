@@ -14,6 +14,9 @@ $(".station-autocomplete").autocomplete({
             });
             console.log(list)
             response(list);
+        })
+        .catch((error) => {
+            alert('Failed autocomplete request. Possibly too many requests. Try again later.')
         });
     }
 });
