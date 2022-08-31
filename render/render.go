@@ -140,8 +140,10 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 				nextArrivalToFill = nil
 			}
 			e.PreviousArrival = "data-pa=\"" + lastProperArrival + "\""
-			if i+1 < len(arrivals) && e.To.SpaceAxis.Station.GroupNumber != nil && stations[*e.To.SpaceAxis.Station.GroupNumber].Rank+1 == len(stations) {
-				nextArrivalToFill = &e.NextArrival
+			if i+1 < len(arrivals) && e.To.SpaceAxis.Station.GroupNumber != nil {
+				if val, ok := stations[*e.To.SpaceAxis.Station.GroupNumber]; ok && val.Rank+1 == len(stations) {
+					nextArrivalToFill = &e.NextArrival
+				}
 			}
 			lastProperArrival = generateEdgeID(arrivals[i])
 		}
@@ -155,8 +157,10 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 				*nextDepartureToFill = "data-nd=\"" + generateEdgeID(departures[i]) + "\""
 				nextDepartureToFill = nil
 			}
-			if e.From.SpaceAxis.Station.GroupNumber != nil && stations[*e.From.SpaceAxis.Station.GroupNumber].Rank == 0 {
-				e.PreviousDeparture = "data-pd=\"" + lastProperDeparture + "\""
+			if e.From.SpaceAxis.Station.GroupNumber != nil {
+				if val, ok := stations[*e.From.SpaceAxis.Station.GroupNumber]; ok && val.Rank == 0 {
+					e.PreviousDeparture = "data-pd=\"" + lastProperDeparture + "\""
+				}
 			}
 			nextDepartureToFill = &e.NextDeparture
 			lastProperDeparture = generateEdgeID(departures[i])

@@ -33,6 +33,10 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Print(to[0], stations)
+		if err != nil {
+			//v, ok := interface{}(err).(internal.ErrorWithCode)
+			w.WriteHeader(err.ErrorCode())
+		}
 		render.Vias(stations, from[0], to[0], datetime, w, err)
 		return
 	}

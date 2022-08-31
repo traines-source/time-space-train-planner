@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"sort"
 	"time"
@@ -153,8 +154,9 @@ func (c *consumer) sortEdges() {
 	}
 }
 
-func (c *consumer) generateEdges(from *Station, to *Station) error {
+func (c *consumer) generateEdges(from *Station, to *Station) *ErrorCode {
 	if from == nil || to == nil {
+		log.Print("Error: Origin or destination does not exist or does not have any arrivals/departures")
 		return &ErrorCode{Code: 400, Msg: "Origin or destination does not exist or does not have any arrivals/departures"}
 	}
 	c.generateTimetableEdges()

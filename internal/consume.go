@@ -158,26 +158,33 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 	line, ok := c.lines[e.LineID]
 	if !ok {
-		log.Printf("Non-existant Line %s for edge upsert", e.LineID)
+		log.Printf("Provider found Line that was not found by TSTP (From: %d, To: %d, LineID: %s, Dep: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID, e.Planned.Departure)
 		return
 	}
 	foundStart := false
 	foundEnd := false
 	for _, edge := range line.Route {
 		// TODO handle multi-line trains (ICE / RE, IC / NJ etc, e.g. IC 60400/NJ 40470)
-		if edge.From.EvaNumber == e.EvaNumberFrom || foundStart && !foundEnd {
+		if edge.From.EvaNumber == e.EvaNumberFrom || c.sameGroupNumber(e.EvaNumberFrom, edge.From.GroupNumber) || foundStart && !foundEnd {
 			if e.ProviderShortestPath != nil {
 				edge.ProviderShortestPath = *e.ProviderShortestPath
 			}
 			foundStart = true
-			if edge.To.EvaNumber == e.EvaNumberTo {
+			if edge.To.EvaNumber == e.EvaNumberTo || c.sameGroupNumber(e.EvaNumberTo, edge.To.GroupNumber) {
 				foundEnd = true
 			}
 		}
 	}
 	if !foundEnd {
-		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s, Dep: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID, e.Planned.Departure)
+		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s, Name: %s, Dep: %s, foundStart: %t)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID, line.Name, e.Planned.Departure, foundStart)
 	}
+}
+
+func (c *consumer) sameGroupNumber(evaNumber int, groupNumber *int) bool {
+	if val, ok := c.stations[evaNumber]; ok && groupNumber != nil && val.GroupNumber != nil && *val.GroupNumber == *groupNumber {
+		return true
+	}
+	return false
 }
 
 func (c *consumer) SetExpectedTravelDuration(duration time.Duration) {
@@ -209,16 +216,16 @@ func (c *consumer) initializeProviders(evaNumbers []int) {
 	c.lines = map[string]*Line{}
 }
 
-func (c *consumer) callProviders(enrich bool) error {
+func (c *consumer) callProviders(enrich bool) *ErrorCode {
 	for _, p := range c.providers {
 		if !enrich {
 			if err := p.Fetch(c); err != nil {
-				log.Print(err)
+				log.Print("Error: ", err)
 				return &ErrorCode{Code: 502}
 			}
 		} else {
 			if err := p.Enrich(c); err != nil {
-				log.Print(err)
+				log.Print("Error: ", err)
 				return &ErrorCode{Code: 502}
 			}
 		}
@@ -267,11 +274,15 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		}
 		stationI := stationsSlice[i]
 		if stationI.GroupNumber != nil {
-			stationI = c.stations[*stationI.GroupNumber]
+			if val, ok := c.stations[*stationI.GroupNumber]; ok {
+				stationI = val
+			}
 		}
 		stationJ := stationsSlice[j]
 		if stationJ.GroupNumber != nil {
-			stationJ = c.stations[*stationJ.GroupNumber]
+			if val, ok := c.stations[*stationJ.GroupNumber]; ok {
+				stationJ = val
+			}
 		}
 		return geoDistStations(origin, stationI)-geoDistStations(destination, stationI) < geoDistStations(origin, stationJ)-geoDistStations(destination, stationJ)
 	})
@@ -297,7 +308,7 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[string]*Line, error) {
+func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[string]*Line, *ErrorCode) {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
