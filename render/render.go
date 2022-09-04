@@ -5,7 +5,6 @@ import (
 	"html"
 	"io"
 	"log"
-	"math"
 	"os"
 	"sort"
 	"text/template"
@@ -325,12 +324,26 @@ func (p *EdgePath) Label() string {
 		label = e.Line.ID
 	}
 	if e.Message != "" {
-		label += " (" + e.Message[0:int(math.Min(float64(len(e.Message)), 30))] + "...)"
+		label += " (" + substr(e.Message, 0, 30) + "...)"
 	}
 	if e.Line.Type == "Foot" {
 		return "🚶 " + label
 	}
 	return label
+}
+
+func substr(input string, start int, length int) string {
+	asRunes := []rune(input)
+
+	if start >= len(asRunes) {
+		return ""
+	}
+
+	if start+length > len(asRunes) {
+		length = len(asRunes) - start
+	}
+
+	return string(asRunes[start : start+length])
 }
 
 func (p *EdgePath) Type() string {

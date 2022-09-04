@@ -268,7 +268,7 @@ func (p *DbRest) parseStationsFromJourneys() {
 				if leg.Departure != nil && start.IsZero() {
 					start = time.Time(*leg.Departure)
 				}
-				if leg.Arrival != nil {
+				if leg.Arrival != nil && end.Before(time.Time(*leg.Arrival)) {
 					end = time.Time(*leg.Arrival)
 				}
 			} else {
