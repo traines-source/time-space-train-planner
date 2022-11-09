@@ -22,24 +22,24 @@ type consumer struct {
 var loc, _ = time.LoadLocation("Europe/Berlin")
 
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
-	// TODO increase depending on journey time according to HAFAS, otherwise longer journeys are impossible to plan
 	defaultDuration, _ := time.ParseDuration("2h")
+	longDuration, _ := time.ParseDuration("8h")
 	maxDuration, _ := time.ParseDuration("14h")
 
 	var travelDuration time.Duration
-	if c.expectedTravelDuration < defaultDuration {
-		travelDuration = defaultDuration
-	} else if c.expectedTravelDuration > maxDuration {
-		travelDuration = maxDuration
+	if c.expectedTravelDuration > maxDuration {
+		travelDuration = maxDuration + defaultDuration + defaultDuration
 	} else {
-		travelDuration = c.expectedTravelDuration.Truncate(time.Hour) + defaultDuration
+		travelDuration = c.expectedTravelDuration.Round(time.Hour) + defaultDuration
+		if travelDuration > longDuration {
+			travelDuration += defaultDuration
+		}
 	}
-	log.Print("Requesting for ", station.EvaNumber, " at ", c.dateTime, " with duration +2 ", travelDuration)
 	//t := time.Now()
 	//from = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
 	//from = time.Date(t.Year(), t.Month(), 9, 19, 0, 0, 0, time.Local)
 	from = c.dateTime
-	return from, from.Add(travelDuration).Add(defaultDuration)
+	return from, from.Add(travelDuration)
 }
 
 func (c *consumer) Stations() []providers.ProviderStation {

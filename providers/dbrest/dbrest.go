@@ -80,6 +80,7 @@ func (p *DbRest) requestDeparturesAndArrivals() error {
 		}
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
+		log.Print("Requesting for ", station.EvaNumber, " at ", from, " with duration ", duration)
 		if err := p.requestArrival(station, from, int64(duration)); err != nil {
 			return err
 		}
@@ -247,7 +248,7 @@ func (p *DbRest) requestJourneysApi() error {
 }
 
 func (p *DbRest) parseStationsFromJourneys() {
-	var start, end time.Time
+	var end time.Time
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
 			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
@@ -265,9 +266,6 @@ func (p *DbRest) parseStationsFromJourneys() {
 					Lat:       float32(*leg.Destination.Location.Latitude),
 					Lon:       float32(*leg.Destination.Location.Longitude),
 				})
-				if leg.Departure != nil && start.IsZero() {
-					start = time.Time(*leg.Departure)
-				}
 				if leg.Arrival != nil && end.Before(time.Time(*leg.Arrival)) {
 					end = time.Time(*leg.Arrival)
 				}
@@ -276,6 +274,7 @@ func (p *DbRest) parseStationsFromJourneys() {
 			}
 		}
 	}
+	start, _ := p.consumer.RequestStationDataBetween(&p.consumer.Stations()[0])
 	log.Print("expdur", start, end)
 	p.consumer.SetExpectedTravelDuration(end.Sub(start))
 }
