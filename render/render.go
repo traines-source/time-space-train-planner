@@ -1,12 +1,14 @@
 package render
 
 import (
+	"encoding/json"
 	"fmt"
 	"html"
 	"io"
 	"log"
 	"os"
 	"sort"
+	"strconv"
 	"text/template"
 	"time"
 
@@ -14,13 +16,13 @@ import (
 )
 
 type container struct {
-	Stations              map[*internal.Station]*StationLabel
+	Stations              map[string]*StationLabel
 	Edges                 map[string]*EdgePath
-	SortedEdges           []*EdgePath
+	SortedEdges           []string
 	MinTime               time.Time
 	MaxTime               time.Time
-	maxSpace              int
-	timeAxisDistance      float32
+	MaxSpace              int
+	TimeAxisDistance      float32
 	TimeIndicators        []Coord
 	TimeAxisSize          int
 	SpaceAxisSize         int
@@ -36,7 +38,7 @@ const (
 
 func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
 	c := &container{
-		Stations:  map[*internal.Station]*StationLabel{},
+		Stations:  map[string]*StationLabel{},
 		Edges:     map[string]*EdgePath{},
 		Query:     html.EscapeString(query),
 		LegalLink: os.Getenv("TSTP_LEGAL"),
@@ -48,12 +50,32 @@ func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Li
 	c.render(wr)
 }
 
+func TimeSpaceApi(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
+	c := &container{
+		Stations: map[string]*StationLabel{},
+		Edges:    map[string]*EdgePath{},
+	}
+	c.setupStations(stations)
+	c.setupEdges(lines)
+	c.setupPreviousAndNext(stations)
+	c.gravitate()
+	json.NewEncoder(wr).Encode(c)
+}
+
 func (c *container) setupStations(stations map[int]*internal.Station) {
 	for _, s := range stations {
 		if len(s.Arrivals) > 0 || len(s.Departures) > 0 {
-			station := &StationLabel{Station: *s}
-			station.Coord.SpaceAxis = station
-			c.Stations[s] = station
+			station := &StationLabel{
+				ID:   strconv.Itoa(s.EvaNumber),
+				Name: s.Name,
+				Rank: s.Rank,
+			}
+			if s.GroupNumber != nil {
+				g := strconv.Itoa(*s.GroupNumber)
+				station.GroupID = &g
+			}
+			station.Coord.SpaceAxis = station.ID
+			c.Stations[station.ID] = station
 		}
 	}
 }
@@ -70,10 +92,10 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 		}
 	}
 	sort.Slice(c.SortedEdges, func(i, j int) bool {
-		if c.SortedEdges[i].Redundant == c.SortedEdges[j].Redundant && c.SortedEdges[i].Line != nil {
-			return c.SortedEdges[i].Line.Type == "Foot"
+		if c.Edges[c.SortedEdges[i]].Redundant == c.Edges[c.SortedEdges[j]].Redundant && c.Edges[c.SortedEdges[i]].Line != nil {
+			return c.Edges[c.SortedEdges[i]].Line.Type == "Foot"
 		}
-		return c.SortedEdges[i].Redundant
+		return c.Edges[c.SortedEdges[i]].Redundant
 	})
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
@@ -101,13 +123,13 @@ func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
 	sort.Slice(stationsSlice, func(i, j int) bool {
 		return stationsSlice[i].Rank < stationsSlice[j].Rank
 	})
-	c.preselectShortestPath(stationsSlice[len(stationsSlice)-1])
+	c.preselectShortestPath(stationsSlice[0], stationsSlice[len(stationsSlice)-1])
 	var arrivals []*internal.Edge
 	var departures []*internal.Edge
 	var lastGroup *int
 	for _, s := range stationsSlice {
 		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
-			c.flushStationGroup(stations, departures, arrivals)
+			c.flushStationGroup(departures, arrivals)
 			arrivals = []*internal.Edge{}
 			departures = []*internal.Edge{}
 			lastGroup = s.GroupNumber
@@ -115,10 +137,10 @@ func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
 		arrivals = append(arrivals, s.Arrivals...)
 		departures = append(departures, s.Departures...)
 	}
-	c.flushStationGroup(stations, departures, arrivals)
+	c.flushStationGroup(departures, arrivals)
 }
 
-func (c *container) flushStationGroup(stations map[int]*internal.Station, departures []*internal.Edge, arrivals []*internal.Edge) {
+func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*internal.Edge) {
 	sort.SliceStable(arrivals, func(i, j int) bool {
 		return arrivals[i].Actual.Arrival.Before(arrivals[j].Actual.Arrival)
 	})
@@ -131,7 +153,7 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 	var nextDepartureToFill *string = nil
 	for i := 0; i < len(arrivals); i++ {
 		if e, ok := c.Edges[generateEdgeID(arrivals[i])]; ok {
-			if isEdgeInsideGroup(e) {
+			if c.isEdgeInsideGroup(e) {
 				continue
 			}
 			if nextArrivalToFill != nil {
@@ -139,8 +161,8 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 				nextArrivalToFill = nil
 			}
 			e.PreviousArrival = "data-pa=\"" + lastProperArrival + "\""
-			if i+1 < len(arrivals) && e.To.SpaceAxis.Station.GroupNumber != nil {
-				if val, ok := stations[*e.To.SpaceAxis.Station.GroupNumber]; ok && val.Rank+1 == len(stations) {
+			if i+1 < len(arrivals) && c.Stations[e.To.SpaceAxis].GroupID != nil {
+				if val, ok := c.Stations[*c.Stations[e.To.SpaceAxis].GroupID]; ok && val.Rank+1 == len(c.Stations) {
 					nextArrivalToFill = &e.NextArrival
 				}
 			}
@@ -149,15 +171,15 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 	}
 	for i := 0; i < len(departures); i++ {
 		if e, ok := c.Edges[generateEdgeID(departures[i])]; ok {
-			if isEdgeInsideGroup(e) {
+			if c.isEdgeInsideGroup(e) {
 				continue
 			}
 			if nextDepartureToFill != nil {
 				*nextDepartureToFill = "data-nd=\"" + generateEdgeID(departures[i]) + "\""
 				nextDepartureToFill = nil
 			}
-			if e.From.SpaceAxis.Station.GroupNumber != nil {
-				if val, ok := stations[*e.From.SpaceAxis.Station.GroupNumber]; ok && val.Rank == 0 {
+			if c.Stations[e.From.SpaceAxis].GroupID != nil {
+				if val, ok := c.Stations[*c.Stations[e.From.SpaceAxis].GroupID]; ok && val.Rank == 0 {
 					e.PreviousDeparture = "data-pd=\"" + lastProperDeparture + "\""
 				}
 			}
@@ -167,9 +189,9 @@ func (c *container) flushStationGroup(stations map[int]*internal.Station, depart
 	}
 }
 
-func (c *container) preselectShortestPath(destination *internal.Station) {
+func (c *container) preselectShortestPath(origin *internal.Station, destination *internal.Station) {
 	for _, s := range destination.Arrivals {
-		if s.ReverseShortestPath != nil {
+		if s.ReverseShortestPath != nil || s.From.EvaNumber == origin.EvaNumber {
 			if e, ok := c.Edges[generateEdgeID(s)]; ok {
 				c.DefaultShortestPathID = e.ID
 			}
@@ -178,16 +200,16 @@ func (c *container) preselectShortestPath(destination *internal.Station) {
 	}
 }
 
-func isEdgeInsideGroup(e *EdgePath) bool {
-	return e.From.SpaceAxis.GroupNumber != nil && e.To.SpaceAxis.GroupNumber != nil && *e.From.SpaceAxis.GroupNumber == *e.To.SpaceAxis.GroupNumber
+func (c *container) isEdgeInsideGroup(e *EdgePath) bool {
+	return c.Stations[e.From.SpaceAxis].GroupID != nil && c.Stations[e.To.SpaceAxis].GroupID != nil && *c.Stations[e.To.SpaceAxis].GroupID == *c.Stations[e.To.SpaceAxis].GroupID
 }
 
 func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, start *internal.Edge, end *internal.Edge) {
 	if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
-		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
 	}
 	if edgePath, ok := c.Edges[generateStationEdgeID(start, end)]; ok {
-		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath)
+		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
 	}
 }
 
@@ -202,13 +224,27 @@ func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edge := &EdgePath{
-		Edge: *e,
-		ID:   generateEdgeID(e),
-		From: Coord{SpaceAxis: c.Stations[e.From], TimeAxis: e.Actual.Departure},
-		To:   Coord{SpaceAxis: c.Stations[e.To], TimeAxis: e.Actual.Arrival},
+		ID:                   generateEdgeID(e),
+		ShortestPathFor:      []string{},
+		From:                 Coord{SpaceAxis: strconv.Itoa(e.From.EvaNumber), TimeAxis: e.Actual.Departure},
+		To:                   Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
+		Redundant:            e.Redundant,
+		Discarded:            e.Discarded,
+		Message:              e.Message,
+		Planned:              e.Planned,
+		Current:              e.Current,
+		Actual:               e.Actual,
+		ProviderShortestPath: e.ProviderShortestPath,
+	}
+	if e.Line != nil {
+		edge.Line = &LineLabel{
+			Name: e.Line.Name,
+			ID:   e.Line.ID,
+			Type: e.Line.Type,
+		}
 	}
 	c.Edges[edge.ID] = edge
-	c.SortedEdges = append(c.SortedEdges, edge)
+	c.SortedEdges = append(c.SortedEdges, edge.ID)
 	return edge
 }
 
@@ -225,15 +261,14 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		return nil
 	}
 	edge := &EdgePath{
-		ID:   generateStationEdgeID(last, this),
-		From: Coord{SpaceAxis: c.Stations[this.From], TimeAxis: last.Actual.Arrival},
-		To:   Coord{SpaceAxis: c.Stations[this.From], TimeAxis: this.Actual.Departure},
-		Edge: internal.Edge{
-			Redundant: last.Redundant || this.Redundant,
-		},
+		ID:              generateStationEdgeID(last, this),
+		ShortestPathFor: []string{},
+		From:            Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: last.Actual.Arrival},
+		To:              Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: this.Actual.Departure},
+		Redundant:       last.Redundant || this.Redundant,
 	}
 	c.Edges[edge.ID] = edge
-	c.SortedEdges = append(c.SortedEdges, edge)
+	c.SortedEdges = append(c.SortedEdges, edge.ID)
 	return edge
 }
 
@@ -262,27 +297,27 @@ func (c *container) layoutStations() {
 	})
 	x := -1
 	y := 0
-	var lastGroup *int
+	var lastGroup *string
 	for _, s := range stationsSlice {
-		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
+		if s.GroupID == nil || lastGroup == nil || *lastGroup != *s.GroupID {
 			x++
 			y = 0
-			lastGroup = s.GroupNumber
+			lastGroup = s.GroupID
 		}
 		s.SpaceAxis = x
-		if s.GroupNumber == nil || s.GroupNumber != nil && *s.GroupNumber == s.EvaNumber {
+		if s.GroupID == nil || s.GroupID != nil && *s.GroupID == s.ID {
 			s.SpaceAxisHeap = 0
 		} else {
 			y++
 			s.SpaceAxisHeap = y
 		}
 	}
-	c.maxSpace = x
+	c.MaxSpace = x
 }
 
 func (c *container) indicateTimes() {
 	delta := c.MaxTime.Unix() - c.MinTime.Unix()
-	c.timeAxisDistance = float32(delta)
+	c.TimeAxisDistance = float32(delta)
 	t := time.Date(c.MinTime.Year(), c.MinTime.Month(), c.MinTime.Day(), c.MinTime.Hour()+1, 0, 0, 0, c.MinTime.Location())
 	for ; t.Before(c.MaxTime); t = t.Add(time.Hour) {
 		c.TimeIndicators = append(c.TimeIndicators, Coord{TimeAxis: t})
@@ -298,22 +333,21 @@ func (c *container) render(wr io.Writer) {
 }
 
 func (c *container) X(coord Coord) int {
-	if coord.SpaceAxis == nil {
+	if coord.SpaceAxis == "" {
 		return 0
 	}
-	return int(float32(coord.SpaceAxis.SpaceAxis)/float32(c.maxSpace)*float32(c.SpaceAxisSize-100) + 50.0)
+	return int(float32(c.Stations[coord.SpaceAxis].SpaceAxis)/float32(c.MaxSpace)*float32(c.SpaceAxisSize-100) + 50.0)
 }
 
 func (c *container) Y(coord Coord) int {
 	if coord.TimeAxis.IsZero() {
-		return 50 + coord.SpaceAxis.SpaceAxisHeap*20
+		return 50 + c.Stations[coord.SpaceAxis].SpaceAxisHeap*20
 	}
 	delta := float32(coord.TimeAxis.Unix() - c.MinTime.Unix())
-	return int(delta/c.timeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
+	return int(delta/c.TimeAxisDistance*float32(c.TimeAxisSize-100) + 100.0)
 }
 
-func (p *EdgePath) Label() string {
-	e := p.Edge
+func (e *EdgePath) Label() string {
 	if e.Line == nil {
 		return ""
 	}
@@ -346,8 +380,7 @@ func substr(input string, start int, length int) string {
 	return string(asRunes[start : start+length])
 }
 
-func (p *EdgePath) Type() string {
-	e := p.Edge
+func (e *EdgePath) Type() string {
 	if e.Line == nil {
 		return ""
 	}
@@ -370,8 +403,7 @@ func (p *EdgePath) LiveDataArrival() string {
 	return p.liveDataClass(func(stop internal.StopInfo) time.Time { return stop.Arrival })
 }
 
-func (p *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackResolver func(internal.StopInfo) string) string {
-	e := p.Edge
+func (e *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackResolver func(internal.StopInfo) string) string {
 	if e.Line == nil {
 		return ""
 	}
@@ -382,8 +414,7 @@ func (p *EdgePath) time(timeResolver func(internal.StopInfo) time.Time, trackRes
 	return label
 }
 
-func (p *EdgePath) liveDataClass(timeResolver func(internal.StopInfo) time.Time) string {
-	e := p.Edge
+func (e *EdgePath) liveDataClass(timeResolver func(internal.StopInfo) time.Time) string {
 	if e.Line == nil {
 		return ""
 	}

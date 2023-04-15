@@ -33,11 +33,11 @@
 
 <div>
     <input id="from-name" placeholder="From" class="station-autocomplete" value="{{.From.Name}}">
-    <input type="hidden" name="from" id="from" value="{{.From.EvaNumber}}">
+    <input type="hidden" name="from" id="from" value="{{.From.ID}}">
 </div>
 <div>
     <input id="to-name" placeholder="To" class="station-autocomplete" value="{{.To.Name}}">
-    <input type="hidden" name="to" id="to" value="{{.To.EvaNumber}}">
+    <input type="hidden" name="to" id="to" value="{{.To.ID}}">
 </div>
 {{if .Stations}}
 <p>
@@ -47,7 +47,7 @@
 {{range $idx, $e := .Stations}}
 <div>
     <input id="via-{{$idx}}-name" placeholder="Via" class="station-autocomplete" value="{{$e.Name}}">
-    <input type="hidden" name="vias" id="via-{{$idx}}" value="{{$e.EvaNumber}}">
+    <input type="hidden" name="vias" id="via-{{$idx}}" value="{{$e.ID}}">
 </div>
 {{end}}
 

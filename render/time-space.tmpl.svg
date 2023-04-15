@@ -16,8 +16,8 @@
 </defs>
 {{range .Stations}}
 <text x="{{$.X .Coord}}" y="{{$.Y .Coord}}" class="station-label">
-    {{.Station.Name}}
-    <title>{{.Station.EvaNumber}}</title>
+    {{.Name}}
+    <title>{{.ID}}</title>
 </text>
 {{end}}
 {{range .TimeIndicators}}
@@ -25,28 +25,32 @@
     {{$.SimpleTime .TimeAxis}}
 </text>
 {{end}}
-{{range .SortedEdges}}{{if not .Discarded}}
-<path id="{{.ID}}" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
-    {{.PreviousDeparture}} {{.NextDeparture}} {{.PreviousArrival}} {{.NextArrival}}
-    class="edge type-{{.Type}} redundant-{{.Redundant}} {{ range .ShortestPathFor }} sp-{{.ID}}{{ end }} {{if eq .ProviderShortestPath true}}provider-shortest-path{{end}}"
+{{range .SortedEdges}}
+{{$e:= index $.Edges .}}
+{{if not $e.Discarded}}
+<path id="{{$e.ID}}" d="M {{$.X $e.From}},{{$.Y $e.From}} L{{$.X $e.To}},{{$.Y $e.To}}"
+    {{$e.PreviousDeparture}} {{$e.NextDeparture}} {{$e.PreviousArrival}} {{$e.NextArrival}}
+    class="edge type-{{$e.Type}} redundant-{{$e.Redundant}} {{ range $e.ShortestPathFor }} sp-{{.}}{{ end }} {{if eq $e.ProviderShortestPath true}}provider-shortest-path{{end}}"
     />
-<path id="{{.ID}}-toucharea" d="M {{$.X .From}},{{$.Y .From}} L{{$.X .To}},{{$.Y .To}}"
+<path id="{{$e.ID}}-toucharea" d="M {{$.X $e.From}},{{$.Y $e.From}} L{{$.X $e.To}},{{$.Y $e.To}}"
     class="edge-toucharea"
     />
 {{end}}{{end}}
-{{range .SortedEdges}}{{if not .Discarded}}
-<text id="{{.ID}}-label" class="label type-{{.Type}} label-{{.ID}}">
-    <textPath href="#{{.ID}}" startOffset="50%">
-        {{.Label}}
+{{range .SortedEdges}}
+{{$e:= index $.Edges .}}
+{{if not $e.Discarded}}
+<text id="{{$e.ID}}-label" class="label type-{{$e.Type}} label-{{$e.ID}}">
+    <textPath href="#{{$e.ID}}" startOffset="50%">
+        {{$e.Label}}
     </textPath>
 </text>
-<text x="{{$.X .To}}" y="{{$.Y .To}}" id="{{.ID}}-arrival"
-    class="arrival type-{{.Type}} label-{{.ID}} {{.LiveDataArrival}}">
-    {{.Arrival}}
+<text x="{{$.X $e.To}}" y="{{$.Y $e.To}}" id="{{$e.ID}}-arrival"
+    class="arrival type-{{$e.Type}} label-{{$e.ID}} {{$e.LiveDataArrival}}">
+    {{$e.Arrival}}
 </text>
-<text x="{{$.X .From}}" y="{{$.Y .From}}" id="{{.ID}}-departure"
-    class="departure type-{{.Type}} label-{{.ID}} {{.LiveDataDeparture}}">
-    {{.Departure}}
+<text x="{{$.X $e.From}}" y="{{$.Y $e.From}}" id="{{$e.ID}}-departure"
+    class="departure type-{{$e.Type}} label-{{$e.ID}} {{$e.LiveDataDeparture}}">
+    {{$e.Departure}}
 </text>
 {{end}}{{end}}
 <a xlink:href="?{{.Query}}&amp;form">
