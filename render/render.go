@@ -16,6 +16,9 @@ import (
 )
 
 type container struct {
+	From                  StationLabel
+	To                    StationLabel
+	Vias                  []StationLabel
 	Stations              map[string]*StationLabel
 	Edges                 map[string]*EdgePath
 	SortedEdges           []string
@@ -63,6 +66,8 @@ func TimeSpaceApi(stations map[int]*internal.Station, lines map[string]*internal
 }
 
 func (c *container) setupStations(stations map[int]*internal.Station) {
+	var from int
+	var to int
 	for _, s := range stations {
 		if len(s.Arrivals) > 0 || len(s.Departures) > 0 {
 			station := &StationLabel{
@@ -74,10 +79,19 @@ func (c *container) setupStations(stations map[int]*internal.Station) {
 				g := strconv.Itoa(*s.GroupNumber)
 				station.GroupID = &g
 			}
+			if s.Rank == 0 {
+				from = s.EvaNumber
+				c.From = *station
+			}
+			if s.Rank+1 == len(stations) {
+				to = s.EvaNumber
+				c.To = *station
+			}
 			station.Coord.SpaceAxis = station.ID
 			c.Stations[station.ID] = station
 		}
 	}
+	c.Vias = makeVias(stations, from, to)
 }
 
 func (c *container) setupEdges(lines map[string]*internal.Line) {

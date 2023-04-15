@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { Station, store } from "../store"
+    import { setFromApi, Station, store } from "../store"
     import { optionsQueryString } from "../url"
     
     let loading = true;
@@ -13,6 +13,8 @@
         .then(d => {
             data = d;
             console.log(data);
+            setFromApi(data);
+            console.log(store);
             loading = false;
         })
         .catch((error) => {

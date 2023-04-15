@@ -286,7 +286,11 @@ a text {
 
 .loading-screen {
   text-align: center;
-  margin-top: 200px;
+  margin: 200px 0 200px 0;
+}
+
+.loading-screen img {
+  height: 12px;
 }
 
 

@@ -1,24 +1,19 @@
 <script>
-    import { Station, store, fillupStations } from "../store"
+    import { Station, store, fillupStations, setFromApi } from "../store"
     import { optionsQueryString } from "../url"
     import StationInput from "./stationInput.svelte"
     import { goto } from '$app/navigation';
+    import { onMount } from "svelte";
 
     let query = store;
     let loading = false;
-
-    function mapStation(s) {
-        return {id: s.ID, name: s.Name};
-    }
    
     function fetchVias() {
         fetch(import.meta.env.VITE_TSTP_API+'vias?'+optionsQueryString(query))
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            query.from = mapStation(data.From);
-            query.to = mapStation(data.To);
-            query.vias = fillupStations(data.Stations.map(mapStation));
+            setFromApi(data);
             query = query;
             loading = false;
         })
@@ -32,13 +27,21 @@
     function submit() {
         if (query.from.id && query.to.id) {
             loading = true;
-            if (query.vias.length > 0) {
-                goto('?'+optionsQueryString(query));
-            } else {
+            goto('?'+optionsQueryString(query));
+            if (query.vias.length == 0) {
                 fetchVias();
             }
         }
     }
+
+    onMount(() => {
+        if (!query.from.name || !query.to.name) {
+            if (query.from.id && query.to.id) {
+                loading = true;
+                fetchVias();
+            }
+        }
+    })
 
 </script>
 
@@ -71,7 +74,7 @@
         {/each}
 
         <div>
-            <input type="datetime-local" id="datetime" name="datetime" value="{query.datetime}">
+            <input type="datetime-local" id="datetime" name="datetime" bind:value="{query.datetime}">
             <p id="default-now">Default is Now</p>
         </div>
         

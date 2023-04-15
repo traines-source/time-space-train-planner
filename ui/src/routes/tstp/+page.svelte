@@ -8,15 +8,21 @@
         store.initialized = true;
         store.from.id = $page.url.searchParams.get('from') || undefined;
         store.to.id = $page.url.searchParams.get('to') || undefined;
-        store.vias = fillupStations($page.url.searchParams.getAll('vias').map(s => ({id: s, name: undefined})));
+        const vias = $page.url.searchParams.getAll('vias').map(s => ({id: s, name: undefined}));
+        if (vias.length > 0) store.vias = fillupStations(vias);
+        store.datetime = $page.url.searchParams.get('datetime');
     }
 
-    let showForm;
-    $: showForm = $page.url.searchParams.has('form') || !requiredFieldsSet() ;   
+    let showForm = false;
+    let showTimespace = false;
+    $: {
+        showForm = $page.url.searchParams.has('form') || !$page.url.searchParams.has('vias') || !requiredFieldsSet();
+        showTimespace = !showForm;
+    }
 </script>
 
 {#if showForm}
     <Form />
-{:else}
+{:else if showTimespace}
     <Timespace />
 {/if}

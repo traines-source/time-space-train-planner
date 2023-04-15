@@ -18,6 +18,16 @@ const store = {
     initialized: false
 };
 
+function mapStation(s) {
+    return {id: s.ID, name: s.Name};
+}
+
+function setFromApi(data) {
+    store.from = mapStation(data.From);
+    store.to = mapStation(data.To);
+    store.vias = fillupStations(data.Vias.map(mapStation));
+}
+
 function requiredFieldsSet() {
     return store.vias.length > 0 && store.from.id && store.to.id
 }
@@ -34,5 +44,6 @@ function fillupStations(vias) {
 export {
     store,
     requiredFieldsSet,
-    fillupStations
+    fillupStations,
+    setFromApi
 }

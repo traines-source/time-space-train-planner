@@ -39,12 +39,12 @@
     <input id="to-name" placeholder="To" class="station-autocomplete" value="{{.To.Name}}">
     <input type="hidden" name="to" id="to" value="{{.To.ID}}">
 </div>
-{{if .Stations}}
+{{if .Vias}}
 <p>
     You need to enter relevant interchange stations (up to 10). Only direct connections between these stations will be found.
 </p>
 {{end}}
-{{range $idx, $e := .Stations}}
+{{range $idx, $e := .Vias}}
 <div>
     <input id="via-{{$idx}}-name" placeholder="Via" class="station-autocomplete" value="{{$e.Name}}">
     <input type="hidden" name="vias" id="via-{{$idx}}" value="{{$e.ID}}">
