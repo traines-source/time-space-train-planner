@@ -49,6 +49,137 @@
         const d = new Date(t);
         return lz(d.getHours())+':'+lz(d.getMinutes());
     }
+
+    let currentSelected = undefined;
+    let currentSelectedShortestPath = [];
+
+    function selectEdge(edgeId) {
+        setSelectedForDependents(false);
+        currentSelected = data.Edges[edgeId];
+        console.log('cur', currentSelected, edgeId);
+        currentSelectedShortestPath = setSelectedForDependents(true);
+        console.log(currentSelectedShortestPath);
+    }
+
+    function setSelectedForDependents(selected) {
+        if (!currentSelected) {
+            return [];
+        }
+        let all = [];
+        let next = currentSelected;
+        while(true) {
+            setSelectedForElement(next, selected);
+            all.push(next);
+            if (next.ShortestPath.length == 0) break;
+            next = data.Edges[next.ShortestPath[0].EdgeID];
+        }
+        next = currentSelected;
+        while(next.ReverseShortestPath.length > 0) {
+
+            next = data.Edges[next.ReverseShortestPath[0].EdgeID];
+            setSelectedForElement(next, selected);
+            all.push(next);
+        }
+        return all;
+    }
+
+    function setSelectedForElement(element, selected) {
+        if (element.Discarded) return;
+        const e = document.getElementById(element.ID);
+        if (selected) {
+            e.className.baseVal += " selected";
+        } else {
+            e.className.baseVal =  e.className.baseVal.replace(" selected", "");
+        }    
+    }
+
+    function selectListener(evt) {
+        const id = this.id.replace('-toucharea', '');
+        console.log('selected ', id);
+        selectEdge(id);
+    }
+
+    function label(e) {
+        if (!e.Line) {
+            return '';
+        }
+        let label = '';
+        if (e.Line.Name) {
+            label = e.Line.Name;
+        } else {
+            label = e.Line.ID;
+        }
+        if (e.Message) {
+            label += ' 🛈';
+        }
+        if (e.Line.Type == 'Foot') {
+            return '🚶 ' + label;
+        }
+        return label;
+    }
+
+    function type(e) {
+        if (!e.Line) {
+            return '';
+        }
+        return e.Line.Type;
+    }
+
+    function departure(e) {
+        return time(e, stop => stop.Departure, stop => stop.DepartureTrack);
+    }
+
+    function arrival(e) {
+        return time(e, stop => stop.Arrival, stop => stop.ArrivalTrack);
+    }
+
+    function liveDataDeparture(e) {
+        return liveDataClass(e, stop => stop.Departure);
+    }
+
+    function liveDataArrival(e) {
+        return liveDataClass(e, stop => stop.Arrival);
+    }
+
+    function time(e, timeResolver, trackResolver) {
+        if (!e.Line) {
+            return ''
+        }
+        let label = simpleTime(timeResolver(e.Actual)) + ' ' + delay(timeResolver(e.Current), timeResolver(e.Planned))
+        if (trackResolver(e.Planned)) {
+            label += "Pl." + trackResolver(e.Planned)
+        }
+        return label
+    }
+
+    function liveDataClass(e, timeResolver) {
+        if (!e.Line) {
+            return '';
+        }
+        let current = timeResolver(e.Current)
+        if (parseTime(current) == 0) {
+            return ''
+        }
+        if (delayMinutes(current, timeResolver(e.Planned)) > 5) {
+            return "live-red"
+        }
+        return "live-green"
+    }
+
+    function delayMinutes(current, planned) {
+        return Math.round((parseTime(current)-parseTime(planned))/1000/60);
+    }
+
+    function delay(current, planned) {
+        if (parseTime(current) != 0) {
+
+            return " (+" + delayMinutes(current, planned) + ") ";
+        }
+        return ''
+    }
+
+    const margin = 25;
+
     onMount(() => {
         fetchTimespace();
     })
@@ -89,11 +220,32 @@
 {#each data.SortedEdges.map(id => data.Edges[id]) as e}
 {#if !e.Discarded}
 <path id="{e.ID}" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
-    class="edge type-{e.Type} redundant-{e.Redundant} {e.ShortestPathFor.map(p => 'sp-'+p).join(' ')} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
+    class="edge type-{type(e)} redundant-{e.Redundant} {e.ShortestPathFor.map(p => 'sp-'+p).join(' ')} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
     />
 <path id="{e.ID}-toucharea" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
-    class="edge-toucharea"
+    class="edge-toucharea" on:click={selectListener}
     />
+{/if}
+{/each}
+{#each currentSelectedShortestPath as e}
+{#if !e.Discarded}
+<text id="{e.ID}-label" class="label type-{type(e)} label-{e.ID}">
+    <textPath href="#{e.ID}" startOffset="50%">
+        {label(e)}
+    </textPath>
+</text>
+<text x="{x(e.To)}" y="{y(e.To)}" id="{e.ID}-arrival"
+    class="arrival type-{type(e)} label-{e.ID} {liveDataArrival(e)}">
+    {arrival(e)}
+</text>
+<text x="{x(e.From)}" y="{y(e.From)}" id="{e.ID}-departure"
+    class="departure type-{type(e)} label-{e.ID} {liveDataDeparture(e)}">
+    {departure(e)}
+</text>
+{#if e.PreviousArrival}<text x="{x(e.To)}" y="{y(e.To)-margin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousArrival)}>▲</text>{/if}
+{#if e.PreviousDeparture}<text x="{x(e.From)}" y="{y(e.From)-margin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousDeparture)}>▲</text>{/if}
+{#if e.NextArrival}<text x="{x(e.To)}" y="{y(e.To)+margin}" class="previous-next-arrow" on:click={selectEdge(e.NextArrival)}>▼</text>{/if}
+{#if e.NextDeparture}<text x="{x(e.From)}" y="{y(e.From)+margin}" class="previous-next-arrow" on:click={selectEdge(e.NextDeparture)}>▼</text>{/if}
 {/if}
 {/each}
 <a xlink:href="?{optionsQueryString(store)}&amp;form">
