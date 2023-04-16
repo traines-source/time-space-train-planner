@@ -48,6 +48,7 @@ func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Li
 	}
 	c.setupStations(stations)
 	c.setupEdges(lines)
+	c.setupShortestPathFors(lines)
 	c.setupPreviousAndNext(stations)
 	c.gravitate()
 	c.render(wr)
@@ -111,6 +112,9 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 		}
 		return c.Edges[c.SortedEdges[i]].Redundant
 	})
+}
+
+func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			origin := l.Route[i]

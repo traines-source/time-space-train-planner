@@ -66,31 +66,48 @@
             return [];
         }
         let all = [];
+        let previous = currentSelected;
         let next = currentSelected;
         while(true) {
-            setSelectedForElement(next, selected);
+            setSelectedForEdge(next, selected);
+            setSelectedForStationEdge(previous, next, selected);
             all.push(next);
             if (next.ShortestPath.length == 0) break;
+            previous = next;
             next = data.Edges[next.ShortestPath[0].EdgeID];
         }
         next = currentSelected;
         while(next.ReverseShortestPath.length > 0) {
-
+            previous = next;
             next = data.Edges[next.ReverseShortestPath[0].EdgeID];
-            setSelectedForElement(next, selected);
+            setSelectedForEdge(next, selected);
+            setSelectedForStationEdge(previous, next, selected);
             all.push(next);
         }
         return all;
     }
 
-    function setSelectedForElement(element, selected) {
-        if (element.Discarded) return;
-        const e = document.getElementById(element.ID);
+    function setSelectedForEdgeId(edgeId, selected) {
+        const e = document.getElementById(edgeId);
         if (selected) {
             e.className.baseVal += " selected";
         } else {
             e.className.baseVal =  e.className.baseVal.replace(" selected", "");
         }    
+    }
+
+    function setSelectedForEdge(edge, selected) {
+        if (edge.Discarded) return;
+        setSelectedForEdgeId(edge.ID, selected);
+    }
+    
+    
+    function setSelectedForStationEdge(previous, next, selected) {
+        if (previous.Discarded || next.Discarded) return;
+        const edgeId = previous.ID+'_'+next.ID+'_station';
+        if (document.getElementById(edgeId)) {
+            setSelectedForEdgeId(edgeId, selected);
+        }
     }
 
     function selectListener(evt) {
