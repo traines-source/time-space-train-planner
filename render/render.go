@@ -170,11 +170,14 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 			if c.isEdgeInsideGroup(e) {
 				continue
 			}
+			if e.Discarded {
+				continue
+			}
 			if nextArrivalToFill != nil {
-				*nextArrivalToFill = "data-na=\"" + generateEdgeID(arrivals[i]) + "\""
+				*nextArrivalToFill = generateEdgeID(arrivals[i])
 				nextArrivalToFill = nil
 			}
-			e.PreviousArrival = "data-pa=\"" + lastProperArrival + "\""
+			e.PreviousArrival = lastProperArrival
 			if i+1 < len(arrivals) && c.Stations[e.To.SpaceAxis].GroupID != nil {
 				if val, ok := c.Stations[*c.Stations[e.To.SpaceAxis].GroupID]; ok && val.Rank+1 == len(c.Stations) {
 					nextArrivalToFill = &e.NextArrival
@@ -188,13 +191,16 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 			if c.isEdgeInsideGroup(e) {
 				continue
 			}
+			if e.Discarded {
+				continue
+			}
 			if nextDepartureToFill != nil {
-				*nextDepartureToFill = "data-nd=\"" + generateEdgeID(departures[i]) + "\""
+				*nextDepartureToFill = generateEdgeID(departures[i])
 				nextDepartureToFill = nil
 			}
 			if c.Stations[e.From.SpaceAxis].GroupID != nil {
 				if val, ok := c.Stations[*c.Stations[e.From.SpaceAxis].GroupID]; ok && val.Rank == 0 {
-					e.PreviousDeparture = "data-pd=\"" + lastProperDeparture + "\""
+					e.PreviousDeparture = lastProperDeparture
 				}
 			}
 			nextDepartureToFill = &e.NextDeparture
@@ -215,7 +221,7 @@ func (c *container) preselectShortestPath(origin *internal.Station, destination 
 }
 
 func (c *container) isEdgeInsideGroup(e *EdgePath) bool {
-	return c.Stations[e.From.SpaceAxis].GroupID != nil && c.Stations[e.To.SpaceAxis].GroupID != nil && *c.Stations[e.To.SpaceAxis].GroupID == *c.Stations[e.To.SpaceAxis].GroupID
+	return c.Stations[e.From.SpaceAxis].GroupID != nil && c.Stations[e.To.SpaceAxis].GroupID != nil && *c.Stations[e.From.SpaceAxis].GroupID == *c.Stations[e.To.SpaceAxis].GroupID
 }
 
 func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, start *internal.Edge, end *internal.Edge) {
@@ -239,7 +245,6 @@ func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edge := &EdgePath{
 		ID:                   generateEdgeID(e),
-		ShortestPathFor:      []string{},
 		From:                 Coord{SpaceAxis: strconv.Itoa(e.From.EvaNumber), TimeAxis: e.Actual.Departure},
 		To:                   Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
 		Redundant:            e.Redundant,
@@ -248,7 +253,10 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		Planned:              e.Planned,
 		Current:              e.Current,
 		Actual:               e.Actual,
+		ShortestPath:         []ShortestPathAlternative{},
+		ReverseShortestPath:  []ShortestPathAlternative{},
 		ProviderShortestPath: e.ProviderShortestPath,
+		ShortestPathFor:      []string{},
 	}
 	if e.Line != nil {
 		edge.Line = &LineLabel{
@@ -256,6 +264,12 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 			ID:   e.Line.ID,
 			Type: e.Line.Type,
 		}
+	}
+	if e.ShortestPath != nil {
+		edge.ShortestPath = append(edge.ShortestPath, ShortestPathAlternative{EdgeID: generateEdgeID(e.ShortestPath)})
+	}
+	if e.ReverseShortestPath != nil {
+		edge.ReverseShortestPath = append(edge.ReverseShortestPath, ShortestPathAlternative{EdgeID: generateEdgeID(e.ReverseShortestPath)})
 	}
 	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge.ID)
@@ -275,11 +289,13 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		return nil
 	}
 	edge := &EdgePath{
-		ID:              generateStationEdgeID(last, this),
-		ShortestPathFor: []string{},
-		From:            Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: last.Actual.Arrival},
-		To:              Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: this.Actual.Departure},
-		Redundant:       last.Redundant || this.Redundant,
+		ID:                  generateStationEdgeID(last, this),
+		ShortestPathFor:     []string{},
+		ShortestPath:        []ShortestPathAlternative{},
+		ReverseShortestPath: []ShortestPathAlternative{},
+		From:                Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: last.Actual.Arrival},
+		To:                  Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: this.Actual.Departure},
+		Redundant:           last.Redundant || this.Redundant,
 	}
 	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge.ID)

@@ -21,7 +21,6 @@ type StationLabel struct {
 
 type EdgePath struct {
 	ID                   string
-	ShortestPathFor      []string
 	From                 Coord
 	To                   Coord
 	Redundant            bool
@@ -31,7 +30,10 @@ type EdgePath struct {
 	Planned              internal.StopInfo
 	Current              internal.StopInfo
 	Actual               internal.StopInfo
+	ShortestPath         []ShortestPathAlternative
+	ReverseShortestPath  []ShortestPathAlternative
 	ProviderShortestPath bool
+	ShortestPathFor      []string
 	PreviousDeparture    string
 	NextDeparture        string
 	PreviousArrival      string
@@ -42,6 +44,10 @@ type LineLabel struct {
 	Name string
 	ID   string
 	Type string
+}
+
+type ShortestPathAlternative struct {
+	EdgeID string
 }
 
 type Coord struct {

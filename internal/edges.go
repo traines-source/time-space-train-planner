@@ -99,6 +99,13 @@ func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station
 
 	var lineID = fmt.Sprint(int64(from.EvaNumber*1000000000+to.EvaNumber*100) + departure.Unix())
 
+	for {
+		_, ok := c.lines[lineID]
+		if !ok {
+			break
+		}
+		lineID += "d"
+	}
 	var line = &Line{
 		ID:   lineID,
 		Name: fmt.Sprintf("%.0fm", math.Round(dist)),

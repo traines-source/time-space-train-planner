@@ -29,7 +29,6 @@
 {{$e:= index $.Edges .}}
 {{if not $e.Discarded}}
 <path id="{{$e.ID}}" d="M {{$.X $e.From}},{{$.Y $e.From}} L{{$.X $e.To}},{{$.Y $e.To}}"
-    {{$e.PreviousDeparture}} {{$e.NextDeparture}} {{$e.PreviousArrival}} {{$e.NextArrival}}
     class="edge type-{{$e.Type}} redundant-{{$e.Redundant}} {{ range $e.ShortestPathFor }} sp-{{.}}{{ end }} {{if eq $e.ProviderShortestPath true}}provider-shortest-path{{end}}"
     />
 <path id="{{$e.ID}}-toucharea" d="M {{$.X $e.From}},{{$.Y $e.From}} L{{$.X $e.To}},{{$.Y $e.To}}"
