@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { setFromApi, Station, store } from "../store"
     import { optionsQueryString } from "../url"
+    import panzoom from 'panzoom'
     
     let loading = true;
     let query = store;
@@ -61,10 +62,20 @@
         console.log(currentSelectedShortestPath);
     }
 
+    function setActive(selected) {
+        const e = document.getElementById(currentSelected.ID+'-toucharea');
+        if (selected) {
+            e.className.baseVal += " active";
+        } else {
+            e.className.baseVal =  e.className.baseVal.replace(" active", "");
+        }
+    }
+
     function setSelectedForDependents(selected) {
         if (!currentSelected) {
             return [];
         }
+        setActive(selected);
         let all = [];
         let previous = currentSelected;
         let next = currentSelected;
@@ -92,7 +103,7 @@
         if (selected) {
             e.className.baseVal += " selected";
         } else {
-            e.className.baseVal =  e.className.baseVal.replace(" selected", "");
+            e.className.baseVal =  e.className.baseVal.replace(" selected", "").replace(" active", "");
         }    
     }
 
@@ -116,7 +127,7 @@
         selectEdge(id);
     }
 
-    function label(e) {
+    function label(e, detail) {
         if (!e.Line) {
             return '';
         }
@@ -126,7 +137,7 @@
         } else {
             label = e.Line.ID;
         }
-        if (e.Message) {
+        if (e.Message && !detail) {
             label += ' 🛈';
         }
         if (e.Line.Type == 'Foot') {
@@ -199,6 +210,16 @@
 
     onMount(() => {
         fetchTimespace();
+        panzoom(document.getElementById('timespace-canvas'), {
+            maxZoom: 5,
+            minZoom: 1,
+            bounds: true,
+            boundsPadding: 1,
+            zoomDoubleClickSpeed: 3,
+            onTouch: function(e) {
+                if (e.target.id == 'timespace-canvas') return true; 
+            }
+        })
     })
 </script>
 
@@ -206,10 +227,10 @@
     <img src="res/icon/loading.gif" id="loading-indicator">
     <p>Data retrieval can take up to one minute.</p>
 </div>
+<div id="timespace-container">
 
-{#if data}
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-    viewBox="0 0 {data.SpaceAxisSize} {data.TimeAxisSize}">
+<svg id="timespace-canvas" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMin"
+    viewBox="0 0 1500 1500">
 <defs>
     <marker id="dot-redundant-false" viewBox="0 0 10 10" refX="5" refY="5"
         markerWidth="4" markerHeight="4" filter="none">
@@ -223,6 +244,7 @@
         <feMorphology operator="erode" radius="8"/>
     </filter>
 </defs>
+{#if data}
 {#each Object.values(data.Stations) as s}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label">
     {s.Name}
@@ -265,44 +287,92 @@
 {#if e.NextDeparture}<text x="{x(e.From)}" y="{y(e.From)+margin}" class="previous-next-arrow" on:click={selectEdge(e.NextDeparture)}>▼</text>{/if}
 {/if}
 {/each}
-<a xlink:href="?{optionsQueryString(store)}&amp;form">
-    <rect x="5" y="1430" width="100" height="40" class="button" />
-    <text x="55" y="1450" class="ui-link">
-        Modify query
-    </text>
-</a>
-<text x="100" y="1450" id="details">
-    
-</text>
-<g id="legend">
-    <path d="M 150,1460 L350,1460" class="edge selected redundant-false" />
-    <text x="150" y="1450">
-        Fastest route (transfer time >= 0 min)
-    </text>
-    <path d="M 400,1460 L600,1460" class="edge provider-shortest-path redundant-false" />
-    <text x="400" y="1450">
-        Route recommended by DB/HAFAS
-    </text>
-    <path d="M 650,1460 L850,1460" class="edge redundant-true" />
-    <text x="650" y="1450">
-        Connections deemed redundant
-    </text>
-    <path d="M 900,1460 L980,1460" class="edge type-nationalExpress redundant-false" />
-    <text x="900" y="1450">
-        ICE, IC, etc.
-    </text>
-    <path d="M 1030,1460 L1110,1460" class="edge type-regional redundant-false" />
-    <text x="1030" y="1450">
-        RE, RB, S, etc.
-    </text>
-    <path d="M 1160,1460 L1240,1460" class="edge type-bus redundant-false" />
-    <text x="1160" y="1450">
-        Bus, Tram, etc.
-    </text>
-    <path d="M 1290,1460 L1370,1460" class="edge type-Foot redundant-false" />
-    <text x="1290" y="1450">
-        On Foot
-    </text>
-</g>
-</svg>
 {/if}
+
+</svg>
+
+</div>
+<div id="details"><div>
+    {#if currentSelected}
+    <div class="train">
+        <h4>
+            <span class="label">{label(currentSelected, true)}</span>
+            <span class="destination">
+                {#if currentSelected.Line && currentSelected.Line.Direction}
+                <span class="arrow">➔</span> {currentSelected.Line.Direction}
+                {/if}
+            </span>
+        </h4>
+    </div>
+    <div class="arrdep">
+        <span class="dep"><span class="{liveDataDeparture(currentSelected)}">{departure(currentSelected)}</span><br />{data.Stations[currentSelected.From.SpaceAxis].Name}</span>
+        <svg viewBox="0 0 50 10" class="miniature">
+            <path d="M 10,5 L40,5" class="edge type-{type(currentSelected)} redundant-false"/>
+        </svg>
+        <span class="arr"><span class="{liveDataArrival(currentSelected)}">{arrival(currentSelected)}</span><br />{data.Stations[currentSelected.To.SpaceAxis].Name}</span>
+    </div>
+    {#if currentSelected.Message}
+    <div class="message">
+        🛈 {currentSelected.Message}
+    </div>
+    {/if}
+    {/if}
+
+    <a href="?{optionsQueryString(store)}&form" class="submit">
+            Modify query
+    </a>
+
+    <div class="legend">
+        <h4>Legend</h4>
+        <svg viewBox="125 1430 500 150" style="width: 100%">
+            <g id="legend">
+                <g>
+                    <path d="M 150,1460 L350,1460" class="edge selected redundant-false" />
+                    <text x="150" y="1450">
+                        Fastest route (transfer time >= 0 min)
+                    </text>
+                </g>
+                <g transform="translate(250, 0)">
+                    <path d="M 150,1460 L350,1460" class="edge provider-shortest-path redundant-false" />
+                    <text x="150" y="1450">
+                        Route recommended by DB/HAFAS
+                    </text>
+                </g>
+                <g transform="translate(0, 40)">
+                    <path d="M 150,1460 L350,1460" class="edge redundant-true" />
+                    <text x="150" y="1450">
+                        Connections deemed redundant
+                    </text>
+                </g>
+                <g transform="translate(0, 80)">
+                    <path d="M 150,1460 L350,1460" class="edge type-nationalExpress redundant-false" />
+                    <text x="150" y="1450">
+                        ICE, IC, etc.
+                    </text>
+                </g>
+                <g transform="translate(250, 80)">
+                    <path d="M 150,1460 L350,1460" class="edge type-regional redundant-false" />
+                    <text x="150" y="1450">
+                        RE, RB, S, etc.
+                    </text>
+                </g>
+                <g transform="translate(0, 120)">
+                    <path d="M 150,1460 L350,1460" class="edge type-bus redundant-false" />
+                    <text x="150" y="1450">
+                        Bus, Tram, etc.
+                    </text>
+                </g>
+                <g transform="translate(250, 120)">
+                    <path d="M 150,1460 L350,1460" class="edge type-Foot redundant-false" />
+                    <text x="150" y="1450">
+                        On Foot
+                    </text>
+                </g>
+            </g>
+        </svg>
+    </div>
+    <p id="footer">
+        <a href="https://github.com/traines-source/time-space-train-planner/issues">Report an issue</a>
+        <a href="{import.meta.env.VITE_TSTP_LEGAL}">Imprint/Privacy</a>
+    </p>
+</div></div>

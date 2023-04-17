@@ -28,6 +28,77 @@ html, body {
   margin: 0;
   padding: 0;
   color: #707070;
+  overscroll-behavior-y: contain;
+}
+
+#timespace-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+#timespace-container svg {
+  width: 100%;
+  height: 100%;
+  background-color: #f2f2f2;
+}
+
+#details {
+  position: absolute;
+  top: 80%;
+  left: 0;
+  right: 0;
+  color: black;
+}
+
+#details > div {
+  background-color: white;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 30px 30px 0 0;
+}
+
+#details .train h4 {
+  margin-top: 0;
+}
+
+#details .arrow {
+  font-family: sans-serif;
+}
+
+#details .miniature {
+  width: 50px;
+}
+
+#details .arrdep {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+#details .message {
+  margin-bottom: 30px;
+}
+
+#details .arr, #details .dep {
+  flex-grow: 0;
+}
+
+#details .arr>span, #details .dep>span {
+  font-weight: bold;
+}
+
+#details .dep {
+  text-align: right;
+}
+
+#details .legend h4 {
+  text-align: center;
+  margin: 40px 0 10px 0;
 }
 
 .edge {
@@ -89,10 +160,12 @@ html, body {
 
 .live-red {
   fill: #B71C1C;
+  color: #B71C1C;
 }
 
 .live-green {
   fill: #019B92;
+  color: #019B92;
 }
 
 .arrival.selected, .departure.selected, .label.selected {
@@ -101,7 +174,12 @@ html, body {
 
 .edge.selected {
   stroke: #01579B;
-  filter: drop-shadow( 0px 0px 3px rgba(1, 87, 155, .7));
+  filter: drop-shadow( 0px 0px 5px rgba(1, 87, 155, 1));
+}
+
+.edge-toucharea.active {
+  stroke: rgba(125,125,125,0.2);
+  stroke-linecap: round;
 }
 
 .edge.provider-shortest-path {
@@ -265,6 +343,7 @@ a text {
   margin: 0;
   width: 100%;
   transition: background-color 0.218s;
+  box-sizing: border-box;
 }
 
 .submit:active {
@@ -284,8 +363,13 @@ a text {
 }
 
 .loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   text-align: center;
   margin: 200px 0 200px 0;
+  z-index: 1000;
 }
 
 .loading-screen img {
