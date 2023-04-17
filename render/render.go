@@ -264,9 +264,10 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	}
 	if e.Line != nil {
 		edge.Line = &LineLabel{
-			Name: e.Line.Name,
-			ID:   e.Line.ID,
-			Type: e.Line.Type,
+			Name:      e.Line.Name,
+			ID:        e.Line.ID,
+			Type:      e.Line.Type,
+			Direction: e.Line.Direction,
 		}
 	}
 	if e.ShortestPath != nil {

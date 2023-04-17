@@ -116,6 +116,9 @@ func (c *consumer) UpsertLine(e providers.ProviderLine) {
 	val.Name = e.Name
 	val.Type = e.Type
 	val.Message = e.Message
+	if e.Direction != "" {
+		val.Direction = e.Direction
+	}
 }
 
 func existingStopHasDifferentPlanned(e providers.ProviderLineStop, stop *LineStop) bool {

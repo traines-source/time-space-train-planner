@@ -170,7 +170,11 @@ func (p *DbRest) parseLine(stop *models.DepartureArrival, tripID string, lineID 
 	if stop.Line.Product != nil {
 		productName = *stop.Line.Product
 	}
-	p.consumer.UpsertLine(providers.ProviderLine{ID: tripID, TripName: lineID, Type: productName, Name: lineName})
+	direction := ""
+	if stop.Direction != nil {
+		direction = *stop.Direction
+	}
+	p.consumer.UpsertLine(providers.ProviderLine{ID: tripID, TripName: lineID, Type: productName, Name: lineName, Direction: direction})
 }
 
 func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaNumber int, tripID string) {

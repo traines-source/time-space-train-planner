@@ -45,11 +45,12 @@ type ProviderLineStopInfo struct {
 }
 
 type ProviderLine struct {
-	ID       string
-	Type     string
-	Name     string
-	TripName int
-	Message  string
+	ID        string
+	Type      string
+	Name      string
+	TripName  int
+	Message   string
+	Direction string
 }
 
 type ProviderLineEdge struct {

@@ -37,12 +37,13 @@ type StopInfo struct {
 }
 
 type Line struct {
-	Type    string
-	Name    string
-	ID      string
-	Message string
-	Route   []*Edge
-	Stops   []*LineStop
+	Type      string
+	Name      string
+	ID        string
+	Message   string
+	Direction string
+	Route     []*Edge
+	Stops     []*LineStop
 }
 
 type LineStop struct {

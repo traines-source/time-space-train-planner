@@ -41,9 +41,10 @@ type EdgePath struct {
 }
 
 type LineLabel struct {
-	Name string
-	ID   string
-	Type string
+	Name      string
+	ID        string
+	Type      string
+	Direction string
 }
 
 type ShortestPathAlternative struct {
