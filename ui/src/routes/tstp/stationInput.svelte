@@ -31,7 +31,6 @@
     localFiltering={false}
     labelFieldName="name"
     valueFieldName="id"
-    selectFirstIfEmpty={true}
     cleanUserText={false}
     minCharactersToSearch="2"
     className="station"
