@@ -253,6 +253,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		To:                   Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
 		Redundant:            e.Redundant,
 		Discarded:            e.Discarded,
+		Cancelled:            e.Cancelled,
 		Message:              e.Message,
 		Planned:              e.Planned,
 		Current:              e.Current,

@@ -35,6 +35,7 @@ type ProviderLineStop struct {
 	Planned   *ProviderLineStopInfo
 	Current   *ProviderLineStopInfo
 	Message   string
+	Cancelled bool
 }
 
 type ProviderLineStopInfo struct {

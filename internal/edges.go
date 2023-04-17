@@ -11,10 +11,7 @@ import (
 const maxFootDistMeters = 5000
 const footKmh = 6
 
-func actualDeparture(stop *LineStop) time.Time {
-	if !stop.Current.Departure.IsZero() {
-		return stop.Current.Departure
-	}
+func relevantDeparture(stop *LineStop) time.Time {
 	return stop.Planned.Departure
 }
 
@@ -22,27 +19,36 @@ func (c *consumer) generateTimetableEdges() {
 	for _, line := range c.lines {
 		var stops []*LineStop = line.Stops
 		sort.Slice(stops, func(i, j int) bool {
-			return actualDeparture(stops[i]).Before(actualDeparture(stops[j]))
+			return relevantDeparture(stops[i]).Before(relevantDeparture(stops[j]))
 		})
+		var a, b *LineStop
 		for i := 1; i < len(stops); i++ {
 			if geoDistStations(stops[i-1].Station, stops[i].Station) == 0 {
 				continue
 			}
+			if !stops[i-1].Cancelled || i == 1 {
+				a = stops[i-1]
+			}			
+			b = stops[i]
+			if b.Cancelled && i+1 != len(stops) {
+				continue
+			}
 			edge := &Edge{
 				Line:    line,
-				From:    stops[i-1].Station,
-				To:      stops[i].Station,
-				Message: stops[i-1].Message,
+				From:    a.Station,
+				To:      b.Station,
+				Message: a.Message, // TODO both msgs?
+				Cancelled: a.Cancelled || b.Cancelled,
 			}
-			copyStopInfo(&stops[i-1].Planned, &stops[i].Planned, &edge.Planned)
-			copyStopInfo(&stops[i-1].Current, &stops[i].Current, &edge.Current)
-			copyStopInfo(&stops[i-1].Planned, &stops[i].Planned, &edge.Actual)
-			copyStopInfo(&stops[i-1].Current, &stops[i].Current, &edge.Actual)
+			copyStopInfo(&a.Planned, &b.Planned, &edge.Planned)
+			copyStopInfo(&a.Current, &b.Current, &edge.Current)
+			copyStopInfo(&a.Planned, &b.Planned, &edge.Actual)
+			copyStopInfo(&a.Current, &b.Current, &edge.Actual)
 
-			edge.Current.DepartureTrack = stops[i-1].Current.DepartureTrack
-			edge.Current.ArrivalTrack = stops[i].Current.ArrivalTrack
-			edge.Current.Departure = stops[i-1].Current.Departure
-			edge.Current.Arrival = stops[i].Current.Arrival
+			edge.Current.DepartureTrack = a.Current.DepartureTrack
+			edge.Current.ArrivalTrack = b.Current.ArrivalTrack
+			edge.Current.Departure = a.Current.Departure
+			edge.Current.Arrival = b.Current.Arrival
 
 			line.Route = append(line.Route, edge)
 			edge.From.Departures = append(edge.From.Departures, edge)

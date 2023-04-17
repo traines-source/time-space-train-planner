@@ -20,6 +20,9 @@ import (
 // swagger:model departureArrival
 type DepartureArrival struct {
 
+	// cancelled
+	Cancelled bool `json:"cancelled"`
+
 	// delay
 	// Required: true
 	Delay *int64 `json:"delay"`

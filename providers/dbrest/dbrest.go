@@ -209,7 +209,7 @@ func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, evaN
 			current.DepartureTrack = *stop.Platform
 		}
 	}
-	pls := providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned, Current: current}
+	pls := providers.ProviderLineStop{EvaNumber: evaNumber, LineID: tripID, Planned: planned, Current: current, Cancelled: stop.Cancelled}
 	if len(stop.Remarks) > 0 {
 		for _, remark := range stop.Remarks {
 			if pls.Message != "" {

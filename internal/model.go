@@ -27,6 +27,7 @@ type Edge struct {
 	ShortestPathFor      map[*Edge]struct{}
 	Redundant            bool
 	Discarded            bool
+	Cancelled            bool
 }
 
 type StopInfo struct {
@@ -47,8 +48,9 @@ type Line struct {
 }
 
 type LineStop struct {
-	Station *Station
-	Planned StopInfo
-	Current StopInfo
-	Message string
+	Station   *Station
+	Planned   StopInfo
+	Current   StopInfo
+	Message   string
+	Cancelled bool
 }

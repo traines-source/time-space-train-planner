@@ -1216,6 +1216,9 @@
             }
           }
         },
+        "cancelled": {
+          "type": "boolean"
+        },
         "loadFactor": {
           "type": "string"
         }

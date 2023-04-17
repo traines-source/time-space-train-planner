@@ -156,6 +156,7 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 		copyProviderStopInfo(e.Current, &val.Current)
 	}
 	val.Message = e.Message
+	val.Cancelled = e.Cancelled
 }
 
 func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {

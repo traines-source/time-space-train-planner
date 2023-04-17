@@ -25,6 +25,7 @@ type EdgePath struct {
 	To                   Coord
 	Redundant            bool
 	Discarded            bool
+	Cancelled            bool
 	Line                 *LineLabel
 	Message              string
 	Planned              internal.StopInfo
