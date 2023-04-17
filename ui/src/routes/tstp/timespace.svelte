@@ -260,7 +260,7 @@
 {#each data.SortedEdges.map(id => data.Edges[id]) as e}
 {#if !e.Discarded}
 <path id="{e.ID}" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
-    class="edge type-{type(e)} redundant-{e.Redundant} {e.ShortestPathFor.map(p => 'sp-'+p).join(' ')} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
+    class="edge type-{type(e)} redundant-{e.Redundant} cancelled-{e.Cancelled} {e.ShortestPathFor.map(p => 'sp-'+p).join(' ')} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
     />
 <path id="{e.ID}-toucharea" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
     class="edge-toucharea" on:click={selectListener}
@@ -306,11 +306,20 @@
         </h4>
     </div>
     <div class="arrdep">
-        <span class="dep"><span class="{liveDataDeparture(currentSelected)}">{departure(currentSelected)}</span><br />{data.Stations[currentSelected.From.SpaceAxis].Name}</span>
+        <span class="dep">
+            <span class="{liveDataDeparture(currentSelected)}">{departure(currentSelected)}</span>
+            {#if currentSelected.Cancelled}<span class="cancelled">(Cancelled)</span>{/if}
+            <br />{data.Stations[currentSelected.From.SpaceAxis].Name}
+        </span>
         <svg viewBox="0 0 50 10" class="miniature">
             <path d="M 10,5 L40,5" class="edge type-{type(currentSelected)} redundant-false"/>
         </svg>
-        <span class="arr"><span class="{liveDataArrival(currentSelected)}">{arrival(currentSelected)}</span><br />{data.Stations[currentSelected.To.SpaceAxis].Name}</span>
+        <span class="arr">
+            <span class="{liveDataArrival(currentSelected)}">{arrival(currentSelected)}</span>
+            {#if currentSelected.Cancelled}<span class="cancelled">(Cancelled)</span>{/if}
+            <br />{data.Stations[currentSelected.To.SpaceAxis].Name}
+            
+        </span>
     </div>
     {#if currentSelected.Message}
     <div class="message">

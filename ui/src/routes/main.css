@@ -66,6 +66,10 @@ html, body {
   margin-top: 0;
 }
 
+#details .cancelled {
+  color: #B71C1C;
+}
+
 #details .arrow {
   font-family: sans-serif;
 }
@@ -122,6 +126,10 @@ html, body {
 .redundant-false {
   marker-start: url(#dot-redundant-false);
   marker-end: url(#dot-redundant-false);
+}
+
+.cancelled-true {
+  stroke-dasharray: 50 10;
 }
 
 #dot-redundant-true circle {
