@@ -67,10 +67,16 @@ func (edge *dijkstraToDestination) setShortestPath(target *Edge) {
 }
 
 func (edge *dijkstraToDestination) travelBackDist(looseEdge *Edge) int {
+	if looseEdge.Cancelled {
+		return inf
+	}
 	return positiveDeltaMinutes(looseEdge.Actual.Departure, edge.getEdge().Actual.Departure)
 }
 
 func (edge *dijkstraToDestination) earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool {
+	if looseEdge.vertexAtTime.getEdge().Cancelled {
+		return false
+	}
 	departingEarlier := positiveDeltaMinutes(looseEdge.vertexAtTime.getEdge().Actual.Arrival, fixedEdge.vertexAtTime.getEdge().Actual.Departure) < positiveDeltaMinutes(looseEdge.vertexAtTime.getEdge().Actual.Arrival, looseEdge.toTarget.Actual.Departure)
 	arrivingEarlierIfSameDestination := fixedEdge.vertexAtTime.getEdge().To != looseEdge.toTarget.To || fixedEdge.vertexAtTime.getEdge().Actual.Arrival.Before(looseEdge.toTarget.Actual.Arrival)
 
@@ -158,6 +164,9 @@ func buildVertexSetByTarget(edgeToTarget dijkstraVertex) map[*Edge]*dijkstra {
 		dist:         int(edgeToTarget.getEdge().Actual.Arrival.Sub(edgeToTarget.getEdge().Actual.Departure).Minutes()),
 		hops:         0,
 		toTarget:     nil,
+	}
+	if edgeToTarget.getEdge().Cancelled {
+		verticesAtTime[edgeToTarget.getEdge()].dist = inf
 	}
 	buildVertexSet(verticesAtTime, edgeToTarget, edgeToTarget.getEdge())
 	return verticesAtTime
