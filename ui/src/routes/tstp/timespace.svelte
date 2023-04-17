@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { setFromApi, Station, store } from "../store"
     import { optionsQueryString } from "../url"
     import panzoom from 'panzoom'
@@ -17,6 +17,7 @@
             setFromApi(data);
             console.log(store);
             loading = false;
+            tick().then(() => selectEdge(data.DefaultShortestPathID));
         })
         .catch((error) => {
             alert('Failed request. Possibly too many requests. Try again later.');

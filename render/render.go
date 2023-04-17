@@ -216,7 +216,11 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 func (c *container) preselectShortestPath(origin *internal.Station, destination *internal.Station) {
 	for _, s := range destination.Arrivals {
 		if s.ReverseShortestPath != nil || s.From.EvaNumber == origin.EvaNumber {
-			if e, ok := c.Edges[generateEdgeID(s)]; ok {
+			start := s
+			for start.ReverseShortestPath != nil {
+				start = s.ReverseShortestPath
+			}
+			if e, ok := c.Edges[generateEdgeID(start)]; ok {
 				c.DefaultShortestPathID = e.ID
 			}
 			break
