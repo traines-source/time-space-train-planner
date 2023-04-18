@@ -11,6 +11,7 @@
         const vias = $page.url.searchParams.getAll('vias').map(s => ({id: s, name: undefined}));
         if (vias.length > 0) store.vias = fillupStations(vias);
         store.datetime = $page.url.searchParams.get('datetime');
+        store.regionly = $page.url.searchParams.get('regionly') == 'true';
     }
 
     let showForm = false;

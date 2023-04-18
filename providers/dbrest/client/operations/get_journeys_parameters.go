@@ -53,10 +53,12 @@ func NewGetJourneysParamsWithHTTPClient(client *http.Client) *GetJourneysParams 
 	}
 }
 
-/* GetJourneysParams contains all the parameters to send to the API endpoint
-   for the get journeys operation.
+/*
+GetJourneysParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get journeys operation.
+
+	Typically these are written to a http.Request.
 */
 type GetJourneysParams struct {
 
@@ -110,6 +112,16 @@ type GetJourneysParams struct {
 	   Compute journeys "after" an `laterRef`.
 	*/
 	LaterThan *string
+
+	// National.
+	//
+	// Default: true
+	National *bool
+
+	// NationalExpress.
+	//
+	// Default: true
+	NationalExpress *bool
 
 	/* Polylines.
 
@@ -204,6 +216,10 @@ func (o *GetJourneysParams) SetDefaults() {
 
 		languageDefault = string("en")
 
+		nationalDefault = bool(true)
+
+		nationalExpressDefault = bool(true)
+
 		polylinesDefault = bool(false)
 
 		remarksDefault = bool(true)
@@ -226,6 +242,8 @@ func (o *GetJourneysParams) SetDefaults() {
 	val := GetJourneysParams{
 		Bike:             &bikeDefault,
 		Language:         &languageDefault,
+		National:         &nationalDefault,
+		NationalExpress:  &nationalExpressDefault,
 		Polylines:        &polylinesDefault,
 		Remarks:          &remarksDefault,
 		Results:          &resultsDefault,
@@ -362,6 +380,28 @@ func (o *GetJourneysParams) WithLaterThan(laterThan *string) *GetJourneysParams 
 // SetLaterThan adds the laterThan to the get journeys params
 func (o *GetJourneysParams) SetLaterThan(laterThan *string) {
 	o.LaterThan = laterThan
+}
+
+// WithNational adds the national to the get journeys params
+func (o *GetJourneysParams) WithNational(national *bool) *GetJourneysParams {
+	o.SetNational(national)
+	return o
+}
+
+// SetNational adds the national to the get journeys params
+func (o *GetJourneysParams) SetNational(national *bool) {
+	o.National = national
+}
+
+// WithNationalExpress adds the nationalExpress to the get journeys params
+func (o *GetJourneysParams) WithNationalExpress(nationalExpress *bool) *GetJourneysParams {
+	o.SetNationalExpress(nationalExpress)
+	return o
+}
+
+// SetNationalExpress adds the nationalExpress to the get journeys params
+func (o *GetJourneysParams) SetNationalExpress(nationalExpress *bool) {
+	o.NationalExpress = nationalExpress
 }
 
 // WithPolylines adds the polylines to the get journeys params
@@ -624,6 +664,40 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		if qLaterThan != "" {
 
 			if err := r.SetQueryParam("laterThan", qLaterThan); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.National != nil {
+
+		// query param national
+		var qrNational bool
+
+		if o.National != nil {
+			qrNational = *o.National
+		}
+		qNational := swag.FormatBool(qrNational)
+		if qNational != "" {
+
+			if err := r.SetQueryParam("national", qNational); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.NationalExpress != nil {
+
+		// query param nationalExpress
+		var qrNationalExpress bool
+
+		if o.NationalExpress != nil {
+			qrNationalExpress = *o.NationalExpress
+		}
+		qNationalExpress := swag.FormatBool(qrNationalExpress)
+		if qNationalExpress != "" {
+
+			if err := r.SetQueryParam("nationalExpress", qNationalExpress); err != nil {
 				return err
 			}
 		}

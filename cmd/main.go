@@ -29,9 +29,10 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 
 	var form = r.URL.Query()["form"]
 	var datetime = r.URL.Query().Get("datetime")
+	var regionly = r.URL.Query().Get("regionly") == "true"
 
 	if len(from) > 0 && len(to) > 0 {
-		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime)
+		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
 		if err == nil && len(vias) > 0 && len(form) == 0 {
 			log.Print("Request:", r.URL.RawQuery)
 			w.Header().Set("Content-Type", "image/svg+xml")
@@ -55,10 +56,11 @@ func apiVias(w http.ResponseWriter, r *http.Request) {
 	var vias = queryIntList(r.URL.Query()["vias"])
 
 	var datetime = r.URL.Query().Get("datetime")
+	var regionly = r.URL.Query().Get("regionly") == "true"
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 {
-		stations, _, err := internal.ObtainData(from[0], to[0], vias, datetime)
+		stations, _, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}
@@ -74,10 +76,11 @@ func apiTimespace(w http.ResponseWriter, r *http.Request) {
 	var vias = queryIntList(r.URL.Query()["vias"])
 
 	var datetime = r.URL.Query().Get("datetime")
+	var regionly = r.URL.Query().Get("regionly") == "true"
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 && len(vias) > 0 {
-		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime)
+		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}

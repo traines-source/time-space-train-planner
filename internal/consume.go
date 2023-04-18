@@ -16,6 +16,7 @@ type consumer struct {
 	stations               map[int]*Station
 	lines                  map[string]*Line
 	dateTime               time.Time
+	regionalOnly           bool
 	expectedTravelDuration time.Duration
 }
 
@@ -62,6 +63,10 @@ func (c *consumer) StationByEva(evaNumber int) (providers.ProviderStation, error
 		}
 	}
 	return providers.ProviderStation{}, errors.New("not found")
+}
+
+func (c *consumer) RegionalOnly() bool {
+	return c.regionalOnly
 }
 
 func (c *consumer) UpsertStation(e providers.ProviderStation) {
@@ -312,10 +317,11 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station, map[string]*Line, *ErrorCode) {
+func ObtainData(from int, to int, vias []int, dateTime string, regionly bool) (map[int]*Station, map[string]*Line, *ErrorCode) {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
+	c.regionalOnly = regionly
 
 	var evaNumbers []int
 	evaNumbers = append(evaNumbers, from)
@@ -330,7 +336,7 @@ func ObtainData(from int, to int, vias []int, dateTime string) (map[int]*Station
 	if err := c.generateEdges(c.stations[from], c.stations[to]); err != nil {
 		return nil, nil, err
 	}
-	shortestPaths(c.stations, c.stations[from], c.stations[to])
+	shortestPaths(c.stations, c.stations[from], c.stations[to], regionly)
 	if err := c.callProviders(true); err != nil {
 		return nil, nil, err
 	}

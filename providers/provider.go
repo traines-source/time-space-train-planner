@@ -12,6 +12,7 @@ type Consumer interface {
 	Stations() []ProviderStation
 	StationByName(name string) (ProviderStation, error)
 	StationByEva(evaNumber int) (ProviderStation, error)
+	RegionalOnly() bool
 	UpsertStation(station ProviderStation)
 	UpsertLine(line ProviderLine)
 	UpsertLineStop(lineStop ProviderLineStop)

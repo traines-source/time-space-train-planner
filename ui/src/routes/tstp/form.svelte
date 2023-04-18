@@ -77,6 +77,9 @@
             <input type="datetime-local" id="datetime" name="datetime" bind:value="{query.datetime}">
             <p id="default-now">Default is Now</p>
         </div>
+        <div>
+            <input type="checkbox" id="regionly" bind:checked="{query.regionly}"><label for="regionly"> Regional transport only</label>
+        </div>
         
         <div id="submit-container"><input type="button" value="Submit" class="submit" on:click={submit}><!--
         --><img src="res/icon/loading.gif" id="loading-indicator" style="display: {loading ? 'block' : 'none'};"></div>

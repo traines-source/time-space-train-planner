@@ -8,6 +8,7 @@ const to = new Station();
 const vias: Station[] = [];
 
 let datetime: string | null = null;
+let regionly: boolean = false;
 
 
 const store = {
@@ -15,6 +16,7 @@ const store = {
     to: to,
     vias: vias,
     datetime: datetime,
+    regionly: regionly,
     initialized: false
 };
 

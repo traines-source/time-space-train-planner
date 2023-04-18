@@ -546,6 +546,18 @@
                           "type": "string",
               "default": "en"
 
+          },
+          {
+            "name": "nationalExpress",
+            "in": "query",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "national",
+            "in": "query",
+            "type": "boolean",
+            "default": true
           }
         ],
         "responses": {

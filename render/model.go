@@ -1,7 +1,6 @@
 package render
 
 import (
-	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -60,7 +59,6 @@ type Coord struct {
 func makeVias(stations map[int]*internal.Station, from int, to int) []StationLabel {
 	list := []StationLabel{}
 	for _, s := range stations {
-		log.Print(s)
 		if s.EvaNumber == from || s.EvaNumber == to || s.GroupNumber != nil && *s.GroupNumber != s.EvaNumber {
 			continue
 		}

@@ -243,6 +243,11 @@ func (p *DbRest) requestJourneysApi() error {
 	params.From = &from
 	params.To = &to
 	params.Departure = (*strfmt.DateTime)(&departure)
+	if p.consumer.RegionalOnly() {
+		falsey := false
+		params.National = &falsey
+		params.NationalExpress = &falsey
+	}
 	res, err := p.client.Operations.GetJourneys(params)
 	if err != nil {
 		return err
