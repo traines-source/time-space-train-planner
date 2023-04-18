@@ -218,7 +218,7 @@ func (c *container) preselectShortestPath(origin *internal.Station, destination 
 		if s.ReverseShortestPath != nil || s.From.EvaNumber == origin.EvaNumber {
 			start := s
 			for start.ReverseShortestPath != nil {
-				start = s.ReverseShortestPath
+				start = start.ReverseShortestPath
 			}
 			if e, ok := c.Edges[generateEdgeID(start)]; ok {
 				c.DefaultShortestPathID = e.ID

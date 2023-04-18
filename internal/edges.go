@@ -23,21 +23,21 @@ func (c *consumer) generateTimetableEdges() {
 		})
 		var a, b *LineStop
 		for i := 1; i < len(stops); i++ {
-			if geoDistStations(stops[i-1].Station, stops[i].Station) == 0 {
-				continue
-			}
 			if !stops[i-1].Cancelled || i == 1 {
 				a = stops[i-1]
-			}			
+			}
 			b = stops[i]
 			if b.Cancelled && i+1 != len(stops) {
 				continue
 			}
+			if geoDistStations(stops[i-1].Station, stops[i].Station) == 0 {
+				continue
+			}
 			edge := &Edge{
-				Line:    line,
-				From:    a.Station,
-				To:      b.Station,
-				Message: a.Message, // TODO both msgs?
+				Line:      line,
+				From:      a.Station,
+				To:        b.Station,
+				Message:   a.Message, // TODO both msgs?
 				Cancelled: a.Cancelled || b.Cancelled,
 			}
 			copyStopInfo(&a.Planned, &b.Planned, &edge.Planned)
