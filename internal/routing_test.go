@@ -22,26 +22,31 @@ func TestSimpleRouting(t *testing.T) {
 		From:   dep,
 		To:     interm,
 		Actual: StopInfo{Departure: minute(1), Arrival: minute(3)},
+		Line: &Line{},
 	}
 	edge2 := &Edge{
 		From:   interm,
 		To:     dest,
 		Actual: StopInfo{Departure: minute(5), Arrival: minute(10)},
+		Line: &Line{},
 	}
 	edge3 := &Edge{
 		From:   dep,
 		To:     interm,
 		Actual: StopInfo{Departure: minute(3), Arrival: minute(4)},
+		Line: &Line{},
 	}
 	edge4 := &Edge{
 		From:   interm,
 		To:     dest,
 		Actual: StopInfo{Departure: minute(20), Arrival: minute(22)},
+		Line: &Line{},
 	}
 	edge5 := &Edge{
 		From:   dep,
 		To:     interm,
 		Actual: StopInfo{Departure: minute(3), Arrival: minute(6)},
+		Line: &Line{},
 	}
 	dep.Departures = []*Edge{edge1, edge3, edge5}
 	interm.Arrivals = []*Edge{edge1, edge3, edge5}
@@ -70,16 +75,19 @@ func TestRoutingWithOvertakingTrains(t *testing.T) {
 		From:   dep,
 		To:     interm,
 		Actual: StopInfo{Departure: minute(0), Arrival: minute(3)},
+		Line: &Line{},
 	}
 	edge2 := &Edge{
 		From:   interm,
 		To:     dest,
 		Actual: StopInfo{Departure: minute(6), Arrival: minute(10)},
+		Line: &Line{},
 	}
 	edge4 := &Edge{
 		From:   interm,
 		To:     dest,
 		Actual: StopInfo{Departure: minute(4), Arrival: minute(15)},
+		Line: &Line{},
 	}
 	dep.Departures = []*Edge{edge1}
 	interm.Arrivals = []*Edge{edge1}
@@ -109,31 +117,37 @@ func TestRoutingTakeFirstTrainPossible(t *testing.T) {
 		From:   dep,
 		To:     interm1,
 		Actual: StopInfo{Departure: minute(0), Arrival: minute(3)},
+		Line:   &Line{},
 	}
 	edge2 := &Edge{
 		From:   interm1,
 		To:     interm2,
 		Actual: StopInfo{Departure: minute(4), Arrival: minute(5)},
+		Line:   &Line{},
 	}
 	edge3 := &Edge{
 		From:   interm1,
 		To:     interm2,
 		Actual: StopInfo{Departure: minute(8), Arrival: minute(9)},
+		Line:   &Line{},
 	}
 	edge4 := &Edge{
 		From:   interm2,
 		To:     dest,
 		Actual: StopInfo{Departure: minute(10), Arrival: minute(15)},
+		Line:   &Line{},
 	}
 	edge5 := &Edge{
 		From:   interm1,
 		To:     interm2,
 		Actual: StopInfo{Departure: minute(2), Arrival: minute(5)},
+		Line:   &Line{},
 	}
 	edge6 := &Edge{
 		From:   interm2,
 		To:     interm1,
 		Actual: StopInfo{Departure: minute(6), Arrival: minute(7)},
+		Line:   &Line{},
 	}
 	dep.Departures = []*Edge{edge1}
 	interm1.Arrivals = []*Edge{edge1, edge6}
@@ -167,31 +181,37 @@ func TestRoutingDontTakeFirstTrainPossibleIfTakesLonger(t *testing.T) {
 		From:   dep,
 		To:     interm1,
 		Actual: StopInfo{Departure: minute(0), Arrival: minute(3)},
+		Line: &Line{},
 	}
 	edge2 := &Edge{
 		From:   interm1,
 		To:     interm2,
 		Actual: StopInfo{Departure: minute(4), Arrival: minute(9)},
+		Line: &Line{},
 	}
 	edge3 := &Edge{
 		From:   interm1,
 		To:     interm2,
 		Actual: StopInfo{Departure: minute(7), Arrival: minute(8)},
+		Line: &Line{},
 	}
 	edge4 := &Edge{
 		From:   interm2,
 		To:     dest,
 		Actual: StopInfo{Departure: minute(10), Arrival: minute(15)},
+		Line: &Line{},
 	}
 	edge5 := &Edge{
 		From:   interm1,
 		To:     interm2,
 		Actual: StopInfo{Departure: minute(2), Arrival: minute(5)},
+		Line: &Line{},
 	}
 	edge6 := &Edge{
 		From:   interm2,
 		To:     interm1,
 		Actual: StopInfo{Departure: minute(6), Arrival: minute(7)},
+		Line: &Line{},
 	}
 	dep.Departures = []*Edge{edge1}
 	interm1.Arrivals = []*Edge{edge1, edge6}
