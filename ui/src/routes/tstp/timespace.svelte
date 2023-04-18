@@ -7,6 +7,10 @@
     let loading = true;
     let query = store;
     let data;
+    let error;
+    let currentSelected = undefined;
+    let currentSelectedShortestPath = [];
+    const arrowMargin = 25;
 
     function fetchTimespace() {
         fetch(import.meta.env.VITE_TSTP_API+'timespace?'+optionsQueryString(query))
@@ -15,15 +19,22 @@
             data = d;
             console.log(data);
             setFromApi(data);
-            console.log(store);
             loading = false;
-            tick().then(() => selectEdge(data.DefaultShortestPathID));
+            tick().then(() => {
+                selectEdge(data.DefaultShortestPathID);
+            });
         })
         .catch((error) => {
             alert('Failed request. Possibly too many requests. Try again later.');
             loading = false;
             console.log(error);
         });
+    }
+
+    function refresh() {
+        error = undefined;
+        loading = true;
+        fetchTimespace();
     }
 
     function parseTime(t) {
@@ -51,9 +62,6 @@
         const d = new Date(t);
         return lz(d.getHours())+':'+lz(d.getMinutes());
     }
-
-    let currentSelected = undefined;
-    let currentSelectedShortestPath = [];
 
     function selectEdge(edgeId) {
         setSelectedForDependents(false);
@@ -207,7 +215,7 @@
         return ''
     }
 
-    const margin = 25;
+
 
     onMount(() => {
         fetchTimespace();
@@ -225,7 +233,9 @@
 </script>
 
 <div class="loading-screen" style="display: {!data ? 'block' : 'none'};">
-    <img src="res/icon/loading.gif" id="loading-indicator">
+    <svg class="indicator {loading ? 'loading' :''}" viewBox="-48.2015 -48.2015 400 400">
+        <path d="M57.866,268.881c25.982,19.891,56.887,30.403,89.369,30.402h0.002c6.545,0,13.176-0.44,19.707-1.308 c39.055-5.187,73.754-25.272,97.702-56.557c14.571-19.033,24.367-41.513,28.329-65.01c0.689-4.084-2.064-7.954-6.148-8.643 l-19.721-3.326c-1.964-0.33-3.974,0.131-5.595,1.284c-1.621,1.153-2.717,2.902-3.048,4.864 c-3.019,17.896-10.49,35.032-21.608,49.555c-18.266,23.861-44.73,39.181-74.521,43.137c-4.994,0.664-10.061,1-15.058,1 c-24.757,0-48.317-8.019-68.137-23.191c-23.86-18.266-39.18-44.73-43.136-74.519c-3.957-29.787,3.924-59.333,22.189-83.194 c21.441-28.007,54.051-44.069,89.469-44.069c24.886,0,48.484,7.996,68.245,23.122c6.55,5.014,12.43,10.615,17.626,16.754 l-36.934-6.52c-1.956-0.347-3.973,0.101-5.604,1.241c-1.631,1.141-2.739,2.882-3.085,4.841l-3.477,19.695 c-0.72,4.079,2.003,7.969,6.081,8.689l88.63,15.647c0.434,0.077,0.869,0.114,1.304,0.114c1.528,0,3.031-0.467,4.301-1.355 c1.63-1.141,2.739-2.882,3.084-4.841l15.646-88.63c0.721-4.079-2.002-7.969-6.081-8.69l-19.695-3.477 c-4.085-0.723-7.97,2.003-8.689,6.082l-6.585,37.3c-7.387-9.162-15.87-17.463-25.248-24.642 c-25.914-19.838-56.86-30.324-89.495-30.324c-46.423,0-89.171,21.063-117.284,57.787C6.454,93.385-3.878,132.123,1.309,171.178 C6.497,210.236,26.583,244.933,57.866,268.881z"></path>
+    </svg>
     <p>Data retrieval can take up to one minute.</p>
 </div>
 <div id="timespace-container">
@@ -282,10 +292,10 @@
     class="departure type-{type(e)} label-{e.ID} {liveDataDeparture(e)}">
     {departure(e)}
 </text>
-{#if e.PreviousArrival}<text x="{x(e.To)}" y="{y(e.To)-margin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousArrival)}>▲</text>{/if}
-{#if e.PreviousDeparture}<text x="{x(e.From)}" y="{y(e.From)-margin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousDeparture)}>▲</text>{/if}
-{#if e.NextArrival}<text x="{x(e.To)}" y="{y(e.To)+margin}" class="previous-next-arrow" on:click={selectEdge(e.NextArrival)}>▼</text>{/if}
-{#if e.NextDeparture}<text x="{x(e.From)}" y="{y(e.From)+margin}" class="previous-next-arrow" on:click={selectEdge(e.NextDeparture)}>▼</text>{/if}
+{#if e.PreviousArrival}<text x="{x(e.To)}" y="{y(e.To)-arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousArrival)}>▲</text>{/if}
+{#if e.PreviousDeparture}<text x="{x(e.From)}" y="{y(e.From)-arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousDeparture)}>▲</text>{/if}
+{#if e.NextArrival}<text x="{x(e.To)}" y="{y(e.To)+arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.NextArrival)}>▼</text>{/if}
+{#if e.NextDeparture}<text x="{x(e.From)}" y="{y(e.From)+arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.NextDeparture)}>▼</text>{/if}
 {/if}
 {/each}
 {/if}
@@ -295,6 +305,11 @@
 </div>
 <div id="details"><div>
     {#if currentSelected}
+    <div class="refresh"><a href="javascript:void(0)" on:click={refresh}>
+        <svg class="indicator {loading ? 'loading' :''}" viewBox="-48.2015 -48.2015 400 400">
+            <path d="M57.866,268.881c25.982,19.891,56.887,30.403,89.369,30.402h0.002c6.545,0,13.176-0.44,19.707-1.308 c39.055-5.187,73.754-25.272,97.702-56.557c14.571-19.033,24.367-41.513,28.329-65.01c0.689-4.084-2.064-7.954-6.148-8.643 l-19.721-3.326c-1.964-0.33-3.974,0.131-5.595,1.284c-1.621,1.153-2.717,2.902-3.048,4.864 c-3.019,17.896-10.49,35.032-21.608,49.555c-18.266,23.861-44.73,39.181-74.521,43.137c-4.994,0.664-10.061,1-15.058,1 c-24.757,0-48.317-8.019-68.137-23.191c-23.86-18.266-39.18-44.73-43.136-74.519c-3.957-29.787,3.924-59.333,22.189-83.194 c21.441-28.007,54.051-44.069,89.469-44.069c24.886,0,48.484,7.996,68.245,23.122c6.55,5.014,12.43,10.615,17.626,16.754 l-36.934-6.52c-1.956-0.347-3.973,0.101-5.604,1.241c-1.631,1.141-2.739,2.882-3.085,4.841l-3.477,19.695 c-0.72,4.079,2.003,7.969,6.081,8.689l88.63,15.647c0.434,0.077,0.869,0.114,1.304,0.114c1.528,0,3.031-0.467,4.301-1.355 c1.63-1.141,2.739-2.882,3.084-4.841l15.646-88.63c0.721-4.079-2.002-7.969-6.081-8.69l-19.695-3.477 c-4.085-0.723-7.97,2.003-8.689,6.082l-6.585,37.3c-7.387-9.162-15.87-17.463-25.248-24.642 c-25.914-19.838-56.86-30.324-89.495-30.324c-46.423,0-89.171,21.063-117.284,57.787C6.454,93.385-3.878,132.123,1.309,171.178 C6.497,210.236,26.583,244.933,57.866,268.881z"></path>
+        </svg>
+    </a></div>
     <div class="train">
         <h4>
             <span class="label">{label(currentSelected, true)}</span>
