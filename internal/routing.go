@@ -132,7 +132,7 @@ func shortestPaths(stations map[int]*Station, origin *Station, destination *Stat
 		}
 	}
 	followShortestPaths(stations)
-	markEdgesAsRedundant(stations, origin, destination)
+	markEdgesAsRedundant(stations, origin, destination, regionly)
 }
 
 func shortestPathsToTarget(stations map[int]*Station, edgeToTarget dijkstraVertex, regionly bool) {
@@ -220,17 +220,21 @@ func deltaMinutes(from time.Time, to time.Time) int {
 	return int(to.Sub(from).Minutes())
 }
 
-func markEdgesAsRedundant(stations map[int]*Station, origin *Station, destination *Station) {
+func markEdgesAsRedundant(stations map[int]*Station, origin *Station, destination *Station, regionly bool) {
 	for _, station := range stations {
 		for _, departure := range station.Departures {
-			markEdgeAsRedundant(departure, origin, destination)
+			markEdgeAsRedundant(departure, origin, destination, regionly)
 			markEdgeAsDiscarded(departure)
 		}
 	}
 }
 
-func markEdgeAsRedundant(edge *Edge, origin *Station, destination *Station) {
+func markEdgeAsRedundant(edge *Edge, origin *Station, destination *Station, regionly bool) {
 	if edge.ShortestPath == nil && edge.To != destination || edge.ReverseShortestPath == nil && edge.From != origin {
+		edge.Redundant = true
+		return
+	}
+	if isNotEligible(edge, regionly) {
 		edge.Redundant = true
 		return
 	}
