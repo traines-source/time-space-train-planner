@@ -1,6 +1,7 @@
 package render
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -32,6 +33,8 @@ type container struct {
 	Query                 string
 	DefaultShortestPathID string
 	LegalLink             string
+	edgeIDByEdge          map[*internal.Edge]string
+	edgeByEdgeID          map[string]*internal.Edge
 }
 
 const (
@@ -41,10 +44,12 @@ const (
 
 func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
 	c := &container{
-		Stations:  map[string]*StationLabel{},
-		Edges:     map[string]*EdgePath{},
-		Query:     html.EscapeString(query),
-		LegalLink: os.Getenv("TSTP_LEGAL"),
+		Stations:     map[string]*StationLabel{},
+		Edges:        map[string]*EdgePath{},
+		edgeIDByEdge: map[*internal.Edge]string{},
+		edgeByEdgeID: map[string]*internal.Edge{},
+		Query:        html.EscapeString(query),
+		LegalLink:    os.Getenv("TSTP_LEGAL"),
 	}
 	c.setupStations(stations)
 	c.setupEdges(lines)
@@ -56,13 +61,16 @@ func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Li
 
 func TimeSpaceApi(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
 	c := &container{
-		Stations: map[string]*StationLabel{},
-		Edges:    map[string]*EdgePath{},
+		Stations:     map[string]*StationLabel{},
+		Edges:        map[string]*EdgePath{},
+		edgeIDByEdge: map[*internal.Edge]string{},
+		edgeByEdgeID: map[string]*internal.Edge{},
 	}
 	c.setupStations(stations)
 	c.setupEdges(lines)
 	c.setupPreviousAndNext(stations)
 	c.gravitate()
+	log.Print("Done.")
 	json.NewEncoder(wr).Encode(c)
 }
 
@@ -118,7 +126,7 @@ func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
 	for _, l := range lines {
 		for i := 0; i < len(l.Route); i++ {
 			origin := l.Route[i]
-			if originEdgePath, ok := c.Edges[generateEdgeID(origin)]; ok {
+			if originEdgePath, ok := c.Edges[c.generateEdgeID(origin)]; ok {
 				var lastEdge *internal.Edge
 				for e := origin; e != nil; e = e.ShortestPath {
 					c.setShortestPathFor(originEdgePath, e, lastEdge, e)
@@ -170,7 +178,7 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 	var nextArrivalToFill *string = nil
 	var nextDepartureToFill *string = nil
 	for i := 0; i < len(arrivals); i++ {
-		if e, ok := c.Edges[generateEdgeID(arrivals[i])]; ok {
+		if e, ok := c.Edges[c.generateEdgeID(arrivals[i])]; ok {
 			if c.isEdgeInsideGroup(e) {
 				continue
 			}
@@ -178,7 +186,7 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 				continue
 			}
 			if nextArrivalToFill != nil {
-				*nextArrivalToFill = generateEdgeID(arrivals[i])
+				*nextArrivalToFill = c.generateEdgeID(arrivals[i])
 				nextArrivalToFill = nil
 			}
 			e.PreviousArrival = lastProperArrival
@@ -187,11 +195,11 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 					nextArrivalToFill = &e.NextArrival
 				}
 			}
-			lastProperArrival = generateEdgeID(arrivals[i])
+			lastProperArrival = c.generateEdgeID(arrivals[i])
 		}
 	}
 	for i := 0; i < len(departures); i++ {
-		if e, ok := c.Edges[generateEdgeID(departures[i])]; ok {
+		if e, ok := c.Edges[c.generateEdgeID(departures[i])]; ok {
 			if c.isEdgeInsideGroup(e) {
 				continue
 			}
@@ -199,7 +207,7 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 				continue
 			}
 			if nextDepartureToFill != nil {
-				*nextDepartureToFill = generateEdgeID(departures[i])
+				*nextDepartureToFill = c.generateEdgeID(departures[i])
 				nextDepartureToFill = nil
 			}
 			if c.Stations[e.From.SpaceAxis].GroupID != nil {
@@ -208,7 +216,7 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 				}
 			}
 			nextDepartureToFill = &e.NextDeparture
-			lastProperDeparture = generateEdgeID(departures[i])
+			lastProperDeparture = c.generateEdgeID(departures[i])
 		}
 	}
 }
@@ -220,7 +228,7 @@ func (c *container) preselectShortestPath(origin *internal.Station, destination 
 			for start.ReverseShortestPath != nil {
 				start = start.ReverseShortestPath
 			}
-			if e, ok := c.Edges[generateEdgeID(start)]; ok {
+			if e, ok := c.Edges[c.generateEdgeID(start)]; ok {
 				c.DefaultShortestPathID = e.ID
 			}
 			break
@@ -233,10 +241,10 @@ func (c *container) isEdgeInsideGroup(e *EdgePath) bool {
 }
 
 func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, start *internal.Edge, end *internal.Edge) {
-	if edgePath, ok := c.Edges[generateEdgeID(e)]; ok {
+	if edgePath, ok := c.Edges[c.generateEdgeID(e)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
 	}
-	if edgePath, ok := c.Edges[generateStationEdgeID(start, end)]; ok {
+	if edgePath, ok := c.Edges[c.generateStationEdgeID(start, end)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
 	}
 }
@@ -252,7 +260,7 @@ func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edge := &EdgePath{
-		ID:                   generateEdgeID(e),
+		ID:                   c.generateEdgeID(e),
 		From:                 Coord{SpaceAxis: strconv.Itoa(e.From.EvaNumber), TimeAxis: e.Actual.Departure},
 		To:                   Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
 		Redundant:            e.Redundant,
@@ -276,18 +284,37 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		}
 	}
 	if e.ShortestPath != nil {
-		edge.ShortestPath = append(edge.ShortestPath, ShortestPathAlternative{EdgeID: generateEdgeID(e.ShortestPath)})
+		edge.ShortestPath = append(edge.ShortestPath, ShortestPathAlternative{EdgeID: c.generateEdgeID(e.ShortestPath)})
 	}
 	if e.ReverseShortestPath != nil {
-		edge.ReverseShortestPath = append(edge.ReverseShortestPath, ShortestPathAlternative{EdgeID: generateEdgeID(e.ReverseShortestPath)})
+		edge.ReverseShortestPath = append(edge.ReverseShortestPath, ShortestPathAlternative{EdgeID: c.generateEdgeID(e.ReverseShortestPath)})
 	}
 	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge.ID)
 	return edge
 }
 
-func generateEdgeID(e *internal.Edge) string {
-	return fmt.Sprintf("%p", e)
+func (c *container) generateEdgeID(e *internal.Edge) string {
+	if edgeID, ok := c.edgeIDByEdge[e]; ok {
+		return edgeID
+	}
+	hash := fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%s_%d_%d_%d", e.Line.ID, e.From.EvaNumber, e.To.EvaNumber, e.Planned.Departure.Unix()))))[:7]
+	for {
+		if _, ok := c.edgeByEdgeID[hash]; !ok {
+			c.edgeIDByEdge[e] = hash
+			c.edgeByEdgeID[hash] = e
+			return hash
+		}
+		log.Print("Prevented id collision for edge", e)
+		hash += "C"
+	}
+}
+
+func (c *container) generateStationEdgeID(last *internal.Edge, this *internal.Edge) string {
+	if last == nil || this == nil {
+		return "undefined"
+	}
+	return fmt.Sprintf("%s_%s_station", c.generateEdgeID(last), c.generateEdgeID(this))
 }
 
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
@@ -299,7 +326,7 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		return nil
 	}
 	edge := &EdgePath{
-		ID:                  generateStationEdgeID(last, this),
+		ID:                  c.generateStationEdgeID(last, this),
 		ShortestPathFor:     []string{},
 		ShortestPath:        []ShortestPathAlternative{},
 		ReverseShortestPath: []ShortestPathAlternative{},
@@ -310,13 +337,6 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge.ID)
 	return edge
-}
-
-func generateStationEdgeID(last *internal.Edge, this *internal.Edge) string {
-	if last == nil {
-		return "undefined"
-	}
-	return fmt.Sprintf("%p_%p_station", last, this)
 }
 
 func (c *container) gravitate() {

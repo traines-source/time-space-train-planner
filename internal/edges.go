@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"crypto/md5"
 	"fmt"
 	"log"
 	"math"
@@ -103,14 +104,13 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 
 func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, departure time.Time, arrival time.Time) {
 
-	var lineID = fmt.Sprint(int64(from.EvaNumber*1000000000+to.EvaNumber*100) + departure.Unix())
-
+	var lineID = fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%d_%d_%d", from.EvaNumber, to.EvaNumber, departure.Unix()))))[:10]
 	for {
 		_, ok := c.lines[lineID]
 		if !ok {
 			break
 		}
-		lineID += "d"
+		lineID += "C"
 	}
 	var line = &Line{
 		ID:   lineID,
@@ -122,6 +122,10 @@ func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station
 		Line: line,
 		From: from,
 		To:   to,
+		Planned: StopInfo{
+			Departure: departure,
+			Arrival:   arrival,
+		},
 		Actual: StopInfo{
 			Departure: departure,
 			Arrival:   arrival,
