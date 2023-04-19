@@ -136,6 +136,8 @@ func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
 					c.setShortestPathFor(originEdgePath, e, e, lastEdge)
 					lastEdge = e
 				}
+			} else {
+				log.Print("Referenced non-existing edge.")
 			}
 		}
 	}
@@ -196,6 +198,8 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 				}
 			}
 			lastProperArrival = c.generateEdgeID(arrivals[i])
+		} else {
+			log.Print("Referenced non-existing edge.")
 		}
 	}
 	for i := 0; i < len(departures); i++ {
@@ -217,6 +221,8 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 			}
 			nextDepartureToFill = &e.NextDeparture
 			lastProperDeparture = c.generateEdgeID(departures[i])
+		} else {
+			log.Print("Referenced non-existing edge.")
 		}
 	}
 }
@@ -230,6 +236,8 @@ func (c *container) preselectShortestPath(origin *internal.Station, destination 
 			}
 			if e, ok := c.Edges[c.generateEdgeID(start)]; ok {
 				c.DefaultShortestPathID = e.ID
+			} else {
+				log.Print("Referenced non-existing edge.")
 			}
 			break
 		}
@@ -243,9 +251,13 @@ func (c *container) isEdgeInsideGroup(e *EdgePath) bool {
 func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, start *internal.Edge, end *internal.Edge) {
 	if edgePath, ok := c.Edges[c.generateEdgeID(e)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
+	} else {
+		log.Print("Referenced non-existing edge.")
 	}
 	if edgePath, ok := c.Edges[c.generateStationEdgeID(start, end)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
+	} else {
+		log.Print("Referenced non-existing edge.")
 	}
 }
 

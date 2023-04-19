@@ -21,7 +21,11 @@
             setFromApi(data);
             loading = false;
             tick().then(() => {
-                selectEdge(data.DefaultShortestPathID);
+                if (currentSelected && data.Edges[currentSelected.ID]) {
+                    selectEdge(currentSelected.ID);
+                } else {
+                    selectEdge(data.DefaultShortestPathID);
+                }                
             });
         })
         .catch((error) => {
@@ -73,6 +77,7 @@
 
     function setActive(selected) {
         const e = document.getElementById(currentSelected.ID+'-toucharea');
+        if (!e) return;
         if (selected) {
             e.className.baseVal += " active";
         } else {
@@ -95,11 +100,13 @@
             if (next.ShortestPath.length == 0) break;
             previous = next;
             next = data.Edges[next.ShortestPath[0].EdgeID];
+            if (!next) break;
         }
         next = currentSelected;
         while(next.ReverseShortestPath.length > 0) {
             previous = next;
             next = data.Edges[next.ReverseShortestPath[0].EdgeID];
+            if (!next) break;
             setSelectedForEdge(next, selected);
             setSelectedForStationEdge(previous, next, selected);
             all.push(next);
@@ -109,6 +116,7 @@
 
     function setSelectedForEdgeId(edgeId, selected) {
         const e = document.getElementById(edgeId);
+        if (!e) return;
         if (selected) {
             e.className.baseVal += " selected";
         } else {
@@ -117,13 +125,13 @@
     }
 
     function setSelectedForEdge(edge, selected) {
-        if (edge.Discarded) return;
+        if (!edge || edge.Discarded) return;
         setSelectedForEdgeId(edge.ID, selected);
     }
     
     
     function setSelectedForStationEdge(previous, next, selected) {
-        if (previous.Discarded || next.Discarded) return;
+        if (!previous || !next || previous.Discarded || next.Discarded) return;
         const edgeId = previous.ID+'_'+next.ID+'_station';
         if (document.getElementById(edgeId)) {
             setSelectedForEdgeId(edgeId, selected);
@@ -256,7 +264,7 @@
     </filter>
 </defs>
 {#if data}
-{#each Object.values(data.Stations) as s}
+{#each Object.values(data.Stations) as s (s.ID)}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label">
     {s.Name}
     <title>{s.ID}</title>
@@ -267,7 +275,7 @@
     {simpleTime(t.TimeAxis)}
 </text>
 {/each}
-{#each data.SortedEdges.map(id => data.Edges[id]) as e}
+{#each data.SortedEdges.map(id => data.Edges[id]) as e (e.ID)}
 {#if !e.Discarded}
 <path id="{e.ID}" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
     class="edge type-{type(e)} redundant-{e.Redundant} cancelled-{e.Cancelled} {e.ShortestPathFor.map(p => 'sp-'+p).join(' ')} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
@@ -277,7 +285,7 @@
     />
 {/if}
 {/each}
-{#each currentSelectedShortestPath as e}
+{#each currentSelectedShortestPath as e (e.ID)}
 {#if !e.Discarded}
 <text id="{e.ID}-label" class="label type-{type(e)} label-{e.ID}">
     <textPath href="#{e.ID}" startOffset="50%">

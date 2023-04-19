@@ -267,6 +267,9 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		stationsSlice = append(stationsSlice, s)
 	}
 	sort.SliceStable(stationsSlice, func(i, j int) bool {
+		return stationsSlice[i].Name < stationsSlice[j].Name
+	})
+	sort.SliceStable(stationsSlice, func(i, j int) bool {
 		if stationsSlice[i] == origin || stationsSlice[j] == destination {
 			return true
 		}
@@ -293,7 +296,9 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 				stationJ = val
 			}
 		}
-		return geoDistStations(origin, stationI)-geoDistStations(destination, stationI) < geoDistStations(origin, stationJ)-geoDistStations(destination, stationJ)
+		a := geoDistStations(origin, stationI) - geoDistStations(destination, stationI)
+		b := geoDistStations(origin, stationJ) - geoDistStations(destination, stationJ)
+		return a < b
 	})
 	i := 0
 	for _, s := range stationsSlice {
