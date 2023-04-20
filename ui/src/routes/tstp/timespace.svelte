@@ -228,7 +228,7 @@
     onMount(() => {
         fetchTimespace();
         panzoom(document.getElementById('timespace-canvas'), {
-            maxZoom: 5,
+            maxZoom: 7,
             minZoom: 1,
             bounds: true,
             boundsPadding: 1,

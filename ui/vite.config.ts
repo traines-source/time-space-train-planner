@@ -9,5 +9,12 @@ export default defineConfig({
 		proxy: {
 			'/api/v1': 'http://localhost:3000',
 		}
+	},
+	preview: {
+		port: 3001,
+		host: true,
+		proxy: {
+			'/api/v1': 'http://localhost:3000',
+		}
 	}
 });
