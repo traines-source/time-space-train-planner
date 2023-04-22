@@ -21,7 +21,6 @@
         .then(handleHttpErrors)
         .then(d => {
             data = d;
-            console.log(data);
             setFromApi(data);
             loading = false;
             tick().then(() => {
@@ -119,7 +118,6 @@
 
     function selectListener(evt: any): void {
         const id = evt.target.id.replace('-toucharea', '');
-        console.log('selected ', id);
         selectEdge(id);
     }
 

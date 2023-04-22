@@ -14,7 +14,6 @@
         fetch(import.meta.env.VITE_TSTP_API+'vias?'+optionsQueryString(query))
         .then(handleHttpErrors)
         .then(data => {
-            console.log(data);
             setFromApi(data);
             query = query;
             loading = false;

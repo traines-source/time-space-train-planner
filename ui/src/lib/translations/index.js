@@ -22,5 +22,3 @@ export const config = {
 };
 
 export const { t, loading, locales, locale, loadTranslations } = new i18n(config);
-
-loading.subscribe(($loading) => $loading && console.log('Loading translations...'));
