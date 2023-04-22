@@ -4,7 +4,7 @@
     "introduction": "Dieses Tool ermöglicht es, Reisen mit öffentlichen Verkehrsmitteln mithilfe eines interaktiven Raum-Zeit-Diagramms zu planen, auf Basis von Echtzeit-Fahrplandaten (aktuell nur Deutschland).",
     "from": "Von",
     "to": "Nach",
-    "interchanges_explanation": "Bitte geben Sie potenzielle Umsteigestationen ein (bis zu 10). Nur direkte Verbindungen zwischen diesen Stationen werden gefunden.",
+    "interchanges_explanation": "Bitte geben Sie alle potenziellen Umsteigestationen ein (bis zu 10). Nur direkte Verbindungen zwischen diesen Stationen werden gefunden.",
     "via": "Umsteigestation",
     "default_now": "ansonsten Jetzt",
     "regionly": "Nur Regionalverkehr",
@@ -29,5 +29,9 @@
     "error_http_502": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise ist der angefragte Zeitraum zu weit in der Vergangenheit oder Zukunft oder andere Anfrageparameter sind ungültig.",
     "error_http_503": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise zu viele Anfragen. Bitte später erneut versuchen.",
     "error_http_unknown": "Unbekannter Serverfehler.",
-    "error_unknown": "Verbindung zum Server fehlgeschlagen. Sind sie offline?"
+    "error_unknown": "Verbindung zum Server fehlgeschlagen. Sind sie offline?",
+    "tip": "Tipp",
+    "tip_0": "Wenn man auf eine Verbindung klickt, wird die kürzeste Route vom Start zum Ziel über diese Verbindung blau hervorgehoben.",
+    "tip_1": "Wenn man Datum/Uhrzeit nicht setzt, kann man ein Bookmark auf die Diagramm-Seite anlegen und jederzeit einfach das aktuelle Diagramm aufrufen.",
+    "tip_2": "Mit den Pfeilen, die über und unter ausgewählten Verbindungen erscheinen, kann man zu früheren Ankünften und späteren Abfahrten an der entsprechenden Station springen."
 }

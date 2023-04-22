@@ -147,6 +147,11 @@
         return Object.values(data.Stations);
     }
 
+    function randomTipId() {
+        const tipCount = 3;
+        return 'tip_'+Math.floor(Math.random()*tipCount);
+    }
+
     onMount(() => {
         fetchTimespace();
         const e = document.getElementById('timespace-canvas')
@@ -166,6 +171,7 @@
 <div class="loading-screen" style="display: {!data ? 'block' : 'none'};">
     <span class="indicator {loading ? 'loading' :''}"><span class="micon">autorenew</span></span>
     <p>{$t('c.data_retrieval_waiting')}</p>
+    <p><span class="micon">tips_and_updates</span> {$t('c.tip')+': '+$t('c.'+randomTipId())}</p>
 </div>
 <div id="timespace-container">
 

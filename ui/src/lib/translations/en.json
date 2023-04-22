@@ -4,7 +4,7 @@
     "introduction": "This tool allows you to plan your public transport journeys using an interactive time-space diagram, based on live timetable data (currently Germany only).",
     "from": "From",
     "to": "To",
-    "interchanges_explanation": "You need to enter possible interchange stations (up to 10). Only direct connections between these stations will be found.",
+    "interchanges_explanation": "You need to enter all potential interchange stations (up to 10). Only direct connections between these stations will be found.",
     "via": "Interchange",
     "default_now": "Default is Now",
     "regionly": "Regional transport only",
@@ -29,5 +29,9 @@
     "error_http_502": "Failed requesting timetable data. Requested time might be too far in the future or past or other request parameters might be invalid.",
     "error_http_503": "Failed requesting timetable data. Possibly too many requests. Try again later.",
     "error_http_unknown": "Unknown server error.",
-    "error_unknown": "Connection to server failed. Are you offline?"
+    "error_unknown": "Connection to server failed. Are you offline?",
+    "tip": "Tip",
+    "tip_0": "If you click on a connection, the shortest route from origin to destination via this connection is highlighted in blue.",
+    "tip_1": "Leave the date/time unset and create a bookmark of the diagram page in order to easily always access the current diagram.",
+    "tip_2": "Use the arrows appearing above and below selected connections to find earlier arrivals and later departures from the respective stations."
 }

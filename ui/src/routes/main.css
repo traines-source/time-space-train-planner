@@ -418,8 +418,8 @@ a text {
 .loading-screen {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 10px;
+  right: 10px;
   text-align: center;
   margin: 200px 0 200px 0;
   z-index: 1000;
