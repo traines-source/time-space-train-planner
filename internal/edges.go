@@ -22,40 +22,44 @@ func (c *consumer) generateTimetableEdges() {
 		sort.Slice(stops, func(i, j int) bool {
 			return relevantDeparture(stops[i]).Before(relevantDeparture(stops[j]))
 		})
-		var a, b *LineStop
+		var lastNonCancelled *LineStop
 		for i := 1; i < len(stops); i++ {
-			if !stops[i-1].Cancelled || i == 1 {
-				a = stops[i-1]
+			if !stops[i-1].Cancelled && stops[i].Cancelled {
+				lastNonCancelled = stops[i-1]
 			}
-			b = stops[i]
-			if b.Cancelled && i+1 != len(stops) {
-				continue
+			if !stops[i].Cancelled && lastNonCancelled != nil {
+				c.generateTimetableEdge(lastNonCancelled, stops[i], line)
+				lastNonCancelled = nil
 			}
 			if geoDistStations(stops[i-1].Station, stops[i].Station) == 0 {
 				continue
 			}
-			edge := &Edge{
-				Line:      line,
-				From:      a.Station,
-				To:        b.Station,
-				Message:   a.Message, // TODO both msgs?
-				Cancelled: a.Cancelled || b.Cancelled,
-			}
-			copyStopInfo(&a.Planned, &b.Planned, &edge.Planned)
-			copyStopInfo(&a.Current, &b.Current, &edge.Current)
-			copyStopInfo(&a.Planned, &b.Planned, &edge.Actual)
-			copyStopInfo(&a.Current, &b.Current, &edge.Actual)
-
-			edge.Current.DepartureTrack = a.Current.DepartureTrack
-			edge.Current.ArrivalTrack = b.Current.ArrivalTrack
-			edge.Current.Departure = a.Current.Departure
-			edge.Current.Arrival = b.Current.Arrival
-
-			line.Route = append(line.Route, edge)
-			edge.From.Departures = append(edge.From.Departures, edge)
-			edge.To.Arrivals = append(edge.To.Arrivals, edge)
+			c.generateTimetableEdge(stops[i-1], stops[i], line)
 		}
 	}
+}
+
+func (c *consumer) generateTimetableEdge(a *LineStop, b *LineStop, line *Line) {
+	edge := &Edge{
+		Line:      line,
+		From:      a.Station,
+		To:        b.Station,
+		Message:   a.Message, // TODO both msgs?
+		Cancelled: a.Cancelled || b.Cancelled,
+	}
+	copyStopInfo(&a.Planned, &b.Planned, &edge.Planned)
+	copyStopInfo(&a.Current, &b.Current, &edge.Current)
+	copyStopInfo(&a.Planned, &b.Planned, &edge.Actual)
+	copyStopInfo(&a.Current, &b.Current, &edge.Actual)
+
+	edge.Current.DepartureTrack = a.Current.DepartureTrack
+	edge.Current.ArrivalTrack = b.Current.ArrivalTrack
+	edge.Current.Departure = a.Current.Departure
+	edge.Current.Arrival = b.Current.Arrival
+
+	line.Route = append(line.Route, edge)
+	edge.From.Departures = append(edge.From.Departures, edge)
+	edge.To.Arrivals = append(edge.To.Arrivals, edge)
 }
 
 func (c *consumer) generateOnFootEdges(origin *Station, destination *Station) {
