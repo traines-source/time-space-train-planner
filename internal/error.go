@@ -7,7 +7,7 @@ import (
 )
 
 var errorCodes = map[int]string{
-	502: "Failed requesting timetable data. Requested time might be too far in the future or past or other request parameters might be invalid.",
+	400: "Failed requesting timetable data. Requested time might be too far in the future or past, requested stations not existing or other request parameters might be invalid.",
 	503: "Failed requesting timetable data. Possibly too many requests. Try again later.",
 }
 
@@ -37,7 +37,7 @@ func (e *ErrorCode) ErrorCode() int {
 func HandleError(e error) *ErrorCode {
 	log.Print("Error: ", e)
 	if strings.Contains(e.Error(), "HAFAS") {
-		return &ErrorCode{Code: 502}
+		return &ErrorCode{Code: 400}
 	}
 	return &ErrorCode{Code: 503}
 }

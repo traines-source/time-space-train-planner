@@ -252,12 +252,10 @@ func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edg
 	if edgePath, ok := c.Edges[c.generateEdgeID(e)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
 	} else {
-		log.Print("Referenced non-existing edge.")
+		log.Print("Referenced non-existing edge. (sp)")
 	}
 	if edgePath, ok := c.Edges[c.generateStationEdgeID(start, end)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
-	} else {
-		log.Print("Referenced non-existing edge.")
 	}
 }
 
