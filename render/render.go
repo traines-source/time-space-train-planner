@@ -229,7 +229,7 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 
 func (c *container) preselectShortestPath(origin *internal.Station, destination *internal.Station) {
 	for _, s := range destination.Arrivals {
-		if s.ReverseShortestPath != nil || s.From.EvaNumber == origin.EvaNumber {
+		if s.ReverseShortestPath != nil || s.From.EvaNumber == origin.EvaNumber && !s.Redundant {
 			start := s
 			for start.ReverseShortestPath != nil {
 				start = start.ReverseShortestPath
