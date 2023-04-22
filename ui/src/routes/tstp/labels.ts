@@ -18,17 +18,14 @@ function label(e: Edge, detail: boolean): string {
     if (!e.Line) {
         return '';
     }
-    let label = '';
-    if (e.Line.Name) {
-        label = e.Line.Name;
-    } else {
-        label = e.Line.ID;
-    }
+    let label = e.Line.Name;
     if (e.Message && !detail) {
-        label += ' 🛈';
+        label += ' <tspan class="micon">info</tspan>';
     }
-    if (e.Line.Type == 'Foot') {
-        return '🚶 ' + label;
+    if (e.Line.Type == 'Foot'  && !detail) {
+        return '<tspan class="micon">directions_walk</tspan> ' + label;
+    } else if (e.Line.Type == 'Foot'  && detail) {
+        return '<span class="micon">directions_walk</span> ' + label;
     }
     return label;
 }

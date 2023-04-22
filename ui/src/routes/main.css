@@ -17,6 +17,42 @@
        url('/res/fonts/roboto-condensed-v25-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
 
+/* material-icons-outlined-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Material Icons Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/res/fonts/material-icons-outlined-v109-latin-regular.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+ */
+       url('/res/fonts/material-icons-outlined-v109-latin-regular.woff') format('woff'); /* Chrome 5+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+.micon {
+  font-family: 'Material Icons Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 16px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: text-top;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
 svg, body {
   font-family: 'Roboto Condensed', sans-serif;
   font-size: 16px;
@@ -77,10 +113,6 @@ noscript {
   color: #B71C1C;
 }
 
-#details .arrow {
-  font-family: sans-serif;
-}
-
 #details .miniature {
   width: 50px;
 }
@@ -110,6 +142,10 @@ noscript {
 #details .legend h4 {
   text-align: center;
   margin: 40px 0 10px 0;
+}
+
+#details .submit {
+  margin: 10px 0 0 0;
 }
 
 .edge {
@@ -367,14 +403,16 @@ a text {
 
 #submit-container {
   position: relative;
-  margin: 20px 0;
+  margin: 30px 0 20px 0;
 }
-#submit-container img {
-  display: none;
+#submit-container .indicator {
+  visibility: hidden;
   position: absolute;
-  left: 11px;
-  top: 14px; 
-  height: 12px;
+  left: 10px;
+  top: 10.5px;
+}
+#submit-container .indicator .micon {
+  font-size: 20px;
 }
 
 .loading-screen {
@@ -401,14 +439,18 @@ a text {
 }
 
 .indicator {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
+  display: inline-block;
 }
-.indicator.loading path {
+.indicator .micon {
+  font-size: 26px;
+  color: black;
+}
+.indicator.loading .micon {
   animation-name: rotate;
   animation-duration: 2s;
   animation-iteration-count: infinite;
-  transform-origin: 151.7985px 151.7985px;
 }
 @keyframes rotate {
   0% {
@@ -421,6 +463,7 @@ a text {
 
 #footer {
   margin-top: 50px;
+  line-height: 24px;
 }
 #footer, #footer a {
   color: #707070;

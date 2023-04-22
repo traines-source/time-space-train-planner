@@ -290,7 +290,6 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	if e.Line != nil {
 		edge.Line = &LineLabel{
 			Name:      e.Line.Name,
-			ID:        e.Line.ID,
 			Type:      e.Line.Type,
 			Direction: e.Line.Direction,
 		}
@@ -423,12 +422,7 @@ func (e *EdgePath) Label() string {
 	if e.Line == nil {
 		return ""
 	}
-	var label string
-	if e.Line.Name != "" {
-		label = e.Line.Name
-	} else {
-		label = e.Line.ID
-	}
+	label := e.Line.Name
 	if e.Message != "" {
 		label += " (" + substr(e.Message, 0, 30) + "...)"
 	}

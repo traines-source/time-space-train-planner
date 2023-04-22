@@ -88,7 +88,7 @@
         </div>
         
         <div id="submit-container"><input type="button" value="{$t('c.submit')}" class="submit" on:click={submit}><!--
-        --><img src="res/icon/loading.gif" id="loading-indicator" style="display: {loading ? 'block' : 'none'};"></div>
+        --><span class="indicator {loading ? 'loading' :''}" style="visibility: {loading ? 'visible' : 'hidden'};"><span class="micon">autorenew</span></span></div>
         
         {$t('c.data_retrieval_waiting')}
     </form>
