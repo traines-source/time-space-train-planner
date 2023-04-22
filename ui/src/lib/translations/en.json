@@ -22,5 +22,12 @@
     "long_distance": "ICE, IC, etc.",
     "regional": "RE, RB, S, etc.",
     "local": "Bus, Tram, etc.",
-    "pedestrian": "On Foot"
+    "pedestrian": "On Foot",
+    "error": "Error",
+    "error_http_400": "Origin or destination does not exist or does not have any arrivals/departures.",
+    "error_http_500": "Unexpected server error.",
+    "error_http_502": "Failed requesting timetable data. Requested time might be too far in the future or past or other request parameters might be invalid.",
+    "error_http_503": "Failed requesting timetable data. Possibly too many requests. Try again later.",
+    "error_http_unknown": "Unknown server error.",
+    "error_unknown": "Connection to server failed. Are you offline?"
 }

@@ -229,13 +229,11 @@ func (c *consumer) callProviders(enrich bool) *ErrorCode {
 	for _, p := range c.providers {
 		if !enrich {
 			if err := p.Fetch(c); err != nil {
-				log.Print("Error: ", err)
-				return &ErrorCode{Code: 502}
+				return HandleError(err)
 			}
 		} else {
 			if err := p.Enrich(c); err != nil {
-				log.Print("Error: ", err)
-				return &ErrorCode{Code: 502}
+				return HandleError(err)
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { t } from '$lib/translations';
     import { store } from "../store"
-    import { optionsQueryString } from "../url"
+    import { optionsQueryString } from "../query"
     import Footer from '../footer.svelte'; 
     import {label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
     import type { Edge, Station } from './types';
@@ -10,9 +10,13 @@
     export let loading: boolean;
     export let doRefresh: () => void;
     export let stationResolver: (id: string) => Station;
+    export let error: string | undefined;
 </script>
 
 <div id="details"><div>
+    {#if error}
+    <p class="error">{$t('c.error')}: {$t('c.'+error)}</p>
+    {/if}
     {#if currentSelected}
     <div class="refresh"><a href="javascript:void(0)" on:click={doRefresh}>
         <svg class="indicator {loading ? 'loading' :''}" viewBox="-48.2015 -48.2015 400 400">

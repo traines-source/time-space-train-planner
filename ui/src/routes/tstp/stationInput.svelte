@@ -19,7 +19,7 @@
             return list;
         })
         .catch((error) => {
-            alert('Failed autocomplete request. Possibly too many requests. Try again later.')
+            console.log(error);
         });
     };
 

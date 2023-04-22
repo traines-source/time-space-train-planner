@@ -21,7 +21,7 @@ import (
 type DepartureArrival struct {
 
 	// cancelled
-	Cancelled bool `json:"cancelled"`
+	Cancelled bool `json:"cancelled,omitempty"`
 
 	// delay
 	// Required: true

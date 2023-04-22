@@ -40,7 +40,8 @@ func NewGetStationsIDOK() *GetStationsIDOK {
 	return &GetStationsIDOK{}
 }
 
-/* GetStationsIDOK describes a response with status code 200, with default header values.
+/*
+GetStationsIDOK describes a response with status code 200, with default header values.
 
 A stop/station, in the [db-stations format](https://github.com/derhuerst/db-stations/blob/master/readme.md).
 */
@@ -48,9 +49,44 @@ type GetStationsIDOK struct {
 	Payload *GetStationsIDOKBody
 }
 
+// IsSuccess returns true when this get stations Id o k response has a 2xx status code
+func (o *GetStationsIDOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get stations Id o k response has a 3xx status code
+func (o *GetStationsIDOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get stations Id o k response has a 4xx status code
+func (o *GetStationsIDOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get stations Id o k response has a 5xx status code
+func (o *GetStationsIDOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get stations Id o k response a status code equal to that given
+func (o *GetStationsIDOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get stations Id o k response
+func (o *GetStationsIDOK) Code() int {
+	return 200
+}
+
 func (o *GetStationsIDOK) Error() string {
 	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK  %+v", 200, o.Payload)
 }
+
+func (o *GetStationsIDOK) String() string {
+	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK  %+v", 200, o.Payload)
+}
+
 func (o *GetStationsIDOK) GetPayload() *GetStationsIDOKBody {
 	return o.Payload
 }
@@ -67,7 +103,8 @@ func (o *GetStationsIDOK) readResponse(response runtime.ClientResponse, consumer
 	return nil
 }
 
-/*GetStationsIDOKBody get stations ID o k body
+/*
+GetStationsIDOKBody get stations ID o k body
 swagger:model GetStationsIDOKBody
 */
 type GetStationsIDOKBody struct {
@@ -267,7 +304,8 @@ func (o *GetStationsIDOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetStationsIDOKBodyAddress get stations ID o k body address
+/*
+GetStationsIDOKBodyAddress get stations ID o k body address
 swagger:model GetStationsIDOKBodyAddress
 */
 type GetStationsIDOKBodyAddress struct {
@@ -310,7 +348,8 @@ func (o *GetStationsIDOKBodyAddress) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetStationsIDOKBodyLocation get stations ID o k body location
+/*
+GetStationsIDOKBodyLocation get stations ID o k body location
 swagger:model GetStationsIDOKBodyLocation
 */
 type GetStationsIDOKBodyLocation struct {
@@ -353,7 +392,8 @@ func (o *GetStationsIDOKBodyLocation) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetStationsIDOKBodyOperator get stations ID o k body operator
+/*
+GetStationsIDOKBodyOperator get stations ID o k body operator
 swagger:model GetStationsIDOKBodyOperator
 */
 type GetStationsIDOKBodyOperator struct {

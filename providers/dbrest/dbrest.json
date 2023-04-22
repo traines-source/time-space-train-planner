@@ -234,6 +234,23 @@
           }
         ],
         "responses": {
+          "502": {
+            "description": "HAFAS error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
           "200": {
             "description": "An array of departures, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md).",
             "schema": {
@@ -379,6 +396,23 @@
           }
         ],
         "responses": {
+          "502": {
+            "description": "HAFAS error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
           "200": {
             "description": "An array of arrivals, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md).",
             "schema": {
@@ -561,6 +595,23 @@
           }
         ],
         "responses": {
+          "502": {
+            "description": "HAFAS error.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "msg": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Too many requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
           "200": {
             "description": "An array of journeys, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md).",
             "schema": {

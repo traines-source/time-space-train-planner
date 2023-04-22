@@ -1,27 +1,28 @@
 <script lang="ts">
     import { t } from '$lib/translations';    
     import { store, setFromApi } from "../store"
-    import { optionsQueryString } from "../url"
+    import { handleHttpErrors, optionsQueryString } from "../query"
     import StationInput from "./stationInput.svelte"
     import { goto } from '$app/navigation';
     import { onMount } from "svelte";
 
     let query = store;
     let loading = false;
+    let error: string | undefined;
    
     function fetchVias(): void {
         fetch(import.meta.env.VITE_TSTP_API+'vias?'+optionsQueryString(query))
-        .then(response => response.json())
+        .then(handleHttpErrors)
         .then(data => {
             console.log(data);
             setFromApi(data);
             query = query;
             loading = false;
         })
-        .catch((error) => {
-            alert('Failed request. Possibly too many requests. Try again later.');
+        .catch((err) => {
             loading = false;
-            console.log(error);
+            console.log('Error:', err);
+            error = err.message && err.message.startsWith('error_http_') ? err.message : 'error_unknown';
         });
     }
 
@@ -53,6 +54,10 @@
     <p>
         {$t('c.introduction')}
     </p>
+
+    {#if error}
+    <p class="error">{$t('c.error')}: {$t('c.'+error)}</p>
+    {/if}
         
     <form autocomplete="off" id="query">
 

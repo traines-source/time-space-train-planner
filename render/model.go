@@ -71,5 +71,8 @@ func makeVias(stations map[int]*internal.Station, from int, to int) []StationLab
 }
 
 func makeStationLabel(s *internal.Station) StationLabel {
+	if s == nil {
+		return StationLabel{}
+	}
 	return StationLabel{ID: strconv.Itoa(s.EvaNumber), Name: s.Name, Rank: s.Rank}
 }

@@ -32,6 +32,18 @@ func (o *GetJourneysReader) ReadResponse(response runtime.ClientResponse, consum
 			return nil, err
 		}
 		return result, nil
+	case 502:
+		result := NewGetJourneysBadGateway()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 503:
+		result := NewGetJourneysServiceUnavailable()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -42,7 +54,8 @@ func NewGetJourneysOK() *GetJourneysOK {
 	return &GetJourneysOK{}
 }
 
-/* GetJourneysOK describes a response with status code 200, with default header values.
+/*
+GetJourneysOK describes a response with status code 200, with default header values.
 
 An array of journeys, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md).
 */
@@ -50,9 +63,44 @@ type GetJourneysOK struct {
 	Payload *GetJourneysOKBody
 }
 
+// IsSuccess returns true when this get journeys o k response has a 2xx status code
+func (o *GetJourneysOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get journeys o k response has a 3xx status code
+func (o *GetJourneysOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get journeys o k response has a 4xx status code
+func (o *GetJourneysOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get journeys o k response has a 5xx status code
+func (o *GetJourneysOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get journeys o k response a status code equal to that given
+func (o *GetJourneysOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get journeys o k response
+func (o *GetJourneysOK) Code() int {
+	return 200
+}
+
 func (o *GetJourneysOK) Error() string {
 	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK  %+v", 200, o.Payload)
 }
+
+func (o *GetJourneysOK) String() string {
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK  %+v", 200, o.Payload)
+}
+
 func (o *GetJourneysOK) GetPayload() *GetJourneysOKBody {
 	return o.Payload
 }
@@ -69,7 +117,180 @@ func (o *GetJourneysOK) readResponse(response runtime.ClientResponse, consumer r
 	return nil
 }
 
-/*GetJourneysOKBody get journeys o k body
+// NewGetJourneysBadGateway creates a GetJourneysBadGateway with default headers values
+func NewGetJourneysBadGateway() *GetJourneysBadGateway {
+	return &GetJourneysBadGateway{}
+}
+
+/*
+GetJourneysBadGateway describes a response with status code 502, with default header values.
+
+HAFAS error.
+*/
+type GetJourneysBadGateway struct {
+	Payload *GetJourneysBadGatewayBody
+}
+
+// IsSuccess returns true when this get journeys bad gateway response has a 2xx status code
+func (o *GetJourneysBadGateway) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get journeys bad gateway response has a 3xx status code
+func (o *GetJourneysBadGateway) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get journeys bad gateway response has a 4xx status code
+func (o *GetJourneysBadGateway) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get journeys bad gateway response has a 5xx status code
+func (o *GetJourneysBadGateway) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this get journeys bad gateway response a status code equal to that given
+func (o *GetJourneysBadGateway) IsCode(code int) bool {
+	return code == 502
+}
+
+// Code gets the status code for the get journeys bad gateway response
+func (o *GetJourneysBadGateway) Code() int {
+	return 502
+}
+
+func (o *GetJourneysBadGateway) Error() string {
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysBadGateway  %+v", 502, o.Payload)
+}
+
+func (o *GetJourneysBadGateway) String() string {
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysBadGateway  %+v", 502, o.Payload)
+}
+
+func (o *GetJourneysBadGateway) GetPayload() *GetJourneysBadGatewayBody {
+	return o.Payload
+}
+
+func (o *GetJourneysBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(GetJourneysBadGatewayBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetJourneysServiceUnavailable creates a GetJourneysServiceUnavailable with default headers values
+func NewGetJourneysServiceUnavailable() *GetJourneysServiceUnavailable {
+	return &GetJourneysServiceUnavailable{}
+}
+
+/*
+GetJourneysServiceUnavailable describes a response with status code 503, with default header values.
+
+Too many requests.
+*/
+type GetJourneysServiceUnavailable struct {
+	Payload string
+}
+
+// IsSuccess returns true when this get journeys service unavailable response has a 2xx status code
+func (o *GetJourneysServiceUnavailable) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get journeys service unavailable response has a 3xx status code
+func (o *GetJourneysServiceUnavailable) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get journeys service unavailable response has a 4xx status code
+func (o *GetJourneysServiceUnavailable) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get journeys service unavailable response has a 5xx status code
+func (o *GetJourneysServiceUnavailable) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this get journeys service unavailable response a status code equal to that given
+func (o *GetJourneysServiceUnavailable) IsCode(code int) bool {
+	return code == 503
+}
+
+// Code gets the status code for the get journeys service unavailable response
+func (o *GetJourneysServiceUnavailable) Code() int {
+	return 503
+}
+
+func (o *GetJourneysServiceUnavailable) Error() string {
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysServiceUnavailable  %+v", 503, o.Payload)
+}
+
+func (o *GetJourneysServiceUnavailable) String() string {
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysServiceUnavailable  %+v", 503, o.Payload)
+}
+
+func (o *GetJourneysServiceUnavailable) GetPayload() string {
+	return o.Payload
+}
+
+func (o *GetJourneysServiceUnavailable) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+/*
+GetJourneysBadGatewayBody get journeys bad gateway body
+swagger:model GetJourneysBadGatewayBody
+*/
+type GetJourneysBadGatewayBody struct {
+
+	// msg
+	Msg string `json:"msg,omitempty"`
+}
+
+// Validate validates this get journeys bad gateway body
+func (o *GetJourneysBadGatewayBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get journeys bad gateway body based on context it is used
+func (o *GetJourneysBadGatewayBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetJourneysBadGatewayBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetJourneysBadGatewayBody) UnmarshalBinary(b []byte) error {
+	var res GetJourneysBadGatewayBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
+}
+
+/*
+GetJourneysOKBody get journeys o k body
 swagger:model GetJourneysOKBody
 */
 type GetJourneysOKBody struct {
@@ -176,7 +397,8 @@ func (o *GetJourneysOKBody) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0 get journeys o k body journeys items0
+/*
+GetJourneysOKBodyJourneysItems0 get journeys o k body journeys items0
 swagger:model GetJourneysOKBodyJourneysItems0
 */
 type GetJourneysOKBodyJourneysItems0 struct {
@@ -374,7 +596,8 @@ func (o *GetJourneysOKBodyJourneysItems0) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0Cycle get journeys o k body journeys items0 cycle
+/*
+GetJourneysOKBodyJourneysItems0Cycle get journeys o k body journeys items0 cycle
 swagger:model GetJourneysOKBodyJourneysItems0Cycle
 */
 type GetJourneysOKBodyJourneysItems0Cycle struct {
@@ -430,7 +653,8 @@ func (o *GetJourneysOKBodyJourneysItems0Cycle) UnmarshalBinary(b []byte) error {
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0 get journeys o k body journeys items0 legs items0
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0 get journeys o k body journeys items0 legs items0
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0 struct {
@@ -899,7 +1123,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0) UnmarshalBinary(b []byte) er
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0Cycle get journeys o k body journeys items0 legs items0 cycle
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0Cycle get journeys o k body journeys items0 legs items0 cycle
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Cycle
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0Cycle struct {
@@ -989,7 +1214,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Cycle) UnmarshalBinary(b []byt
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0Destination get journeys o k body journeys items0 legs items0 destination
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0Destination get journeys o k body journeys items0 legs items0 destination
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Destination
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0Destination struct {
@@ -1180,7 +1406,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) UnmarshalBinary(b
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation get journeys o k body journeys items0 legs items0 destination location
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation get journeys o k body journeys items0 legs items0 destination location
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation struct {
@@ -1287,7 +1514,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationLocation) Unmarshal
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts get journeys o k body journeys items0 legs items0 destination products
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts get journeys o k body journeys items0 legs items0 destination products
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts struct {
@@ -1496,7 +1724,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0DestinationProducts) Unmarshal
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0Line get journeys o k body journeys items0 legs items0 line
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0Line get journeys o k body journeys items0 legs items0 line
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Line
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0Line struct {
@@ -1724,7 +1953,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) UnmarshalBinary(b []byte
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0LineOperator get journeys o k body journeys items0 legs items0 line operator
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0LineOperator get journeys o k body journeys items0 legs items0 line operator
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0LineOperator
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0LineOperator struct {
@@ -1814,7 +2044,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0LineOperator) UnmarshalBinary(
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0Origin get journeys o k body journeys items0 legs items0 origin
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0Origin get journeys o k body journeys items0 legs items0 origin
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0Origin
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0Origin struct {
@@ -2005,7 +2236,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) UnmarshalBinary(b []by
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation get journeys o k body journeys items0 legs items0 origin location
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation get journeys o k body journeys items0 legs items0 origin location
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation struct {
@@ -2112,7 +2344,8 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0OriginLocation) UnmarshalBinar
 	return nil
 }
 
-/*GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts get journeys o k body journeys items0 legs items0 origin products
+/*
+GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts get journeys o k body journeys items0 legs items0 origin products
 swagger:model GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts
 */
 type GetJourneysOKBodyJourneysItems0LegsItems0OriginProducts struct {

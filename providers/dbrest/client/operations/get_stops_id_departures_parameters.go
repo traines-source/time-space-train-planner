@@ -53,10 +53,12 @@ func NewGetStopsIDDeparturesParamsWithHTTPClient(client *http.Client) *GetStopsI
 	}
 }
 
-/* GetStopsIDDeparturesParams contains all the parameters to send to the API endpoint
-   for the get stops ID departures operation.
+/*
+GetStopsIDDeparturesParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get stops ID departures operation.
+
+	Typically these are written to a http.Request.
 */
 type GetStopsIDDeparturesParams struct {
 

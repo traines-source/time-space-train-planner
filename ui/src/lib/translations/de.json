@@ -22,5 +22,12 @@
     "long_distance": "ICE, IC, etc.",
     "regional": "RE, RB, S, etc.",
     "local": "Bus, Tram, etc.",
-    "pedestrian": "Zu Fuß"
+    "pedestrian": "Zu Fuß",
+    "error": "Fehler",
+    "error_http_400": "Start oder Ziel existieren nicht oder haben keine Ankünfte/Abfahrten.",
+    "error_http_500": "Unerwarteter Serverfehler.",
+    "error_http_502": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise ist der angefragte Zeitraum zu weit in der Vergangenheit oder Zukunft oder andere Anfrageparameter sind ungültig.",
+    "error_http_503": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise zu viele Anfragen. Bitte später erneut versuchen.",
+    "error_http_unknown": "Unbekannter Serverfehler.",
+    "error_unknown": "Verbindung zum Server fehlgeschlagen. Sind sie offline?"
 }

@@ -1,3 +1,13 @@
+const knownErrors = [400, 500, 502, 503];
+
+function handleHttpErrors(response: Response) {
+    if (!response.ok) {
+        const errorMsgId = 'error_http_'+ (knownErrors.indexOf(response.status) != -1 ? response.status : 'unknown');
+        throw new Error(errorMsgId);
+    }
+    return response.json();
+}
+
 function queryString(q: any): string {
     return Object.keys(q)
     .map(
@@ -21,6 +31,9 @@ function optionsQueryString(query: any): any {
     return queryString(q);        
 }
 
+
+
 export {
-    optionsQueryString
+    optionsQueryString,
+    handleHttpErrors
 }

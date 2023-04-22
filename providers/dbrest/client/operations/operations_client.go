@@ -44,9 +44,9 @@ type ClientService interface {
 }
 
 /*
-  GetJourneys finds journeys from a to b
+GetJourneys finds journeys from a to b
 
-  Uses [`hafasClient.journeys()`](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md) to **find journeys from A (`from`) to B (`to`)**.
+Uses [`hafasClient.journeys()`](https://github.com/public-transport/hafas-client/blob/5/docs/journeys.md) to **find journeys from A (`from`) to B (`to`)**.
 */
 func (a *Client) GetJourneys(params *GetJourneysParams, opts ...ClientOption) (*GetJourneysOK, error) {
 	// TODO: Validate the params before sending
@@ -84,9 +84,9 @@ func (a *Client) GetJourneys(params *GetJourneysParams, opts ...ClientOption) (*
 }
 
 /*
-  GetLocations finds stops stations p o is and addresses matching a query
+GetLocations finds stops stations p o is and addresses matching a query
 
-  Uses [`hafasClient.locations()`](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md) to **find stops/stations, POIs and addresses matching `query`**.
+Uses [`hafasClient.locations()`](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md) to **find stops/stations, POIs and addresses matching `query`**.
 */
 func (a *Client) GetLocations(params *GetLocationsParams, opts ...ClientOption) (*GetLocationsOK, error) {
 	// TODO: Validate the params before sending
@@ -124,9 +124,9 @@ func (a *Client) GetLocations(params *GetLocationsParams, opts ...ClientOption) 
 }
 
 /*
-  GetStationsID returns a stop station from db stations
+GetStationsID returns a stop station from db stations
 
-  Returns a stop/station from [db-stations](https://npmjs.com/package/db-stations).
+Returns a stop/station from [db-stations](https://npmjs.com/package/db-stations).
 */
 func (a *Client) GetStationsID(params *GetStationsIDParams, opts ...ClientOption) (*GetStationsIDOK, error) {
 	// TODO: Validate the params before sending
@@ -164,9 +164,9 @@ func (a *Client) GetStationsID(params *GetStationsIDParams, opts ...ClientOption
 }
 
 /*
-  GetStopsIDArrivals fetches arrivals at a stop station
+GetStopsIDArrivals fetches arrivals at a stop station
 
-  Works like `/stops/{id}/departures`, except that it uses [`hafasClient.arrivals()`](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md) to **query arrivals at a stop/station**.
+Works like `/stops/{id}/departures`, except that it uses [`hafasClient.arrivals()`](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md) to **query arrivals at a stop/station**.
 */
 func (a *Client) GetStopsIDArrivals(params *GetStopsIDArrivalsParams, opts ...ClientOption) (*GetStopsIDArrivalsOK, error) {
 	// TODO: Validate the params before sending
@@ -204,9 +204,9 @@ func (a *Client) GetStopsIDArrivals(params *GetStopsIDArrivalsParams, opts ...Cl
 }
 
 /*
-  GetStopsIDDepartures fetches departures at a stop station
+GetStopsIDDepartures fetches departures at a stop station
 
-  Uses [`hafasClient.departures()`](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md) to **query departures at a stop/station**.
+Uses [`hafasClient.departures()`](https://github.com/public-transport/hafas-client/blob/5/docs/departures.md) to **query departures at a stop/station**.
 */
 func (a *Client) GetStopsIDDepartures(params *GetStopsIDDeparturesParams, opts ...ClientOption) (*GetStopsIDDeparturesOK, error) {
 	// TODO: Validate the params before sending

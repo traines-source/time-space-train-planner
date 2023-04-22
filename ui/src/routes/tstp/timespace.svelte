@@ -2,7 +2,7 @@
     import { t } from '$lib/translations';
     import { onMount, tick } from "svelte";
     import { setFromApi, store } from "../store"
-    import { optionsQueryString } from "../url"
+    import { handleHttpErrors, optionsQueryString } from "../query"
     import {parseTime, simpleTime, label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
     import type {Response, Edge, Coord, Station} from './types';
     import panzoom from 'panzoom'
@@ -11,14 +11,14 @@
     let loading = true;
     let query = store;
     let data: Response;
-    let error;
+    let error: string | undefined;
     let currentSelected: Edge = undefined;
     let currentSelectedShortestPath: Edge[] = [];
     const arrowMargin = 25;
 
     function fetchTimespace(): void {
         fetch(import.meta.env.VITE_TSTP_API+'timespace?'+optionsQueryString(query))
-        .then(response => response.json())
+        .then(handleHttpErrors)
         .then(d => {
             data = d;
             console.log(data);
@@ -32,10 +32,10 @@
                 }                
             });
         })
-        .catch((error) => {
-            alert('Failed request. Possibly too many requests. Try again later.');
+        .catch((err) => {
             loading = false;
-            console.log(error);
+            console.log('Error:', err);
+            error = err.message && err.message.startsWith('error_http_') ? err.message : 'error_unknown';
         });
     }
 
@@ -233,4 +233,4 @@
 
 </svg>
 </div>
-<Details currentSelected={currentSelected} loading={loading} doRefresh={refresh} stationResolver={stationResolver}/>
+<Details currentSelected={currentSelected} loading={loading} doRefresh={refresh} stationResolver={stationResolver} error={error}/>

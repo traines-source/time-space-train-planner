@@ -6,11 +6,13 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 
 	"traines.eu/time-space-train-planner/providers/dbrest/models"
 )
@@ -29,6 +31,18 @@ func (o *GetStopsIDArrivalsReader) ReadResponse(response runtime.ClientResponse,
 			return nil, err
 		}
 		return result, nil
+	case 502:
+		result := NewGetStopsIDArrivalsBadGateway()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 503:
+		result := NewGetStopsIDArrivalsServiceUnavailable()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -39,7 +53,8 @@ func NewGetStopsIDArrivalsOK() *GetStopsIDArrivalsOK {
 	return &GetStopsIDArrivalsOK{}
 }
 
-/* GetStopsIDArrivalsOK describes a response with status code 200, with default header values.
+/*
+GetStopsIDArrivalsOK describes a response with status code 200, with default header values.
 
 An array of arrivals, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md).
 */
@@ -47,9 +62,44 @@ type GetStopsIDArrivalsOK struct {
 	Payload []*models.DepartureArrival
 }
 
+// IsSuccess returns true when this get stops Id arrivals o k response has a 2xx status code
+func (o *GetStopsIDArrivalsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get stops Id arrivals o k response has a 3xx status code
+func (o *GetStopsIDArrivalsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get stops Id arrivals o k response has a 4xx status code
+func (o *GetStopsIDArrivalsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get stops Id arrivals o k response has a 5xx status code
+func (o *GetStopsIDArrivalsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get stops Id arrivals o k response a status code equal to that given
+func (o *GetStopsIDArrivalsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get stops Id arrivals o k response
+func (o *GetStopsIDArrivalsOK) Code() int {
+	return 200
+}
+
 func (o *GetStopsIDArrivalsOK) Error() string {
 	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsOK  %+v", 200, o.Payload)
 }
+
+func (o *GetStopsIDArrivalsOK) String() string {
+	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsOK  %+v", 200, o.Payload)
+}
+
 func (o *GetStopsIDArrivalsOK) GetPayload() []*models.DepartureArrival {
 	return o.Payload
 }
@@ -61,5 +111,177 @@ func (o *GetStopsIDArrivalsOK) readResponse(response runtime.ClientResponse, con
 		return err
 	}
 
+	return nil
+}
+
+// NewGetStopsIDArrivalsBadGateway creates a GetStopsIDArrivalsBadGateway with default headers values
+func NewGetStopsIDArrivalsBadGateway() *GetStopsIDArrivalsBadGateway {
+	return &GetStopsIDArrivalsBadGateway{}
+}
+
+/*
+GetStopsIDArrivalsBadGateway describes a response with status code 502, with default header values.
+
+HAFAS error.
+*/
+type GetStopsIDArrivalsBadGateway struct {
+	Payload *GetStopsIDArrivalsBadGatewayBody
+}
+
+// IsSuccess returns true when this get stops Id arrivals bad gateway response has a 2xx status code
+func (o *GetStopsIDArrivalsBadGateway) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get stops Id arrivals bad gateway response has a 3xx status code
+func (o *GetStopsIDArrivalsBadGateway) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get stops Id arrivals bad gateway response has a 4xx status code
+func (o *GetStopsIDArrivalsBadGateway) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get stops Id arrivals bad gateway response has a 5xx status code
+func (o *GetStopsIDArrivalsBadGateway) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this get stops Id arrivals bad gateway response a status code equal to that given
+func (o *GetStopsIDArrivalsBadGateway) IsCode(code int) bool {
+	return code == 502
+}
+
+// Code gets the status code for the get stops Id arrivals bad gateway response
+func (o *GetStopsIDArrivalsBadGateway) Code() int {
+	return 502
+}
+
+func (o *GetStopsIDArrivalsBadGateway) Error() string {
+	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsBadGateway  %+v", 502, o.Payload)
+}
+
+func (o *GetStopsIDArrivalsBadGateway) String() string {
+	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsBadGateway  %+v", 502, o.Payload)
+}
+
+func (o *GetStopsIDArrivalsBadGateway) GetPayload() *GetStopsIDArrivalsBadGatewayBody {
+	return o.Payload
+}
+
+func (o *GetStopsIDArrivalsBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(GetStopsIDArrivalsBadGatewayBody)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewGetStopsIDArrivalsServiceUnavailable creates a GetStopsIDArrivalsServiceUnavailable with default headers values
+func NewGetStopsIDArrivalsServiceUnavailable() *GetStopsIDArrivalsServiceUnavailable {
+	return &GetStopsIDArrivalsServiceUnavailable{}
+}
+
+/*
+GetStopsIDArrivalsServiceUnavailable describes a response with status code 503, with default header values.
+
+Too many requests.
+*/
+type GetStopsIDArrivalsServiceUnavailable struct {
+	Payload string
+}
+
+// IsSuccess returns true when this get stops Id arrivals service unavailable response has a 2xx status code
+func (o *GetStopsIDArrivalsServiceUnavailable) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get stops Id arrivals service unavailable response has a 3xx status code
+func (o *GetStopsIDArrivalsServiceUnavailable) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get stops Id arrivals service unavailable response has a 4xx status code
+func (o *GetStopsIDArrivalsServiceUnavailable) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get stops Id arrivals service unavailable response has a 5xx status code
+func (o *GetStopsIDArrivalsServiceUnavailable) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this get stops Id arrivals service unavailable response a status code equal to that given
+func (o *GetStopsIDArrivalsServiceUnavailable) IsCode(code int) bool {
+	return code == 503
+}
+
+// Code gets the status code for the get stops Id arrivals service unavailable response
+func (o *GetStopsIDArrivalsServiceUnavailable) Code() int {
+	return 503
+}
+
+func (o *GetStopsIDArrivalsServiceUnavailable) Error() string {
+	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsServiceUnavailable  %+v", 503, o.Payload)
+}
+
+func (o *GetStopsIDArrivalsServiceUnavailable) String() string {
+	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsServiceUnavailable  %+v", 503, o.Payload)
+}
+
+func (o *GetStopsIDArrivalsServiceUnavailable) GetPayload() string {
+	return o.Payload
+}
+
+func (o *GetStopsIDArrivalsServiceUnavailable) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+/*
+GetStopsIDArrivalsBadGatewayBody get stops ID arrivals bad gateway body
+swagger:model GetStopsIDArrivalsBadGatewayBody
+*/
+type GetStopsIDArrivalsBadGatewayBody struct {
+
+	// msg
+	Msg string `json:"msg,omitempty"`
+}
+
+// Validate validates this get stops ID arrivals bad gateway body
+func (o *GetStopsIDArrivalsBadGatewayBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get stops ID arrivals bad gateway body based on context it is used
+func (o *GetStopsIDArrivalsBadGatewayBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *GetStopsIDArrivalsBadGatewayBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *GetStopsIDArrivalsBadGatewayBody) UnmarshalBinary(b []byte) error {
+	var res GetStopsIDArrivalsBadGatewayBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
 	return nil
 }

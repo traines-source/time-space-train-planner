@@ -37,7 +37,8 @@ func NewGetLocationsOK() *GetLocationsOK {
 	return &GetLocationsOK{}
 }
 
-/* GetLocationsOK describes a response with status code 200, with default header values.
+/*
+GetLocationsOK describes a response with status code 200, with default header values.
 
 An array of locations, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/locations.md).
 */
@@ -45,9 +46,44 @@ type GetLocationsOK struct {
 	Payload []interface{}
 }
 
+// IsSuccess returns true when this get locations o k response has a 2xx status code
+func (o *GetLocationsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get locations o k response has a 3xx status code
+func (o *GetLocationsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get locations o k response has a 4xx status code
+func (o *GetLocationsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get locations o k response has a 5xx status code
+func (o *GetLocationsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get locations o k response a status code equal to that given
+func (o *GetLocationsOK) IsCode(code int) bool {
+	return code == 200
+}
+
+// Code gets the status code for the get locations o k response
+func (o *GetLocationsOK) Code() int {
+	return 200
+}
+
 func (o *GetLocationsOK) Error() string {
 	return fmt.Sprintf("[GET /locations][%d] getLocationsOK  %+v", 200, o.Payload)
 }
+
+func (o *GetLocationsOK) String() string {
+	return fmt.Sprintf("[GET /locations][%d] getLocationsOK  %+v", 200, o.Payload)
+}
+
 func (o *GetLocationsOK) GetPayload() []interface{} {
 	return o.Payload
 }

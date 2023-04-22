@@ -41,7 +41,6 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Print(to[0], stations)
 		if err != nil {
-			//v, ok := interface{}(err).(internal.ErrorWithCode)
 			w.WriteHeader(err.ErrorCode())
 		}
 		render.Vias(stations, from[0], to[0], datetime, w, err)
@@ -83,6 +82,7 @@ func apiTimespace(w http.ResponseWriter, r *http.Request) {
 		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
+			return
 		}
 		render.TimeSpaceApi(stations, lines, w, r.URL.RawQuery)
 		return
