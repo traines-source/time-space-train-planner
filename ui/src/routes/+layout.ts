@@ -1,10 +1,10 @@
 import { loadTranslations, locales } from '$lib/translations';
 
-function userLangCode() {
+function userLangCode(): string {
     if (typeof window == 'undefined') {
-        return 'en'
+        return 'en';
     }
-    const userLang = navigator.language || navigator.userLanguage;
+    const userLang = navigator.language || (<any>navigator).userLanguage;
     for (let i=0;i<locales.get().length;i++) {
         console.log(userLang, locales.get()[i]);
         if (userLang.includes(locales.get()[i])) {

@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
     import { t } from '$lib/translations';    
-    import { Station, store, fillupStations, setFromApi } from "../store"
+    import { store, setFromApi } from "../store"
     import { optionsQueryString } from "../url"
     import StationInput from "./stationInput.svelte"
     import { goto } from '$app/navigation';
@@ -9,7 +9,7 @@
     let query = store;
     let loading = false;
    
-    function fetchVias() {
+    function fetchVias(): void {
         fetch(import.meta.env.VITE_TSTP_API+'vias?'+optionsQueryString(query))
         .then(response => response.json())
         .then(data => {
@@ -25,7 +25,7 @@
         });
     }
 
-    function submit() {
+    function submit(): void {
         if (query.from.id && query.to.id) {
             loading = true;
             goto('?'+optionsQueryString(query));

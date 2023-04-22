@@ -1,19 +1,20 @@
 import { t } from '$lib/translations';
+import type { Edge } from './types';
 
 
-function parseTime(t) {
+function parseTime(t: string): number {
     return Math.max(0, Date.parse(t));
 }
 
-function lz(i) {
+function lz(i: number): string {
     return i < 10 ? '0'+i : ''+i;
 }
-function simpleTime(t) {
+function simpleTime(t: string): string {
     const d = new Date(t);
     return lz(d.getHours())+':'+lz(d.getMinutes());
 }
 
-function label(e, detail) {
+function label(e: Edge, detail: boolean): string {
     if (!e.Line) {
         return '';
     }
@@ -32,30 +33,30 @@ function label(e, detail) {
     return label;
 }
 
-function type(e) {
+function type(e: Edge): string {
     if (!e.Line) {
         return '';
     }
     return e.Line.Type;
 }
 
-function departure(e) {
-    return time(e, stop => stop.Departure, stop => stop.DepartureTrack);
+function departure(e: Edge): string {
+    return time(e, (stop: any) => stop.Departure, (stop: any) => stop.DepartureTrack);
 }
 
-function arrival(e) {
-    return time(e, stop => stop.Arrival, stop => stop.ArrivalTrack);
+function arrival(e: Edge): string {
+    return time(e, (stop: any) => stop.Arrival, (stop: any) => stop.ArrivalTrack);
 }
 
-function liveDataDeparture(e) {
-    return liveDataClass(e, stop => stop.Departure);
+function liveDataDeparture(e: Edge): string {
+    return liveDataClass(e, (stop: any) => stop.Departure);
 }
 
-function liveDataArrival(e) {
-    return liveDataClass(e, stop => stop.Arrival);
+function liveDataArrival(e: Edge): string {
+    return liveDataClass(e, (stop: any) => stop.Arrival);
 }
 
-function time(e, timeResolver, trackResolver) {
+function time(e: Edge, timeResolver: (stop: any) => string, trackResolver: (stop: any) => string) {
     if (!e.Line) {
         return ''
     }
@@ -66,11 +67,11 @@ function time(e, timeResolver, trackResolver) {
     return label
 }
 
-function liveDataClass(e, timeResolver) {
+function liveDataClass(e: Edge, timeResolver: (stop: any) => string) {
     if (!e.Line) {
         return '';
     }
-    let current = timeResolver(e.Current)
+    const current = timeResolver(e.Current)
     if (parseTime(current) == 0) {
         return ''
     }
@@ -80,11 +81,11 @@ function liveDataClass(e, timeResolver) {
     return "live-green"
 }
 
-function delayMinutes(current, planned) {
+function delayMinutes(current: string, planned: string) {
     return Math.round((parseTime(current)-parseTime(planned))/1000/60);
 }
 
-function delay(current, planned) {
+function delay(current: string, planned: string) {
     if (parseTime(current) != 0) {
 
         return " (+" + delayMinutes(current, planned) + ") ";

@@ -4,11 +4,12 @@
     import { optionsQueryString } from "../url"
     import Footer from '../footer.svelte'; 
     import {label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
+    import type { Edge, Station } from './types';
 
-    export let currentSelected: any;
+    export let currentSelected: Edge;
     export let loading: boolean;
     export let doRefresh: () => void;
-    export let stationResolver: (id: string) => any;
+    export let stationResolver: (id: string) => Station;
 </script>
 
 <div id="details"><div>

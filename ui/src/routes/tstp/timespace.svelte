@@ -4,18 +4,19 @@
     import { setFromApi, store } from "../store"
     import { optionsQueryString } from "../url"
     import {parseTime, simpleTime, label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
+    import type {Response, Edge, Coord, Station} from './types';
     import panzoom from 'panzoom'
     import Details from './details.svelte'
-    
+
     let loading = true;
     let query = store;
-    let data: any;
+    let data: Response;
     let error;
-    let currentSelected: any = undefined;
-    let currentSelectedShortestPath: any[] = [];
+    let currentSelected: Edge = undefined;
+    let currentSelectedShortestPath: Edge[] = [];
     const arrowMargin = 25;
 
-    function fetchTimespace() {
+    function fetchTimespace(): void {
         fetch(import.meta.env.VITE_TSTP_API+'timespace?'+optionsQueryString(query))
         .then(response => response.json())
         .then(d => {
@@ -44,7 +45,8 @@
         fetchTimespace();
     }
 
-    function selectEdge(edgeId) {
+    function selectEdge(edgeId: string | undefined): void {
+        if (!edgeId) return;
         setSelectedForDependents(false);
         currentSelected = data.Edges[edgeId];
         console.log('cur', currentSelected, edgeId);
@@ -52,8 +54,8 @@
         console.log(currentSelectedShortestPath);
     }
 
-    function setActive(selected) {
-        const e = document.getElementById(currentSelected.ID+'-toucharea');
+    function setActive(selected: boolean): void {
+        const e = <SVGPathElement><any>document.getElementById(currentSelected.ID+'-toucharea');
         if (!e) return;
         if (selected) {
             e.className.baseVal += " active";
@@ -62,7 +64,7 @@
         }
     }
 
-    function setSelectedForDependents(selected) {
+    function setSelectedForDependents(selected: boolean): Edge[] {
         if (!currentSelected) {
             return [];
         }
@@ -91,8 +93,8 @@
         return all;
     }
 
-    function setSelectedForEdgeId(edgeId, selected) {
-        const e = document.getElementById(edgeId);
+    function setSelectedForEdgeId(edgeId: string, selected: boolean): void {
+        const e = <SVGPathElement><any>document.getElementById(edgeId);
         if (!e) return;
         if (selected) {
             e.className.baseVal += " selected";
@@ -101,13 +103,13 @@
         }    
     }
 
-    function setSelectedForEdge(edge, selected) {
+    function setSelectedForEdge(edge: Edge, selected: boolean): void {
         if (!edge || edge.Discarded) return;
         setSelectedForEdgeId(edge.ID, selected);
     }
     
     
-    function setSelectedForStationEdge(previous, next, selected) {
+    function setSelectedForStationEdge(previous: Edge, next: Edge, selected: boolean): void {
         if (!previous || !next || previous.Discarded || next.Discarded) return;
         const edgeId = previous.ID+'_'+next.ID+'_station';
         if (document.getElementById(edgeId)) {
@@ -115,20 +117,20 @@
         }
     }
 
-    function selectListener(evt) {
-        const id = this.id.replace('-toucharea', '');
+    function selectListener(evt: any): void {
+        const id = evt.target.id.replace('-toucharea', '');
         console.log('selected ', id);
         selectEdge(id);
     }
 
-    function x(coord) {
+    function x(coord: Coord): number {
         if (coord.SpaceAxis == "") {
             return 0;
         }
         return data.Stations[coord.SpaceAxis].SpaceAxis/data.MaxSpace*(data.SpaceAxisSize-100)+50;
     }
 
-    function y(coord) {
+    function y(coord: Coord): number {
         if (parseTime(coord.TimeAxis) == 0) {
             return 50 + data.Stations[coord.SpaceAxis].SpaceAxisHeap*20;
         }
@@ -137,22 +139,27 @@
         return delta/data.TimeAxisDistance*(data.TimeAxisSize-100)+100;
     }
 
-    function stationResolver(id: string) {
+    function stationResolver(id: string): Station {
         return data.Stations[id];
+    }
+
+    function stationsList(): Station[] {
+        return Object.values(data.Stations);
     }
 
     onMount(() => {
         fetchTimespace();
-        panzoom(document.getElementById('timespace-canvas'), {
-            maxZoom: 7,
-            minZoom: 1,
-            bounds: true,
-            boundsPadding: 1,
-            zoomDoubleClickSpeed: 3,
-            onTouch: function(e) {
-                if (e.target?.id == 'timespace-canvas') return true; 
-            }
-        })
+        const e = document.getElementById('timespace-canvas')
+        if (e) panzoom(e, {
+                maxZoom: 7,
+                minZoom: 1,
+                bounds: true,
+                boundsPadding: 1,
+                zoomDoubleClickSpeed: 3,
+                onTouch: function(e) {
+                    if ((<any>e.target)?.id == 'timespace-canvas') return true; 
+                }
+        });
     })
 </script>
 
@@ -180,7 +187,7 @@
     </filter>
 </defs>
 {#if data}
-{#each Object.values(data.Stations) as s (s.ID)}
+{#each stationsList() as s (s.ID)}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label">
     {s.Name}
     <title>{s.ID}</title>
@@ -194,7 +201,7 @@
 {#each data.SortedEdges.map(id => data.Edges[id]) as e (e.ID)}
 {#if !e.Discarded}
 <path id="{e.ID}" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
-    class="edge type-{type(e)} redundant-{e.Redundant} cancelled-{e.Cancelled} {e.ShortestPathFor.map(p => 'sp-'+p).join(' ')} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
+    class="edge type-{type(e)} redundant-{e.Redundant} cancelled-{e.Cancelled} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
     />
 <path id="{e.ID}-toucharea" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
     class="edge-toucharea" on:click={selectListener}
@@ -205,7 +212,7 @@
 {#if !e.Discarded}
 <text id="{e.ID}-label" class="label type-{type(e)} label-{e.ID}">
     <textPath href="#{e.ID}" startOffset="50%">
-        {label(e)}
+        {label(e, false)}
     </textPath>
 </text>
 <text x="{x(e.To)}" y="{y(e.To)}" id="{e.ID}-arrival"
@@ -216,10 +223,10 @@
     class="departure type-{type(e)} label-{e.ID} {liveDataDeparture(e)}">
     {departure(e)}
 </text>
-{#if e.PreviousArrival}<text x="{x(e.To)}" y="{y(e.To)-arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousArrival)}>▲</text>{/if}
-{#if e.PreviousDeparture}<text x="{x(e.From)}" y="{y(e.From)-arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.PreviousDeparture)}>▲</text>{/if}
-{#if e.NextArrival}<text x="{x(e.To)}" y="{y(e.To)+arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.NextArrival)}>▼</text>{/if}
-{#if e.NextDeparture}<text x="{x(e.From)}" y="{y(e.From)+arrowMargin}" class="previous-next-arrow" on:click={selectEdge(e.NextDeparture)}>▼</text>{/if}
+{#if e.PreviousArrival}<text x="{x(e.To)}" y="{y(e.To)-arrowMargin}" class="previous-next-arrow" on:click={() => selectEdge(e.PreviousArrival)}>▲</text>{/if}
+{#if e.PreviousDeparture}<text x="{x(e.From)}" y="{y(e.From)-arrowMargin}" class="previous-next-arrow" on:click={() => selectEdge(e.PreviousDeparture)}>▲</text>{/if}
+{#if e.NextArrival}<text x="{x(e.To)}" y="{y(e.To)+arrowMargin}" class="previous-next-arrow" on:click={() => selectEdge(e.NextArrival)}>▼</text>{/if}
+{#if e.NextDeparture}<text x="{x(e.From)}" y="{y(e.From)+arrowMargin}" class="previous-next-arrow" on:click={() => selectEdge(e.NextDeparture)}>▼</text>{/if}
 {/if}
 {/each}
 {/if}

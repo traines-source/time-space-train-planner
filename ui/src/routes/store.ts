@@ -1,44 +1,38 @@
-export class Station {
+export class StationLabel {
     id: string | undefined;
     name: string | undefined;
 }
 
-const from = new Station();
-const to = new Station();
-const vias: Station[] = [];
+class Store {
+    from = new StationLabel();
+    to = new StationLabel();
+    vias: StationLabel[] = [];
+    datetime: string | null = null;
+    regionly = false;
+    initialized = false;
+}
 
-let datetime: string | null = null;
-let regionly: boolean = false;
+const store = new Store();
 
-
-const store = {
-    from: from,
-    to: to,
-    vias: vias,
-    datetime: datetime,
-    regionly: regionly,
-    initialized: false
-};
-
-function mapStation(s) {
+function mapStation(s: any): StationLabel {
     return {id: s.ID, name: s.Name};
 }
 
-function setFromApi(data) {
+function setFromApi(data: any): void {
     store.from = mapStation(data.From);
     store.to = mapStation(data.To);
     store.vias = fillupStations(data.Vias.map(mapStation));
 }
 
-function requiredFieldsSet() {
-    return store.vias.length > 0 && store.from.id && store.to.id
+function requiredFieldsSet(): boolean {
+    return store.vias.length > 0 && !!store.from.id && !!store.to.id
 }
 
 const maxVias = 10;
-function fillupStations(vias) {
+function fillupStations(vias: StationLabel[]): StationLabel[] {
     const l = vias.length;
     for(let i=0; i<maxVias-l; i++) {
-        vias.push(new Station());
+        vias.push(new StationLabel());
     }
     return vias;
 }

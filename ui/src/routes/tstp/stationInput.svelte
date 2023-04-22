@@ -1,17 +1,18 @@
-<script>
+<script lang="ts">
     import { t } from '$lib/translations';
     import AutoComplete from "simple-svelte-autocomplete"
+    import type { StationLabel } from '../store';
 
-    export let selectedStation;
-    export let placeholder;
+    export let selectedStation: StationLabel;
+    export let placeholder: string;
 
-    function getItems(input) {
+    function getItems(input: string) {
         return fetch(import.meta.env.VITE_STATIONS_API + "?addresses=false&poi=false&pretty=false&query="+input)
         .then(response => response.json())
         .then(data => {
             var list = data
-            .filter(station => !station.isMeta)
-            .map(station => ({
+            .filter((station: any) => !station.isMeta)
+            .map((station: any) => ({
                 name: station.name,
                 id: station.id
             }));
