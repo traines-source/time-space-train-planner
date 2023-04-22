@@ -1,4 +1,5 @@
 <script>
+    import { t } from '$lib/translations';
     import AutoComplete from "simple-svelte-autocomplete"
 
     export let selectedStation;
@@ -26,7 +27,7 @@
 <AutoComplete searchFunction={getItems}
     delay="200"
     placeholder={placeholder}
-    noResultsText="No results"
+    noResultsText="{$t('c.no_results')}"
     hideArrow={true}
     localFiltering={false}
     labelFieldName="name"
