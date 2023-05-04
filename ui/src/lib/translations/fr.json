@@ -23,6 +23,8 @@
     "regional": "TER, RER, RE, RB, S, etc.",
     "local": "Bus, Tram, etc.",
     "pedestrian": "À pied",
+    "stay_on": "rester dans",
+    "next_best_departures": "Prochaines meilleures correspondances à",
     "error": "Erreur",
     "error_http_400": "Échec de la requête des données d'horaire. Peut-être l'heure requise est trop loin dans le futur ou dans le passé, ou la station de départ ou d'arrivée n'existe pas ou n'a pas de départs ou d'arrivées.",
     "error_http_500": "Erreur de serveur inattendu.",

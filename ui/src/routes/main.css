@@ -119,8 +119,17 @@ noscript {
 
 #details .arrdep {
   display: flex;
-  justify-content: center;
   margin-bottom: 30px;
+}
+
+.arrdep .left, .arrdep .right {
+  flex: 1;
+}
+
+.arrdep .back .micon {
+  color: black;
+  font-size: 26px;
+  padding: 5px 10px 5px 0;
 }
 
 #details .message {
@@ -473,4 +482,28 @@ a text {
 .error {
   color: #B71C1C;
   font-weight: 700;
+}
+
+.next-best-departures {
+  width: 100%;
+  margin-bottom: 30px;
+}
+.next-best-departures td {
+  padding: 2px 8px;
+}
+
+.next-best-departures tr {
+  cursor: pointer;
+}
+
+.next-best-departures .shortest {
+  font-weight: bold;
+}
+
+.next-best-departures .redundant {
+  color: #707070;
+}
+
+.nowrap {
+  white-space: nowrap;
 }

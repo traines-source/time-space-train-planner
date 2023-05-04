@@ -80,9 +80,10 @@ func (c *container) setupStations(stations map[int]*internal.Station) {
 	for _, s := range stations {
 		if len(s.Arrivals) > 0 || len(s.Departures) > 0 {
 			station := &StationLabel{
-				ID:   strconv.Itoa(s.EvaNumber),
-				Name: s.Name,
-				Rank: s.Rank,
+				ID:             strconv.Itoa(s.EvaNumber),
+				Name:           s.Name,
+				Rank:           s.Rank,
+				BestDepartures: []string{},
 			}
 			if s.GroupNumber != nil {
 				g := strconv.Itoa(*s.GroupNumber)
@@ -120,6 +121,14 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 		}
 		return c.Edges[c.SortedEdges[i]].Redundant
 	})
+	for _, s := range c.Stations {
+		sort.SliceStable(s.BestDepartures, func(i, j int) bool {
+			return c.Edges[s.BestDepartures[i]].Planned.Departure.Before(c.Edges[s.BestDepartures[j]].Planned.Departure)
+		})
+		sort.SliceStable(s.BestDepartures, func(i, j int) bool {
+			return c.Edges[s.BestDepartures[i]].EarliestDestinationArrival.Before(c.Edges[s.BestDepartures[j]].EarliestDestinationArrival)
+		})
+	}
 }
 
 func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
@@ -269,24 +278,27 @@ func (c *container) stretchTimeAxis(min time.Time, max time.Time) {
 }
 
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {
+	edgeID := c.generateEdgeID(e)
 	edge := &EdgePath{
-		ID:                   c.generateEdgeID(e),
-		From:                 Coord{SpaceAxis: strconv.Itoa(e.From.EvaNumber), TimeAxis: e.Actual.Departure},
-		To:                   Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
-		Redundant:            e.Redundant,
-		Discarded:            e.Discarded,
-		Cancelled:            e.Cancelled,
-		Message:              e.Message,
-		Planned:              e.Planned,
-		Current:              e.Current,
-		Actual:               e.Actual,
-		ShortestPath:         []ShortestPathAlternative{},
-		ReverseShortestPath:  []ShortestPathAlternative{},
-		ProviderShortestPath: e.ProviderShortestPath,
-		ShortestPathFor:      []string{},
+		ID:                         edgeID,
+		From:                       Coord{SpaceAxis: strconv.Itoa(e.From.EvaNumber), TimeAxis: e.Actual.Departure},
+		To:                         Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
+		Redundant:                  e.Redundant,
+		Discarded:                  e.Discarded,
+		Cancelled:                  e.Cancelled,
+		Message:                    e.Message,
+		Planned:                    e.Planned,
+		Current:                    e.Current,
+		Actual:                     e.Actual,
+		ShortestPath:               []ShortestPathAlternative{},
+		ReverseShortestPath:        []ShortestPathAlternative{},
+		ProviderShortestPath:       e.ProviderShortestPath,
+		ShortestPathFor:            []string{},
+		EarliestDestinationArrival: e.EarliestDestinationArrival,
 	}
 	if e.Line != nil {
 		edge.Line = &LineLabel{
+			ID:        e.Line.ID,
 			Name:      e.Line.Name,
 			Type:      e.Line.Type,
 			Direction: e.Line.Direction,
@@ -297,6 +309,11 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	}
 	if e.ReverseShortestPath != nil {
 		edge.ReverseShortestPath = append(edge.ReverseShortestPath, ShortestPathAlternative{EdgeID: c.generateEdgeID(e.ReverseShortestPath)})
+	}
+	if !e.Discarded {
+		if station, ok := c.Stations[strconv.Itoa(e.From.EvaNumber)]; ok && !edge.EarliestDestinationArrival.IsZero() {
+			station.BestDepartures = append(station.BestDepartures, edgeID)
+		}
 	}
 	c.Edges[edge.ID] = edge
 	c.SortedEdges = append(c.SortedEdges, edge.ID)

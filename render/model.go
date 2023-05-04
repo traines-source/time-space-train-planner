@@ -9,38 +9,41 @@ import (
 )
 
 type StationLabel struct {
-	ID            string
-	Name          string
-	Coord         Coord
-	SpaceAxis     int
-	SpaceAxisHeap int
-	GroupID       *string
-	Rank          int
+	ID             string
+	Name           string
+	Coord          Coord
+	SpaceAxis      int
+	SpaceAxisHeap  int
+	GroupID        *string
+	Rank           int
+	BestDepartures []string
 }
 
 type EdgePath struct {
-	ID                   string
-	From                 Coord
-	To                   Coord
-	Redundant            bool
-	Discarded            bool
-	Cancelled            bool
-	Line                 *LineLabel
-	Message              string
-	Planned              internal.StopInfo
-	Current              internal.StopInfo
-	Actual               internal.StopInfo
-	ShortestPath         []ShortestPathAlternative
-	ReverseShortestPath  []ShortestPathAlternative
-	ProviderShortestPath bool
-	ShortestPathFor      []string
-	PreviousDeparture    string
-	NextDeparture        string
-	PreviousArrival      string
-	NextArrival          string
+	ID                         string
+	From                       Coord
+	To                         Coord
+	Redundant                  bool
+	Discarded                  bool
+	Cancelled                  bool
+	Line                       *LineLabel
+	Message                    string
+	Planned                    internal.StopInfo
+	Current                    internal.StopInfo
+	Actual                     internal.StopInfo
+	ShortestPath               []ShortestPathAlternative
+	ReverseShortestPath        []ShortestPathAlternative
+	ProviderShortestPath       bool
+	ShortestPathFor            []string
+	EarliestDestinationArrival time.Time
+	PreviousDeparture          string
+	NextDeparture              string
+	PreviousArrival            string
+	NextArrival                string
 }
 
 type LineLabel struct {
+	ID        string
 	Name      string
 	Type      string
 	Direction string

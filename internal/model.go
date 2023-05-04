@@ -14,20 +14,22 @@ type Station struct {
 }
 
 type Edge struct {
-	Line                 *Line
-	From                 *Station
-	To                   *Station
-	Planned              StopInfo
-	Current              StopInfo
-	Actual               StopInfo
-	Message              string
-	ShortestPath         *Edge
-	ReverseShortestPath  *Edge
-	ProviderShortestPath bool
-	ShortestPathFor      map[*Edge]struct{}
-	Redundant            bool
-	Discarded            bool
-	Cancelled            bool
+	Line                       *Line
+	From                       *Station
+	To                         *Station
+	Planned                    StopInfo
+	Current                    StopInfo
+	Actual                     StopInfo
+	Message                    string
+	ShortestPath               *Edge
+	ReverseShortestPath        *Edge
+	ProviderShortestPath       bool
+	ShortestPathFor            map[*Edge]struct{}
+	EarliestDestinationArrival time.Time
+	LatestOriginDeparture      time.Time
+	Redundant                  bool
+	Discarded                  bool
+	Cancelled                  bool
 }
 
 type StopInfo struct {

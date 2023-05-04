@@ -23,6 +23,8 @@
     "regional": "RE, RB, S, etc.",
     "local": "Bus, Tram, etc.",
     "pedestrian": "Zu Fuß",
+    "stay_on": "bleiben in",
+    "next_best_departures": "Nächste beste Verbindungen von",
     "error": "Fehler",
     "error_http_400": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise ist der angefragte Zeitraum zu weit in der Vergangenheit oder Zukunft, oder Start oder Ziel existieren nicht oder haben keine Ankünfte/Abfahrten.",
     "error_http_500": "Unerwarteter Serverfehler.",

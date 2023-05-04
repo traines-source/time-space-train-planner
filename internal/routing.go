@@ -20,6 +20,7 @@ type dijkstraVertex interface {
 	isTargetEdge(target *Edge) bool
 	getShortestPath() dijkstraVertex
 	setShortestPath(edge *Edge)
+	setTargetTime(minutes int)
 	travelBackDist(looseEdge *Edge) int
 	earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool
 }
@@ -47,6 +48,7 @@ func shortestPathsToTarget(stations map[int]*Station, edgeToTarget dijkstraVerte
 	for len(verticesAtTime) != 0 {
 		u := minDist(verticesAtTime)
 		u.vertexAtTime.setShortestPath(u.toTarget)
+		u.vertexAtTime.setTargetTime(u.dist)
 		delete(verticesAtTime, u.vertexAtTime.getEdge())
 
 		for _, vertex := range u.vertexAtTime.getVertices() {

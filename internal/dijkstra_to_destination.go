@@ -1,5 +1,7 @@
 package internal
 
+import "time"
+
 type dijkstraToDestination struct {
 	*Edge
 }
@@ -52,4 +54,8 @@ func (edge *dijkstraToDestination) earlierConnectionWithSameDist(fixedEdge *dijk
 	arrivingEarlierIfSameDestination := fixedEdge.vertexAtTime.getEdge().To != looseEdge.toTarget.To || fixedEdge.vertexAtTime.getEdge().Actual.Arrival.Before(looseEdge.toTarget.Actual.Arrival)
 
 	return departingEarlier && arrivingEarlierIfSameDestination
+}
+
+func (edge *dijkstraToDestination) setTargetTime(minutes int) {
+	edge.Edge.EarliestDestinationArrival = edge.Edge.Actual.Departure.Add(time.Duration(minutes) * time.Minute)
 }

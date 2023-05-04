@@ -1,5 +1,7 @@
 package internal
 
+import "time"
+
 type dijkstraToOrigin struct {
 	*Edge
 }
@@ -41,4 +43,8 @@ func (edge *dijkstraToOrigin) travelBackDist(looseEdge *Edge) int {
 
 func (edge *dijkstraToOrigin) earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool {
 	return false
+}
+
+func (edge *dijkstraToOrigin) setTargetTime(minutes int) {
+	edge.Edge.LatestOriginDeparture = edge.Edge.Actual.Arrival.Add(time.Duration(-minutes)*time.Minute)
 }

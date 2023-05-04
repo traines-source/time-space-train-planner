@@ -137,6 +137,10 @@
         return delta/data.TimeAxisDistance*(data.TimeAxisSize-100)+100;
     }
 
+    function edgeResolver(id: string): Edge {
+        return data.Edges[id];
+    }
+
     function stationResolver(id: string): Station {
         return data.Stations[id];
     }
@@ -235,4 +239,4 @@
 
 </svg>
 </div>
-<Details currentSelected={currentSelected} loading={loading} doRefresh={refresh} stationResolver={stationResolver} error={error}/>
+<Details currentSelected={currentSelected} loading={loading} doRefresh={refresh} selectEdge={selectEdge} data={data} error={error}/>
