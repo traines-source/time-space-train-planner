@@ -13,14 +13,6 @@ type dijkstra struct {
 	toTarget     *Edge
 }
 
-type dijkstraToDestination struct {
-	*Edge
-}
-
-type dijkstraToOrigin struct {
-	*Edge
-}
-
 type dijkstraVertex interface {
 	getVertices() []dijkstraVertex
 	getEdge() *Edge
@@ -30,95 +22,6 @@ type dijkstraVertex interface {
 	setShortestPath(edge *Edge)
 	travelBackDist(looseEdge *Edge) int
 	earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool
-}
-
-func (edge *dijkstraToDestination) getVertices() []dijkstraVertex {
-	var edges []dijkstraVertex
-	for _, edge := range edge.From.Arrivals {
-		edges = append(edges, &dijkstraToDestination{edge})
-	}
-	for i, j := 0, len(edges)-1; i < j; i, j = i+1, j-1 {
-		edges[i], edges[j] = edges[j], edges[i]
-	}
-	return edges
-}
-
-func (edge *dijkstraToDestination) getEdge() *Edge {
-	return edge.Edge
-}
-
-func (edge *dijkstraToDestination) isUnreachable(looseEdge *Edge) bool {
-	return edge.getEdge().Actual.Departure.Before(looseEdge.Actual.Arrival)
-}
-
-func (edge *dijkstraToDestination) isTargetEdge(targetEdge *Edge) bool {
-	return edge.To == targetEdge.To
-}
-
-func (edge *dijkstraToDestination) getShortestPath() dijkstraVertex {
-	if edge.Edge.ShortestPath == nil {
-		return nil
-	}
-	return &dijkstraToDestination{edge.Edge.ShortestPath}
-}
-
-func (edge *dijkstraToDestination) setShortestPath(target *Edge) {
-	edge.Edge.ShortestPath = target
-}
-
-func (edge *dijkstraToDestination) travelBackDist(looseEdge *Edge) int {
-	return deltaMinutes(looseEdge.Actual.Departure, edge.getEdge().Actual.Departure)
-}
-
-func (edge *dijkstraToDestination) earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool {
-	a := deltaMinutes(looseEdge.vertexAtTime.getEdge().Actual.Arrival, fixedEdge.vertexAtTime.getEdge().Actual.Departure)
-	b := deltaMinutes(looseEdge.vertexAtTime.getEdge().Actual.Arrival, looseEdge.toTarget.Actual.Departure)
-	if a < 0 || b < 0 {
-		return false
-	}
-	departingEarlier := a < b
-	arrivingEarlierIfSameDestination := fixedEdge.vertexAtTime.getEdge().To != looseEdge.toTarget.To || fixedEdge.vertexAtTime.getEdge().Actual.Arrival.Before(looseEdge.toTarget.Actual.Arrival)
-
-	return departingEarlier && arrivingEarlierIfSameDestination
-}
-
-func (edge *dijkstraToOrigin) getVertices() []dijkstraVertex {
-	var edges []dijkstraVertex
-	for _, edge := range edge.To.Departures {
-		edges = append(edges, &dijkstraToOrigin{edge})
-	}
-	return edges
-}
-
-func (edge *dijkstraToOrigin) getEdge() *Edge {
-	return edge.Edge
-}
-
-func (edge *dijkstraToOrigin) isUnreachable(looseEdge *Edge) bool {
-	return looseEdge.Actual.Departure.Before(edge.getEdge().Actual.Arrival)
-}
-
-func (edge *dijkstraToOrigin) isTargetEdge(targetEdge *Edge) bool {
-	return edge.From == targetEdge.From
-}
-
-func (edge *dijkstraToOrigin) getShortestPath() dijkstraVertex {
-	if edge.Edge.ReverseShortestPath == nil {
-		return nil
-	}
-	return &dijkstraToOrigin{edge.Edge.ReverseShortestPath}
-}
-
-func (edge *dijkstraToOrigin) setShortestPath(target *Edge) {
-	edge.Edge.ReverseShortestPath = target
-}
-
-func (edge *dijkstraToOrigin) travelBackDist(looseEdge *Edge) int {
-	return deltaMinutes(edge.Actual.Arrival, looseEdge.Actual.Arrival)
-}
-
-func (edge *dijkstraToOrigin) earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool {
-	return false
 }
 
 func shortestPaths(stations map[int]*Station, origin *Station, destination *Station, regionly bool) {
