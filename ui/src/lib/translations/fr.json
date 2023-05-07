@@ -36,5 +36,6 @@
     "tip": "Tuyeau",
     "tip_0": "En cliquant sur une connexion, l'itinéraire le plus court de la station de départ à la station d'arrivée via cette connexion est marquée en bleu.",
     "tip_1": "Laissez la date/heure non définie et créez un signet de la page de diagramme afin de toujours accéder facilement au diagramme actuel.",
-    "tip_2": "Utilisez les flèches apparaissant au-dessus et au-dessous des connexions sélectionnées pour trouver les arrivées d'avant et les départs d'après des stations respectives."
+    "tip_2": "Utilisez les flèches apparaissant au-dessus et au-dessous des connexions sélectionnées pour trouver les arrivées d'avant et les départs d'après des stations respectives.",
+    "tip_3": "En cliquant sur un nom de station dans le diagramme ou sur la flèche de retour dans la vue détaillée, les prochaines meilleures connexions de la station peuvent être affichées."
 }

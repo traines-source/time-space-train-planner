@@ -196,6 +196,7 @@ noscript {
 
 .station-label {
   text-anchor: middle;
+  cursor: pointer;
 }
 
 .arrival, .departure, .label {

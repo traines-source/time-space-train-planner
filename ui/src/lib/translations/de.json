@@ -34,7 +34,8 @@
     "error_http_unknown": "Unbekannter Serverfehler.",
     "error_unknown": "Verbindung zum Server fehlgeschlagen. Sind sie offline?",
     "tip": "Tipp",
-    "tip_0": "Wenn man auf eine Verbindung klickt, wird die kürzeste Route vom Start zum Ziel über diese Verbindung blau hervorgehoben.",
-    "tip_1": "Wenn man Datum/Uhrzeit nicht setzt, kann man ein Bookmark auf die Diagramm-Seite anlegen und jederzeit einfach das aktuelle Diagramm aufrufen.",
-    "tip_2": "Mit den Pfeilen, die über und unter ausgewählten Verbindungen erscheinen, kann man zu früheren Ankünften und späteren Abfahrten an der entsprechenden Station springen."
+    "tip_0": "Durch Klicken auf eine Verbindung wird die kürzeste Route vom Start zum Ziel über diese Verbindung blau hervorgehoben.",
+    "tip_1": "Wenn Datum/Uhrzeit nicht gesetzt sind, kann man ein Browser-Bookmark auf die Diagramm-Seite anlegen und jederzeit einfach das aktuelle Diagramm aufrufen.",
+    "tip_2": "Mit den Pfeilen, die über und unter ausgewählten Verbindungen erscheinen, kann zu früheren Ankünften und späteren Abfahrten an der entsprechenden Station gesprungen werden.",
+    "tip_3": "Durch Klicken auf einen Stationsnamen im Diagramm oder auf den Zurück-Pfeil in der Detailansicht können die nächsten besten Verbindungen von der entsprechenden Station angezeigt werden."
 }

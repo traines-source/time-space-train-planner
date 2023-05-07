@@ -56,7 +56,7 @@
         selectedShortestPath = setSelectedForDependents(true);
     }
 
-    function selectStation(stationId: string, time: Date | undefined) {
+    function selectStation(stationId: string) {
         if (!stationId) return;
         selectEdge(undefined);
         selection = Selection.fromStation(data.Stations[stationId]);
@@ -141,13 +141,16 @@
         if (parseTime(coord.TimeAxis) == 0) {
             return 50 + data.Stations[coord.SpaceAxis].SpaceAxisHeap*20;
         }
-        
-        let delta = (parseTime(coord.TimeAxis)-parseTime(data.MinTime))/1000;
+        return yByTs(parseTime(coord.TimeAxis));       
+    }
+
+    function yByTs(unixTs: number) {
+        let delta = (unixTs-parseTime(data.MinTime))/1000;
         return delta/data.TimeAxisDistance*(data.TimeAxisSize-100)+100;
     }
 
     function randomTipId() {
-        const tipCount = 3;
+        const tipCount = 4;
         return 'tip_'+Math.floor(Math.random()*tipCount);
     }
 
@@ -191,7 +194,7 @@
 </defs>
 {#if data}
 {#each Object.values(data.Stations) as s (s.ID)}
-<text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label">
+<text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label" on:click={() => selectStation(s.GroupID || s.ID)}>
     {s.Name}
     <title>{s.ID}</title>
 </text>
@@ -201,6 +204,10 @@
     {simpleTime(t.TimeAxis)}
 </text>
 {/each}
+{#if selection.station && selection.from}
+<path id="station-toucharea" d="M {x(selection.station.Coord)},{yByTs(selection.from?.getTime())} L{x(selection.station.Coord)},{yByTs(selection.from?.getTime()+3600*1000)}"
+    class="edge-toucharea active" />
+{/if}
 {#each data.SortedEdges.map(id => data.Edges[id]) as e (e.ID)}
 {#if !e.Discarded}
 <path id="{e.ID}" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
@@ -236,4 +243,4 @@
 
 </svg>
 </div>
-<Details selection={selection} loading={loading} doRefresh={refresh} selectEdge={selectEdge} selectStation={selectStation} data={data} error={error}/>
+<Details bind:selection={selection} loading={loading} doRefresh={refresh} selectEdge={selectEdge} selectStation={selectStation} data={data} error={error}/>
