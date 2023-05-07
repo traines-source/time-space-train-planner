@@ -6,33 +6,34 @@
     import {label, type, departure, arrival, liveDataDeparture, liveDataArrival, parseTime, simpleTime} from './labels';
     import type { Edge, Station, Response } from './types';
 
-    export let currentSelected: Edge;
+    export let selection: Edge;
     export let loading: boolean;
     export let doRefresh: () => void;
     export let selectEdge: (id: string) => void;
+    export let selectStation: (id: string) => void;
     export let data: Response;
     export let error: string | undefined;
 
-    let selectedEdgeHistory: Edge[] = [currentSelected];
+    let selectedEdgeHistory: Edge[] = [];
 
     let nextBestDepartures: Edge[] = [];
     const maxNextBestDepartures = 5;
     const negativeTransferMinutes = 5;
     $: {
-        if (currentSelected) {
+        if (selection.edge) {
             updateNextBestDepartures();
             rectifyEdgeHistory();
         }
     }
 
     function updateNextBestDepartures() {
-        if (currentSelected.To.SpaceAxis == data.To.ID) {
+        if (selection.edge.To.SpaceAxis == data.To.ID) {
             nextBestDepartures = [];
             return;
         }
-        const station = stationResolver(currentSelected.To.SpaceAxis);
+        const station = stationResolver(selection.edge.To.SpaceAxis);
         const candidates = [];
-        const currentTime = parseTime(currentSelected.Actual.Arrival)-negativeTransferMinutes*60*1000;
+        const currentTime = parseTime(selection.edge.Actual.Arrival)-negativeTransferMinutes*60*1000;
         for (let i=0; i<station.BestDepartures.length; i++) {
             const e = edgeResolver(station.BestDepartures[i]);
             if (parseTime(e.Actual.Departure) < currentTime) {
@@ -50,8 +51,8 @@
     }
 
     function rectifyEdgeHistory() {
-        if (selectedEdgeHistory[selectedEdgeHistory.length-1] != currentSelected) {
-            selectedEdgeHistory = [currentSelected];
+        if (selectedEdgeHistory[selectedEdgeHistory.length-1] != selection.edge) {
+            selectedEdgeHistory = [selection.edge];
             console.log("history reset");
         }
     }
@@ -65,7 +66,7 @@
     }
 
     function isShortestPath(d: Edge) {
-        return currentSelected.ShortestPath.length > 0 && d.ID == currentSelected.ShortestPath[0].EdgeID;
+        return selection.edge.ShortestPath.length > 0 && d.ID == selection.edge.ShortestPath[0].EdgeID;
     }
 
     function pushEdge(edge: Edge) {
@@ -78,8 +79,8 @@
             selectedEdgeHistory.pop();
             selectEdge(selectedEdgeHistory[selectedEdgeHistory.length-1].ID);
             selectedEdgeHistory = selectedEdgeHistory;
-        } else if (currentSelected.ReverseShortestPath.length > 0) {
-            selectEdge(currentSelected.ReverseShortestPath[0].EdgeID);
+        } else if (selection.edge.ReverseShortestPath.length > 0) {
+            selectEdge(selection.edge.ReverseShortestPath[0].EdgeID);
         }
     }
 </script>
@@ -88,16 +89,16 @@
     {#if error}
     <p class="error">{$t('c.error')}: {$t('c.'+error)}</p>
     {/if}
-    {#if currentSelected}
+    {#if selection.edge}
     <div class="refresh"><a href="javascript:void(0)" on:click={doRefresh}>
         <span class="indicator {loading ? 'loading' :''}"><span class="micon">autorenew</span></span>
     </a></div>
     <div class="train">
         <h4>
-            <span class="label">{@html label(currentSelected, true)}</span>
+            <span class="label">{@html label(selection.edge, true)}</span>
             <span class="destination">
-                {#if currentSelected.Line && currentSelected.Line.Direction}
-                <span class="micon">east</span> {currentSelected.Line.Direction}
+                {#if selection.edge.Line && selection.edge.Line.Direction}
+                <span class="micon">east</span> {selection.edge.Line.Direction}
                 {/if}
             </span>
         </h4>
@@ -105,40 +106,40 @@
    
     <div class="arrdep">
         <span class="left">
-            {#if selectedEdgeHistory.length > 1 || currentSelected.ReverseShortestPath.length > 0}
+            {#if selectedEdgeHistory.length > 1 || selection.edge.ReverseShortestPath.length > 0}
                 <a href="javascript:void(0)" on:click={() => popEdge()} class="back"><span class="micon">arrow_back_ios_new</span></a>
             {/if}
         </span>
         <span class="dep">
-            <span class="{liveDataDeparture(currentSelected)}">{departure(currentSelected)}</span>
-            {#if currentSelected.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
-            <br />{stationResolver(currentSelected.From.SpaceAxis).Name}
+            <span class="{liveDataDeparture(selection.edge)}">{departure(selection.edge)}</span>
+            {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
+            <br />{stationResolver(selection.edge.From.SpaceAxis).Name}
         </span>
         <svg viewBox="0 0 50 10" class="miniature">
-            <path d="M 10,5 L40,5" class="edge type-{type(currentSelected)} redundant-false"/>
+            <path d="M 10,5 L40,5" class="edge type-{type(selection.edge)} redundant-false"/>
         </svg>
         <span class="arr">
-            <span class="{liveDataArrival(currentSelected)}">{arrival(currentSelected)}</span>
-            {#if currentSelected.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
-            <br />{stationResolver(currentSelected.To.SpaceAxis).Name}
+            <span class="{liveDataArrival(selection.edge)}">{arrival(selection.edge)}</span>
+            {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
+            <br />{stationResolver(selection.edge.To.SpaceAxis).Name}
         </span>
         <span class="right"></span>
     </div>
-    {#if currentSelected.Message}
+    {#if selection.edge.Message}
     <div class="message">
-        <span class="micon">info</span> {currentSelected.Message}
+        <span class="micon">info</span> {selection.edge.Message}
     </div>
     {/if}
 
     {#if nextBestDepartures.length > 0}
-        <h4>{$t('c.next_best_departures')} {stationResolver(currentSelected.To.SpaceAxis).Name}, ~{simpleTime(currentSelected.Actual.Arrival)}</h4>
+        <h4>{$t('c.next_best_departures')} {stationResolver(selection.edge.To.SpaceAxis).Name}, ~{simpleTime(selection.edge.Actual.Arrival)}</h4>
     {/if}
     <table class="next-best-departures">
     {#each nextBestDepartures as d}
         <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushEdge(d)}>
             <td class="nowrap"><span class="{liveDataDeparture(d)}">{departure(d)}</span></td>
             <td class="forcewrap">
-                {d.Line && currentSelected.Line && d.Line.ID == currentSelected.Line.ID ? $t('c.stay_on') : ''}
+                {d.Line && selection.edge.Line && d.Line.ID == selection.edge.Line.ID ? $t('c.stay_on') : ''}
                 <span>{@html label(d, true)}</span>
                 <span>
                     {#if d.Line && d.Line.Direction}

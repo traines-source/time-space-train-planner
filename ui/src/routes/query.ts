@@ -20,7 +20,7 @@ function queryString(q: any): string {
     .join('&');
 }
 
-function optionsQueryString(query: any, datetime: string | undefined): any {
+function optionsQueryString(query: any, datetime?: string): any {
     const q = {
         from: query.from.id,
         to: query.to.id,
@@ -30,8 +30,6 @@ function optionsQueryString(query: any, datetime: string | undefined): any {
     };
     return queryString(q);        
 }
-
-
 
 export {
     optionsQueryString,

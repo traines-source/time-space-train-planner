@@ -4,7 +4,7 @@
     import { defaultDatetime, setFromApi, store } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
     import {parseTime, simpleTime, label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
-    import type {Response, Edge, Coord, Station} from './types';
+    import {type Response, type Edge, type Coord, Selection} from './types';
     import panzoom from 'panzoom'
     import Details from './details.svelte'
 
@@ -12,8 +12,8 @@
     let query = store;
     let data: Response;
     let error: string | undefined;
-    let currentSelected: Edge = undefined;
-    let currentSelectedShortestPath: Edge[] = [];
+    let selection: Selection = new Selection();
+    let selectedShortestPath: Edge[] = [];
     const arrowMargin = 25;
 
     function fetchTimespace(): void {
@@ -25,8 +25,8 @@
             setFromApi(data);
             loading = false;
             tick().then(() => {
-                if (currentSelected && data.Edges[currentSelected.ID]) {
-                    selectEdge(currentSelected.ID);
+                if (selection.edge && data.Edges[selection.edge.ID]) {
+                    selectEdge(selection.edge.ID);
                 } else {
                     selectEdge(data.DefaultShortestPathID);
                 }                
@@ -48,14 +48,19 @@
     function selectEdge(edgeId: string | undefined): void {
         if (!edgeId) return;
         setSelectedForDependents(false);
-        currentSelected = data.Edges[edgeId];
-        console.log('cur', currentSelected, edgeId);
-        currentSelectedShortestPath = setSelectedForDependents(true);
-        console.log(currentSelectedShortestPath);
+        selection = Selection.fromEdge(data.Edges[edgeId]);
+        console.log('cur', selection.edge, edgeId);
+        selectedShortestPath = setSelectedForDependents(true);
+    }
+
+    function selectStation(stationId: string, time: Date | undefined) {
+        if (!stationId) return;
+        selectEdge(undefined);
+        selection = Selection.fromStation(data.Stations[stationId]);
     }
 
     function setActive(selected: boolean): void {
-        const e = <SVGPathElement><any>document.getElementById(currentSelected.ID+'-toucharea');
+        const e = <SVGPathElement><any>document.getElementById(selection.edge.ID+'-toucharea');
         if (!e) return;
         if (selected) {
             e.className.baseVal += " active";
@@ -65,13 +70,13 @@
     }
 
     function setSelectedForDependents(selected: boolean): Edge[] {
-        if (!currentSelected) {
+        if (!selection.edge) {
             return [];
         }
         setActive(selected);
         let all = [];
-        let previous = currentSelected;
-        let next = currentSelected;
+        let previous = selection.edge;
+        let next = selection.edge;
         while(true) {
             setSelectedForEdge(next, selected);
             setSelectedForStationEdge(previous, next, selected);
@@ -81,7 +86,7 @@
             next = data.Edges[next.ShortestPath[0].EdgeID];
             if (!next) break;
         }
-        next = currentSelected;
+        next = selection.edge;
         while(next.ReverseShortestPath.length > 0) {
             previous = next;
             next = data.Edges[next.ReverseShortestPath[0].EdgeID];
@@ -203,7 +208,7 @@
     />
 {/if}
 {/each}
-{#each currentSelectedShortestPath as e (e.ID)}
+{#each selectedShortestPath as e (e.ID)}
 {#if !e.Discarded}
 <text id="{e.ID}-label" class="label type-{type(e)} label-{e.ID}">
     <textPath href="#{e.ID}" startOffset="50%">
@@ -228,4 +233,4 @@
 
 </svg>
 </div>
-<Details currentSelected={currentSelected} loading={loading} doRefresh={refresh} selectEdge={selectEdge} data={data} error={error}/>
+<Details selection={selection} loading={loading} doRefresh={refresh} selectEdge={selectEdge} selectStation={selectStation} data={data} error={error}/>
