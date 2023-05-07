@@ -488,9 +488,13 @@ a text {
 .next-best-departures {
   width: 100%;
   margin-bottom: 30px;
+  border-collapse: collapse;
+  line-height: 16px;
 }
 .next-best-departures td {
-  padding: 2px 8px;
+  padding: 0 8px;
+  height: 40px;
+  border-top: 1px solid #dbdbdb;
 }
 
 .next-best-departures tr {

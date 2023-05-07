@@ -27,6 +27,8 @@
             tick().then(() => {
                 if (selection.edge && data.Edges[selection.edge.ID]) {
                     selectEdge(selection.edge.ID);
+                } else if (selection.station && data.Stations[selection.station.ID]) {
+                    selectStation(selection.station.ID);
                 } else {
                     selectEdge(data.DefaultShortestPathID);
                 }                

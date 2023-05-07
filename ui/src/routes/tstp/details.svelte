@@ -42,8 +42,10 @@
 
     function nextBestDeparturesForStation() {
         if (!selection.from) {
-            selection.from = new Date(new Date().getTime()-negativeTransferMinutes*60*1000);
+            const n = selectedEdgeHistory.length > 0 ? parseTime(selectedEdgeHistory[selectedEdgeHistory.length-1].Actual.Departure) : new Date().getTime();
+            selection.from = new Date(n-negativeTransferMinutes*60*1000);
         }
+        selectedEdgeHistory = [];
         updateNextBestDepartures(selection.station, selection.from);
     }
 
@@ -74,10 +76,12 @@
     }
 
     function edgeResolver(id: string): Edge {
+        if (!id) return undefined;
         return data.Edges[id];
     }
 
     function stationResolver(id: string): Station {
+        if (!id) return undefined;
         return data.Stations[id];
     }
 
@@ -203,6 +207,9 @@
                         {/if}
                         {#if d.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
                     </span>
+                    {#if d.Line?.Type == 'Foot' && d.ShortestPath.length > 0}
+                    <span>– {@html label(edgeResolver(d.ShortestPath[0].EdgeID), true)}</span>
+                    {/if}
                 </td>
                 <td class="nowrap">
                     <span class="micon">flag</span>
