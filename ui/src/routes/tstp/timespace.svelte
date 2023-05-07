@@ -1,7 +1,7 @@
 <script lang="ts">
     import { t } from '$lib/translations';
     import { onMount, tick } from "svelte";
-    import { setFromApi, store } from "../store"
+    import { defaultDatetime, setFromApi, store } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
     import {parseTime, simpleTime, label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
     import type {Response, Edge, Coord, Station} from './types';
@@ -17,7 +17,7 @@
     const arrowMargin = 25;
 
     function fetchTimespace(): void {
-        fetch(import.meta.env.VITE_TSTP_API+'timespace?'+optionsQueryString(query))
+        fetch(import.meta.env.VITE_TSTP_API+'timespace?'+optionsQueryString(query, defaultDatetime))
         .then(handleHttpErrors)
         .then(d => {
             setSelectedForDependents(false);

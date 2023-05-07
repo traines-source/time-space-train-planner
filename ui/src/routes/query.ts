@@ -20,12 +20,12 @@ function queryString(q: any): string {
     .join('&');
 }
 
-function optionsQueryString(query: any): any {
+function optionsQueryString(query: any, datetime: string | undefined): any {
     const q = {
         from: query.from.id,
         to: query.to.id,
         vias: query.vias.map((v: any) => v.id),
-        datetime: query.datetime,
+        datetime: query.datetime || datetime,
         regionly: query.regionly
     };
     return queryString(q);        

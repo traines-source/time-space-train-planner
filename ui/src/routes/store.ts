@@ -13,6 +13,20 @@ class Store {
 }
 
 const store = new Store();
+const defaultDatetime = getDatetime();
+
+function getDatetime() {
+    const date = new Date();
+    return date.getFullYear() +
+      '-' + pad(date.getMonth() + 1) +
+      '-' + pad(date.getDate()) +
+      'T' + pad(date.getHours()) +
+      ':00';
+}
+
+function pad(num: number) {
+    return (num < 10 ? '0' : '') + num;
+}
 
 function mapStation(s: any): StationLabel {
     return {id: s.ID, name: s.Name};
@@ -39,6 +53,7 @@ function fillupStations(vias: StationLabel[]): StationLabel[] {
 
 export {
     store,
+    defaultDatetime,
     requiredFieldsSet,
     fillupStations,
     setFromApi

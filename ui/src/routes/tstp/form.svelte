@@ -1,6 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/translations';    
-    import { store, setFromApi } from "../store"
+    import { store, setFromApi, defaultDatetime } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
     import StationInput from "./stationInput.svelte"
     import { goto } from '$app/navigation';
@@ -11,7 +11,7 @@
     let error: string | undefined;
    
     function fetchVias(): void {
-        fetch(import.meta.env.VITE_TSTP_API+'vias?'+optionsQueryString(query))
+        fetch(import.meta.env.VITE_TSTP_API+'vias?'+optionsQueryString(query, defaultDatetime))
         .then(handleHttpErrors)
         .then(data => {
             setFromApi(data);
