@@ -20,6 +20,7 @@
         fetch(import.meta.env.VITE_TSTP_API+'timespace?'+optionsQueryString(query))
         .then(handleHttpErrors)
         .then(d => {
+            setSelectedForDependents(false);
             data = d;
             setFromApi(data);
             loading = false;
@@ -137,18 +138,6 @@
         return delta/data.TimeAxisDistance*(data.TimeAxisSize-100)+100;
     }
 
-    function edgeResolver(id: string): Edge {
-        return data.Edges[id];
-    }
-
-    function stationResolver(id: string): Station {
-        return data.Stations[id];
-    }
-
-    function stationsList(): Station[] {
-        return Object.values(data.Stations);
-    }
-
     function randomTipId() {
         const tipCount = 3;
         return 'tip_'+Math.floor(Math.random()*tipCount);
@@ -193,7 +182,7 @@
     </filter>
 </defs>
 {#if data}
-{#each stationsList() as s (s.ID)}
+{#each Object.values(data.Stations) as s (s.ID)}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label">
     {s.Name}
     <title>{s.ID}</title>
