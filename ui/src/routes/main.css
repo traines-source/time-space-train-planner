@@ -501,9 +501,13 @@ a text {
 }
 
 .next-best-departures .redundant {
-  color: #707070;
+  color: #dbdbdb;
 }
 
 .nowrap {
   white-space: nowrap;
+}
+
+.forcewrap {
+  overflow-wrap: anywhere;
 }

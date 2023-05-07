@@ -132,7 +132,7 @@
     {#each nextBestDepartures as d}
         <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushEdge(d)}>
             <td class="nowrap"><span class="{liveDataDeparture(d)}">{departure(d)}</span></td>
-            <td>
+            <td class="forcewrap">
                 {d.Line && currentSelected.Line && d.Line.ID == currentSelected.Line.ID ? $t('c.stay_on') : ''}
                 <span>{@html label(d, true)}</span>
                 <span>
@@ -158,7 +158,7 @@
 
     <div class="legend">
         <h4>{$t('c.legend')}</h4>
-        <svg viewBox="125 1430 500 150" style="width: 100%">
+        <svg viewBox="125 1430 500 160" style="width: 100%">
             <g id="legend">
                 <g>
                     <path d="M 150,1460 L350,1460" class="edge selected redundant-false" />
