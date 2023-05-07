@@ -20,11 +20,12 @@
     const negativeTransferMinutes = 5;
     $: {
         if (currentSelected) {
-            update();
+            updateNextBestDepartures();
+            rectifyEdgeHistory();
         }
     }
 
-    function update() {
+    function updateNextBestDepartures() {
         if (currentSelected.To.SpaceAxis == data.To.ID) {
             nextBestDepartures = [];
             return;
@@ -46,7 +47,9 @@
             return parseTime(a.Planned.Departure)-parseTime(b.Planned.Departure);
         });
         nextBestDepartures = candidates;
-        console.log(nextBestDepartures);
+    }
+
+    function rectifyEdgeHistory() {
         if (selectedEdgeHistory[selectedEdgeHistory.length-1] != currentSelected) {
             selectedEdgeHistory = [currentSelected];
             console.log("history reset");
@@ -75,6 +78,8 @@
             selectedEdgeHistory.pop();
             selectEdge(selectedEdgeHistory[selectedEdgeHistory.length-1].ID);
             selectedEdgeHistory = selectedEdgeHistory;
+        } else if (currentSelected.ReverseShortestPath.length > 0) {
+            selectEdge(currentSelected.ReverseShortestPath[0].EdgeID);
         }
     }
 </script>
@@ -100,7 +105,7 @@
    
     <div class="arrdep">
         <span class="left">
-            {#if selectedEdgeHistory.length > 1}
+            {#if selectedEdgeHistory.length > 1 || currentSelected.ReverseShortestPath.length > 0}
                 <a href="javascript:void(0)" on:click={() => popEdge()} class="back"><span class="micon">arrow_back_ios_new</span></a>
             {/if}
         </span>
