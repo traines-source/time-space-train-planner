@@ -110,6 +110,9 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			if i > 0 {
 				c.insertStationEdge(l.Route[i-1], e)
 			}
+			if e.Discarded {
+				continue
+			}
 			edge := c.insertEdge(e)
 			c.stretchTimeAxis(edge.From.TimeAxis, edge.To.TimeAxis)
 		}
@@ -145,7 +148,7 @@ func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
 					lastEdge = e
 				}
 			} else {
-				log.Print("Referenced non-existing edge.")
+				log.Print("Referenced non-existing edge. (sp)")
 			}
 		}
 	}
@@ -206,8 +209,8 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 				}
 			}
 			lastProperArrival = c.generateEdgeID(arrivals[i])
-		} else {
-			log.Print("Referenced non-existing edge.")
+		} else if !arrivals[i].Discarded {
+			log.Print("Referenced non-existing edge. (arrows1)")
 		}
 	}
 	for i := 0; i < len(departures); i++ {
@@ -229,8 +232,8 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 			}
 			nextDepartureToFill = &e.NextDeparture
 			lastProperDeparture = c.generateEdgeID(departures[i])
-		} else {
-			log.Print("Referenced non-existing edge.")
+		} else if !departures[i].Discarded {
+			log.Print("Referenced non-existing edge. (arrows2)")
 		}
 	}
 }
@@ -245,7 +248,7 @@ func (c *container) preselectShortestPath(origin *internal.Station, destination 
 			if e, ok := c.Edges[c.generateEdgeID(start)]; ok {
 				c.DefaultShortestPathID = e.ID
 			} else {
-				log.Print("Referenced non-existing edge.")
+				log.Print("Referenced non-existing edge. (default)")
 			}
 			break
 		}
@@ -260,7 +263,7 @@ func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edg
 	if edgePath, ok := c.Edges[c.generateEdgeID(e)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
 	} else {
-		log.Print("Referenced non-existing edge. (sp)")
+		log.Print("Referenced non-existing edge. (spf)")
 	}
 	if edgePath, ok := c.Edges[c.generateStationEdgeID(start, end)]; ok {
 		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
