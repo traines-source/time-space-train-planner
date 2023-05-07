@@ -25,6 +25,7 @@
     "pedestrian": "On Foot",
     "stay_on": "stay on",
     "next_best_departures": "Next best connections from",
+    "no_known_connections": "No connections known at this time.",
     "error": "Error",
     "error_http_400": "Requested time might be too far in the future or past, or origin or destination do not exist or do not have any arrivals/departures.",
     "error_http_500": "Unexpected server error.",

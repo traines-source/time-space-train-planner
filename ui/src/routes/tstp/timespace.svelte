@@ -46,8 +46,11 @@
     }
 
     function selectEdge(edgeId: string | undefined): void {
-        if (!edgeId) return;
         setSelectedForDependents(false);
+        if (!edgeId) {
+            selectedShortestPath = [];
+            return;
+        }
         selection = Selection.fromEdge(data.Edges[edgeId]);
         console.log('cur', selection.edge, edgeId);
         selectedShortestPath = setSelectedForDependents(true);

@@ -9,7 +9,7 @@ function parseTime(t: string): number {
 function lz(i: number): string {
     return i < 10 ? '0'+i : ''+i;
 }
-function simpleTime(t: string): string {
+function simpleTime(t: string | number): string {
     const d = new Date(t);
     return lz(d.getHours())+':'+lz(d.getMinutes());
 }
@@ -22,7 +22,7 @@ function label(e: Edge, detail: boolean): string {
     if (e.Message && !detail) {
         label += ' <tspan class="micon">info</tspan>';
     }
-    if (e.Line.Type == 'Foot'  && !detail) {
+    if (e.Line.Type == 'Foot' && !detail) {
         return '<tspan class="micon">directions_walk</tspan> ' + label;
     } else if (e.Line.Type == 'Foot'  && detail) {
         return '<span class="micon">directions_walk</span> ' + label;
