@@ -263,18 +263,21 @@ func (p *DbRest) parseStationsFromJourneys() {
 			evaNumberFrom, err1 := strconv.Atoi(*leg.Origin.ID)
 			evaNumberTo, err2 := strconv.Atoi(*leg.Destination.ID)
 			if err1 == nil && err2 == nil {
-				p.consumer.UpsertStation(providers.ProviderStation{
+				from := providers.ProviderStation{
 					EvaNumber: evaNumberFrom,
 					Name:      *leg.Origin.Name,
 					Lat:       float32(*leg.Origin.Location.Latitude),
 					Lon:       float32(*leg.Origin.Location.Longitude),
-				})
-				p.consumer.UpsertStation(providers.ProviderStation{
+				}
+				to := providers.ProviderStation{
 					EvaNumber: evaNumberTo,
 					Name:      *leg.Destination.Name,
 					Lat:       float32(*leg.Destination.Location.Latitude),
 					Lon:       float32(*leg.Destination.Location.Longitude),
-				})
+				}
+				p.fallbackStations(from, to)
+				p.consumer.UpsertStation(from)
+				p.consumer.UpsertStation(to)
 				if leg.Arrival != nil && end.Before(time.Time(*leg.Arrival)) {
 					end = time.Time(*leg.Arrival)
 				}
@@ -286,6 +289,23 @@ func (p *DbRest) parseStationsFromJourneys() {
 	start, _ := p.consumer.RequestStationDataBetween(&p.consumer.Stations()[0])
 	log.Print("expdur", start, end)
 	p.consumer.SetExpectedTravelDuration(end.Sub(start))
+}
+
+
+func (p *DbRest) fallbackStations(from providers.ProviderStation, to providers.ProviderStation) {
+	stations := p.consumer.Stations()
+	p.consumer.UpsertStation(providers.ProviderStation{
+		EvaNumber:   stations[0].EvaNumber,
+		GroupNumber: &stations[0].EvaNumber,
+		Lat:         from.Lat,
+		Lon:         from.Lon,
+	})
+	p.consumer.UpsertStation(providers.ProviderStation{
+		EvaNumber:   stations[len(stations)-1].EvaNumber,
+		GroupNumber: &stations[len(stations)-1].EvaNumber,
+		Lat:         to.Lat,
+		Lon:         to.Lon,
+	})
 }
 
 func (p *DbRest) parseEdgesFromJourneys() {

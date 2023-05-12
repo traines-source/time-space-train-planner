@@ -87,6 +87,7 @@ func apiTimespace(w http.ResponseWriter, r *http.Request) {
 		render.TimeSpaceApi(stations, lines, w, r.URL.RawQuery)
 		return
 	}
+	log.Print("Bad Request, from/to/vias unset")
 	w.WriteHeader(http.StatusBadRequest)
 }
 
