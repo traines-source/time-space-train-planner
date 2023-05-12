@@ -37,45 +37,52 @@ function type(e: Edge): string {
     return e.Line.Type;
 }
 
-function departure(e: Edge): string {
-    return time(e, (stop: any) => stop.Departure, (stop: any) => stop.DepartureTrack);
+function departure(e: Edge, span='span'): string {
+    return timeString(e, (stop: any) => stop.Departure, (stop: any) => stop.DepartureTrack, span);
 }
 
-function arrival(e: Edge): string {
-    return time(e, (stop: any) => stop.Arrival, (stop: any) => stop.ArrivalTrack);
+function arrival(e: Edge, span='span'): string {
+    return timeString(e, (stop: any) => stop.Arrival, (stop: any) => stop.ArrivalTrack, span);
 }
 
-function liveDataDeparture(e: Edge): string {
-    return liveDataClass(e, (stop: any) => stop.Departure);
+function makeSpan(span: string, clazz: string, innerHtml: string) {
+    return '<'+span+' class="' + clazz + '">' + innerHtml + '</'+span+'>';
 }
 
-function liveDataArrival(e: Edge): string {
-    return liveDataClass(e, (stop: any) => stop.Arrival);
-}
-
-function time(e: Edge, timeResolver: (stop: any) => string, trackResolver: (stop: any) => string) {
+function timeString(e: Edge, timeResolver: (stop: any) => string, trackResolver: (stop: any) => string, span: string) {
     if (!e.Line) {
-        return ''
+        return '';
     }
-    let label = simpleTime(timeResolver(e.Actual)) + ' ' + delay(timeResolver(e.Current), timeResolver(e.Planned))
-    if (trackResolver(e.Planned)) {
-        label += t.get('c.platform') + trackResolver(e.Planned)
+    const timeLabel = simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned));
+    let label = makeSpan(span, liveDataClass(e, timeResolver), timeLabel);
+    if (trackResolver(e.Actual)) {
+        label += ' ' + makeSpan(span, trackChangedClass(e, trackResolver), t.get('c.platform') + trackResolver(e.Actual).replace(' ', '&nbsp;'));
     }
-    return label
+    return label;
 }
 
 function liveDataClass(e: Edge, timeResolver: (stop: any) => string) {
     if (!e.Line) {
         return '';
     }
-    const current = timeResolver(e.Current)
+    const current = timeResolver(e.Current);
     if (parseTime(current) == 0) {
         return ''
     }
     if (delayMinutes(current, timeResolver(e.Planned)) > 5) {
-        return "live-red"
+        return 'live-red';
     }
-    return "live-green"
+    return 'live-green';
+}
+
+function trackChangedClass(e: Edge, trackResolver: (stop: any) => string) {
+    if (!e.Line) {
+        return '';
+    }
+    if (trackResolver(e.Actual) != trackResolver(e.Planned)) {
+        return 'live-red';
+    }
+    return '';
 }
 
 function delayMinutes(current: string, planned: string) {
@@ -84,8 +91,7 @@ function delayMinutes(current: string, planned: string) {
 
 function delay(current: string, planned: string) {
     if (parseTime(current) != 0) {
-
-        return " (+" + delayMinutes(current, planned) + ") ";
+        return "&nbsp;(+" + delayMinutes(current, planned) + ")";
     }
     return ''
 }
@@ -93,5 +99,5 @@ function delay(current: string, planned: string) {
 export {
     parseTime,
     simpleTime,
-    label, type, departure, arrival, liveDataDeparture, liveDataArrival
+    label, type, departure, arrival
 }

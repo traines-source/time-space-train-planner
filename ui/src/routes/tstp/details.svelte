@@ -3,7 +3,7 @@
     import { store } from "../store"
     import { optionsQueryString } from "../query"
     import Footer from '../footer.svelte'; 
-    import {label, type, departure, arrival, liveDataDeparture, liveDataArrival, parseTime, simpleTime} from './labels';
+    import {label, type, departure, arrival, parseTime, simpleTime} from './labels';
     import type { Edge, Station, Response } from './types';
 
     export let selection: Edge;
@@ -171,7 +171,7 @@
                 {/if}
             </span>
             <span class="dep">
-                <span class="{liveDataDeparture(selection.edge)}">{departure(selection.edge)}</span>
+                {@html departure(selection.edge)}
                 {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
                 <br />{stationResolver(selection.edge.From.SpaceAxis).Name}
             </span>
@@ -179,7 +179,7 @@
                 <path d="M 10,5 L40,5" class="edge type-{type(selection.edge)} redundant-false"/>
             </svg>
             <span class="arr">
-                <span class="{liveDataArrival(selection.edge)}">{arrival(selection.edge)}</span>
+                {@html arrival(selection.edge)}
                 {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
                 <br />{stationResolver(selection.edge.To.SpaceAxis).Name}
             </span>
@@ -197,7 +197,7 @@
         <table class="next-best-departures">
         {#each nextBestDepartures as d}
             <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
-                <td class="nowrap"><span class="{liveDataDeparture(d)}">{departure(d)}</span></td>
+                <td>{@html departure(d)}</td>
                 <td class="forcewrap">
                     {d.Line?.ID == selection.edge?.Line?.ID ? $t('c.stay_on') : ''}
                     <span>{@html label(d, true)}</span>

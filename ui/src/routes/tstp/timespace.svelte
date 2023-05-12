@@ -3,7 +3,7 @@
     import { onMount, tick } from "svelte";
     import { defaultDatetime, setFromApi, store } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
-    import {parseTime, simpleTime, label, type, departure, arrival, liveDataDeparture, liveDataArrival} from './labels';
+    import {parseTime, simpleTime, label, type, departure, arrival} from './labels';
     import {type Response, type Edge, type Coord, Selection} from './types';
     import panzoom from 'panzoom'
     import Details from './details.svelte'
@@ -228,12 +228,12 @@
     </textPath>
 </text>
 <text x="{x(e.To)}" y="{y(e.To)}" id="{e.ID}-arrival"
-    class="arrival type-{type(e)} label-{e.ID} {liveDataArrival(e)}">
-    {arrival(e)}
+    class="arrival type-{type(e)} label-{e.ID}">
+    {@html arrival(e, 'tspan')}
 </text>
 <text x="{x(e.From)}" y="{y(e.From)}" id="{e.ID}-departure"
-    class="departure type-{type(e)} label-{e.ID} {liveDataDeparture(e)}">
-    {departure(e)}
+    class="departure type-{type(e)} label-{e.ID}">
+    {@html departure(e, 'tspan')}
 </text>
 {#if e.PreviousArrival}<text x="{x(e.To)}" y="{y(e.To)-arrowMargin}" class="previous-next-arrow" on:click={() => selectEdge(e.PreviousArrival)}>▲</text>{/if}
 {#if e.PreviousDeparture}<text x="{x(e.From)}" y="{y(e.From)-arrowMargin}" class="previous-next-arrow" on:click={() => selectEdge(e.PreviousDeparture)}>▲</text>{/if}
