@@ -1,6 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/translations';    
-    import { store, setFromApi, defaultDatetime } from "../store"
+    import { store, setFromApi, defaultDatetime, viasSet } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
     import StationInput from "./stationInput.svelte"
     import { goto } from '$app/navigation';
@@ -29,7 +29,7 @@
         if (query.from.id && query.to.id) {
             loading = true;
             goto('?'+optionsQueryString(query));
-            if (query.vias.length == 0) {
+            if (!viasSet()) {
                 fetchVias();
             }
         }

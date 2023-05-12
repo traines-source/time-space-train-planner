@@ -38,8 +38,12 @@ function setFromApi(data: any): void {
     store.vias = fillupStations(data.Vias.map(mapStation));
 }
 
+function viasSet(): boolean {
+    return store.vias.filter(v => v.id).length > 0;
+}
+
 function requiredFieldsSet(): boolean {
-    return store.vias.length > 0 && !!store.from.id && !!store.to.id
+    return viasSet() && !!store.from.id && !!store.to.id
 }
 
 const maxVias = 10;
@@ -55,6 +59,7 @@ export {
     store,
     defaultDatetime,
     requiredFieldsSet,
+    viasSet,
     fillupStations,
     setFromApi
 }
