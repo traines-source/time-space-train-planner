@@ -98,7 +98,7 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 		} else {
 			departure = correspondance.Actual.Departure.Add(-duration)
 			arrival = correspondance.Actual.Departure
-			if from != origin && (len(from.Arrivals) == 0 || departure.Before(from.Arrivals[0].Actual.Arrival)) {
+			if departure.Before(c.dateTime) || from != origin && (len(from.Arrivals) == 0 || departure.Before(from.Arrivals[0].Actual.Arrival)) {
 				continue
 			}
 		}
