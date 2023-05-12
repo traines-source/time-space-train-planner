@@ -1,5 +1,7 @@
 import { loadTranslations, locales } from '$lib/translations';
 
+export const prerender = true;
+
 function userLangCode(): string {
     if (typeof window == 'undefined') {
         return 'en';

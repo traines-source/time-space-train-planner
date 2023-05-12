@@ -1,10 +1,11 @@
 <script>
+    import { browser } from '$app/environment'; 
     import { requiredFieldsSet, fillupStations, store } from "../store"
     import { page } from '$app/stores'
     import Form from './form.svelte'
     import Timespace from './timespace.svelte'
 
-    if (!store.initialized) {
+    if (browser && !store.initialized) {
         store.initialized = true;
         store.from.id = $page.url.searchParams.get('from') || undefined;
         store.to.id = $page.url.searchParams.get('to') || undefined;
@@ -17,7 +18,7 @@
     let showForm = false;
     let showTimespace = false;
     $: {
-        showForm = $page.url.searchParams.has('form') || !$page.url.searchParams.has('vias') || !requiredFieldsSet();
+        showForm = !browser || $page.url.searchParams.has('form') || !$page.url.searchParams.has('vias') || !requiredFieldsSet();
         showTimespace = !showForm;
     }
 </script>

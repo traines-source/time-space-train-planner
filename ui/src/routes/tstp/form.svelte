@@ -53,6 +53,9 @@
     <p>
         {$t('c.introduction')}
     </p>
+    <noscript>
+        JavaScript needs to be enabled to use this tool.
+    </noscript>
 
     {#if error}
     <p class="error">{$t('c.error')}: {$t('c.'+error)}</p>
