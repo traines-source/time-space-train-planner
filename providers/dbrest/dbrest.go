@@ -23,55 +23,45 @@ type DbRest struct {
 	cachedJourneys *operations.GetJourneysOKBody
 }
 
-func (p *DbRest) Fetch(c providers.Consumer) error {
-	p.consumer = c
-	p.prepareClient()
-	//p.requestStations()
+func (p *DbRest) Vias(c providers.Consumer) error {
+	p.prepareClient(c)
 	if err := p.requestJourneys(); err != nil {
 		return err
 	}
-	if err := p.requestDeparturesAndArrivals(); err != nil {
+	p.parseStationsFromJourneys()
+	return nil
+}
+
+func (p *DbRest) DeparturesArrivals(c providers.Consumer) error {
+	p.prepareClient(c)
+	if err := p.requestJourneys(); err != nil {
+		return err
+	}
+	p.parseStationsFromJourneys()
+	if err := p.requestAndParseDeparturesArrivals(); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *DbRest) Enrich(c providers.Consumer) error {
-	p.consumer = c
-	return p.requestJourneys()
-}
-
-func (p *DbRest) prepareClient() {
-	r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("HAFAS_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
-	p.client = apiclient.New(r, strfmt.Default)
-}
-
-func (p *DbRest) requestStations() error {
-	stations := p.consumer.Stations()
-	for _, station := range stations {
-		if err := p.requestStation(station); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (p *DbRest) requestStation(station providers.ProviderStation) error {
-	var params = operations.NewGetStationsIDParams()
-	params.ID = strconv.Itoa(station.EvaNumber)
-	res, err := p.client.Operations.GetStationsID(params)
-	if err != nil {
+	p.prepareClient(c)
+	if err := p.requestJourneys(); err != nil {
 		return err
 	}
-	p.consumer.UpsertStation(providers.ProviderStation{
-		EvaNumber: station.EvaNumber,
-		Lat:       float32(res.Payload.Location.Latitude),
-		Lon:       float32(res.Payload.Location.Longitude),
-	})
+	p.parseEdgesFromJourneys()
 	return nil
 }
 
-func (p *DbRest) requestDeparturesAndArrivals() error {
+func (p *DbRest) prepareClient(c providers.Consumer) {
+	p.consumer = c
+	if p.client == nil {
+		r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("HAFAS_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
+		p.client = apiclient.New(r, strfmt.Default)
+	}
+}
+
+func (p *DbRest) requestAndParseDeparturesArrivals() error {
 	stations := p.consumer.Stations()
 	for i, station := range stations {
 		if i > 20 {
@@ -81,17 +71,17 @@ func (p *DbRest) requestDeparturesAndArrivals() error {
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
 		log.Print("Requesting for ", station.EvaNumber, " at ", from, " with duration ", duration)
-		if err := p.requestArrival(station, from, int64(duration)); err != nil {
+		if err := p.requestAndParseArrival(station, from, int64(duration)); err != nil {
 			return err
 		}
-		if err := p.requestDeparture(station, from, int64(duration)); err != nil {
+		if err := p.requestAndParseDeparture(station, from, int64(duration)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Time, duration int64) error {
+func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when time.Time, duration int64) error {
 	var params = operations.NewGetStopsIDArrivalsParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	params.Duration = &duration
@@ -107,7 +97,7 @@ func (p *DbRest) requestArrival(station providers.ProviderStation, when time.Tim
 	return nil
 }
 
-func (p *DbRest) requestDeparture(station providers.ProviderStation, when time.Time, duration int64) error {
+func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, when time.Time, duration int64) error {
 	var params = operations.NewGetStopsIDDeparturesParams()
 	params.ID = strconv.Itoa(station.EvaNumber)
 	params.Duration = &duration
@@ -226,10 +216,7 @@ func (p *DbRest) requestJourneys() error {
 	if p.cachedJourneys == nil {
 		if err := p.requestJourneysApi(); err != nil {
 			return err
-		}
-		p.parseStationsFromJourneys()
-	} else {
-		p.parseEdgesFromJourneys()
+		}	
 	}
 	return nil
 }

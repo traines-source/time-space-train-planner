@@ -32,14 +32,18 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 	var regionly = r.URL.Query().Get("regionly") == "true"
 
 	if len(from) > 0 && len(to) > 0 {
-		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
-		if err == nil && len(vias) > 0 && len(form) == 0 {
-			log.Print("Request:", r.URL.RawQuery)
-			w.Header().Set("Content-Type", "image/svg+xml")
-			render.TimeSpace(stations, lines, w, r.URL.RawQuery)
-			return
+		if len(vias) > 0 && len(form) == 0 {
+			stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
+			if err == nil {
+				log.Print("Request:", r.URL.RawQuery)
+				w.Header().Set("Content-Type", "image/svg+xml")
+				render.TimeSpace(stations, lines, w, r.URL.RawQuery)
+				return
+			} else {
+				w.WriteHeader(err.ErrorCode())
+			}
 		}
-		log.Print(to[0], stations)
+		stations, err := internal.ObtainVias(from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}
@@ -59,13 +63,14 @@ func apiVias(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 {
-		stations, _, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
+		stations, err := internal.ObtainVias(from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}
 		render.ViasApi(stations, from[0], to[0], datetime, w, err)
 		return
 	}
+	log.Print("Bad Request, from/to unset")
 	w.WriteHeader(http.StatusBadRequest)
 }
 

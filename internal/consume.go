@@ -218,32 +218,40 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 }
 
 func (c *consumer) initializeProviders(evaNumbers []int) {
-	c.providers = []providers.Provider{&dbrest.DbRest{}}
-	c.providerStations = defaultStations(evaNumbers)
-
 	c.stations = map[int]*Station{}
 	c.lines = map[string]*Line{}
+
+	c.providers = []providers.Provider{&dbrest.DbRest{}}
+	c.providerStations = c.defaultStations(evaNumbers)
 }
 
-func (c *consumer) callProviders(enrich bool) *ErrorCode {
+func (c *consumer) callProviders(call func(providers.Provider, *consumer) error) *ErrorCode {
 	for _, p := range c.providers {
-		if !enrich {
-			if err := p.Fetch(c); err != nil {
-				return HandleError(err)
-			}
-		} else {
-			if err := p.Enrich(c); err != nil {
-				return HandleError(err)
-			}
+		if err := call(p, c); err != nil {
+			return HandleError(err)
 		}
 	}
 	return nil
 }
 
-func defaultStations(evaNumbers []int) []providers.ProviderStation {
+func callVias(p providers.Provider, c *consumer) error {
+	return p.Vias(c)
+}
+
+func callDeparturesArrivals(p providers.Provider, c *consumer) error {
+	return p.DeparturesArrivals(c)
+}
+
+func callEnrich(p providers.Provider, c *consumer) error {
+	return p.Enrich(c)
+}
+
+func (c *consumer) defaultStations(evaNumbers []int) []providers.ProviderStation {
 	var stations []providers.ProviderStation
 	for _, n := range evaNumbers {
-		stations = append(stations, providers.ProviderStation{EvaNumber: n})
+		s := providers.ProviderStation{EvaNumber: n}
+		stations = append(stations, s)
+		c.UpsertStation(s)
 	}
 	return stations
 }
@@ -320,7 +328,7 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func ObtainData(from int, to int, vias []int, dateTime string, regionly bool) (map[int]*Station, map[string]*Line, *ErrorCode) {
+func prepare(from int, to int, vias []int, dateTime string, regionly bool) *consumer {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
@@ -333,14 +341,27 @@ func ObtainData(from int, to int, vias []int, dateTime string, regionly bool) (m
 
 	log.Print(evaNumbers)
 	c.initializeProviders(evaNumbers)
-	if err := c.callProviders(false); err != nil {
+	return c
+}
+
+func ObtainVias(from int, to int, vias []int, dateTime string, regionly bool) (map[int]*Station, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly)
+	if err := c.callProviders(callVias); err != nil {
+		return nil, err
+	}
+	return c.stations, nil
+}
+
+func ObtainData(from int, to int, vias []int, dateTime string, regionly bool) (map[int]*Station, map[string]*Line, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly)
+	if err := c.callProviders(callDeparturesArrivals); err != nil {
 		return nil, nil, err
 	}
 	if err := c.generateEdges(c.stations[from], c.stations[to]); err != nil {
 		return nil, nil, err
 	}
 	shortestPaths(c.stations, c.stations[from], c.stations[to], regionly)
-	if err := c.callProviders(true); err != nil {
+	if err := c.callProviders(callEnrich); err != nil {
 		return nil, nil, err
 	}
 	c.rankStations(c.stations[from], c.stations[to])

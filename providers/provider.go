@@ -3,7 +3,8 @@ package providers
 import "time"
 
 type Provider interface {
-	Fetch(c Consumer) error
+	Vias(c Consumer) error
+	DeparturesArrivals(c Consumer) error
 	Enrich(c Consumer) error
 }
 
