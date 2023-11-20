@@ -13,7 +13,7 @@ import (
 type consumer struct {
 	providers              []providers.Provider
 	providerStations       []providers.ProviderStation
-	stations               map[int]*Station
+	stations               map[string]*Station
 	lines                  map[string]*Line
 	dateTime               time.Time
 	regionalOnly           bool
@@ -56,9 +56,9 @@ func (c *consumer) StationByName(name string) (providers.ProviderStation, error)
 	return providers.ProviderStation{}, errors.New("not found")
 }
 
-func (c *consumer) StationByEva(evaNumber int) (providers.ProviderStation, error) {
+func (c *consumer) StationByID(id string) (providers.ProviderStation, error) {
 	for _, v := range c.providerStations {
-		if evaNumber == v.EvaNumber {
+		if id == v.ID {
 			return v, nil
 		}
 	}
@@ -72,12 +72,12 @@ func (c *consumer) RegionalOnly() bool {
 func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	var station *providers.ProviderStation
 	for _, s := range c.providerStations {
-		if s.EvaNumber == e.EvaNumber {
+		if s.ID == e.ID {
 			station = &s
 		}
 	}
 	if station == nil {
-		station = &providers.ProviderStation{EvaNumber: e.EvaNumber}
+		station = &providers.ProviderStation{ID: e.ID}
 		//c.providerStations = append(c.providerStations, *station)
 	}
 	if e.Name != "" {
@@ -89,14 +89,14 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	if e.Lon != 0 {
 		station.Lon = e.Lon
 	}
-	if e.GroupNumber != nil {
-		station.GroupNumber = e.GroupNumber
+	if e.GroupID != nil {
+		station.GroupID = e.GroupID
 	}
 
-	val, ok := c.stations[e.EvaNumber]
+	val, ok := c.stations[e.ID]
 	if !ok {
-		val = &Station{EvaNumber: e.EvaNumber}
-		c.stations[e.EvaNumber] = val
+		val = &Station{ID: e.ID}
+		c.stations[e.ID] = val
 	}
 	if e.Name != "" {
 		val.Name = e.Name
@@ -107,8 +107,8 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	if e.Lon != 0 {
 		val.Lon = e.Lon
 	}
-	if e.GroupNumber != nil {
-		val.GroupNumber = e.GroupNumber
+	if e.GroupID != nil {
+		val.GroupID = e.GroupID
 	}
 }
 
@@ -133,14 +133,14 @@ func existingStopHasDifferentPlanned(e providers.ProviderLineStop, stop *LineSto
 }
 
 func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
-	station, ok := c.stations[e.EvaNumber]
+	station, ok := c.stations[e.ID]
 	if !ok {
-		log.Panicf("Non-existant Station %d for stop of Line %s", e.EvaNumber, e.LineID)
+		log.Panicf("Non-existant Station %s for stop of Line %s", e.ID, e.LineID)
 		return
 	}
 	line, ok := c.lines[e.LineID]
 	if !ok {
-		log.Panicf("Non-existant Line %s for Station  %d", e.LineID, e.EvaNumber)
+		log.Panicf("Non-existant Line %s for Station  %s", e.LineID, e.ID)
 		return
 	}
 	var val *LineStop
@@ -167,30 +167,30 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
 	line, ok := c.lines[e.LineID]
 	if !ok {
-		log.Printf("Provider found Line that was not found by TSTP (From: %d, To: %d, LineID: %s, Dep: %s)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID, e.Planned.Departure)
+		log.Printf("Provider found Line that was not found by TSTP (From: %s, To: %s, LineID: %s, Dep: %s)", e.IDFrom, e.IDTo, e.LineID, e.Planned.Departure)
 		return
 	}
 	foundStart := false
 	foundEnd := false
 	for _, edge := range line.Route {
 		// TODO handle multi-line trains (ICE / RE, IC / NJ etc, e.g. IC 60400/NJ 40470)
-		if edge.From.EvaNumber == e.EvaNumberFrom || c.sameGroupNumber(e.EvaNumberFrom, edge.From.GroupNumber) || foundStart && !foundEnd {
+		if edge.From.ID == e.IDFrom || c.sameGroupNumber(e.IDFrom, edge.From.GroupID) || foundStart && !foundEnd {
 			if e.ProviderShortestPath != nil {
 				edge.ProviderShortestPath = *e.ProviderShortestPath
 			}
 			foundStart = true
-			if edge.To.EvaNumber == e.EvaNumberTo || c.sameGroupNumber(e.EvaNumberTo, edge.To.GroupNumber) {
+			if edge.To.ID == e.IDTo || c.sameGroupNumber(e.IDTo, edge.To.GroupID) {
 				foundEnd = true
 			}
 		}
 	}
 	if !foundEnd {
-		log.Printf("Provider found connection that was not found by TSTP (From: %d, To: %d, LineID: %s, Name: %s, Dep: %s, foundStart: %t)", e.EvaNumberFrom, e.EvaNumberTo, e.LineID, line.Name, e.Planned.Departure, foundStart)
+		log.Printf("Provider found connection that was not found by TSTP (From: %s, To: %s, LineID: %s, Name: %s, Dep: %s, foundStart: %t)", e.IDFrom, e.IDTo, e.LineID, line.Name, e.Planned.Departure, foundStart)
 	}
 }
 
-func (c *consumer) sameGroupNumber(evaNumber int, groupNumber *int) bool {
-	if val, ok := c.stations[evaNumber]; ok && groupNumber != nil && val.GroupNumber != nil && *val.GroupNumber == *groupNumber {
+func (c *consumer) sameGroupNumber(id string, groupID *string) bool {
+	if val, ok := c.stations[id]; ok && groupID != nil && val.GroupID != nil && *val.GroupID == *groupID {
 		return true
 	}
 	return false
@@ -217,12 +217,12 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	}
 }
 
-func (c *consumer) initializeProviders(evaNumbers []int) {
-	c.stations = map[int]*Station{}
+func (c *consumer) initializeProviders(stationIDs []string) {
+	c.stations = map[string]*Station{}
 	c.lines = map[string]*Line{}
 
 	c.providers = []providers.Provider{&dbrest.DbRest{}}
-	c.providerStations = c.defaultStations(evaNumbers)
+	c.providerStations = c.defaultStations(stationIDs)
 }
 
 func (c *consumer) callProviders(call func(providers.Provider, *consumer) error) *ErrorCode {
@@ -246,17 +246,17 @@ func callEnrich(p providers.Provider, c *consumer) error {
 	return p.Enrich(c)
 }
 
-func (c *consumer) defaultStations(evaNumbers []int) []providers.ProviderStation {
+func (c *consumer) defaultStations(stationIDs []string) []providers.ProviderStation {
 	var stations []providers.ProviderStation
-	for _, n := range evaNumbers {
-		s := providers.ProviderStation{EvaNumber: n}
+	for _, n := range stationIDs {
+		s := providers.ProviderStation{ID: n}
 		stations = append(stations, s)
 		c.UpsertStation(s)
 	}
 	return stations
 }
 
-func indexOf(slice []int, value int) int {
+func indexOf(slice []string, value string) int {
 	for i, e := range slice {
 		if e == value {
 			return i
@@ -267,7 +267,7 @@ func indexOf(slice []int, value int) int {
 
 func (c *consumer) rankStations(origin *Station, destination *Station) {
 	//force := []int{8070003, 8070004, 8000105, 8098105, 8006404, 8000615}
-	force := []int{}
+	force := []string{}
 	var stationsSlice []*Station
 	for _, s := range c.stations {
 		stationsSlice = append(stationsSlice, s)
@@ -282,23 +282,23 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		if stationsSlice[j] == origin || stationsSlice[i] == destination {
 			return false
 		}
-		if stationsSlice[i].GroupNumber != nil && stationsSlice[j].GroupNumber != nil && *stationsSlice[i].GroupNumber == *stationsSlice[j].GroupNumber {
+		if stationsSlice[i].GroupID != nil && stationsSlice[j].GroupID != nil && *stationsSlice[i].GroupID == *stationsSlice[j].GroupID {
 			return false
 		}
-		forceI := indexOf(force, stationsSlice[i].EvaNumber)
-		forceJ := indexOf(force, stationsSlice[j].EvaNumber)
+		forceI := indexOf(force, stationsSlice[i].ID)
+		forceJ := indexOf(force, stationsSlice[j].ID)
 		if forceI != -1 && forceJ != -1 {
 			return forceI < forceJ
 		}
 		stationI := stationsSlice[i]
-		if stationI.GroupNumber != nil {
-			if val, ok := c.stations[*stationI.GroupNumber]; ok {
+		if stationI.GroupID != nil {
+			if val, ok := c.stations[*stationI.GroupID]; ok {
 				stationI = val
 			}
 		}
 		stationJ := stationsSlice[j]
-		if stationJ.GroupNumber != nil {
-			if val, ok := c.stations[*stationJ.GroupNumber]; ok {
+		if stationJ.GroupID != nil {
+			if val, ok := c.stations[*stationJ.GroupID]; ok {
 				stationJ = val
 			}
 		}
@@ -308,7 +308,7 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 	})
 	i := 0
 	for _, s := range stationsSlice {
-		c.stations[s.EvaNumber].Rank = i
+		c.stations[s.ID].Rank = i
 		i++
 	}
 }
@@ -328,23 +328,23 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func prepare(from int, to int, vias []int, dateTime string, regionly bool) *consumer {
+func prepare(from string, to string, vias []string, dateTime string, regionly bool) *consumer {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
 	c.regionalOnly = regionly
 
-	var evaNumbers []int
-	evaNumbers = append(evaNumbers, from)
-	evaNumbers = append(evaNumbers, vias...)
-	evaNumbers = append(evaNumbers, to)
+	var stationIDs []string
+	stationIDs = append(stationIDs, from)
+	stationIDs = append(stationIDs, vias...)
+	stationIDs = append(stationIDs, to)
 
-	log.Print(evaNumbers)
-	c.initializeProviders(evaNumbers)
+	log.Print(stationIDs)
+	c.initializeProviders(stationIDs)
 	return c
 }
 
-func ObtainVias(from int, to int, vias []int, dateTime string, regionly bool) (map[int]*Station, *ErrorCode) {
+func ObtainVias(from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, *ErrorCode) {
 	c := prepare(from, to, vias, dateTime, regionly)
 	if err := c.callProviders(callVias); err != nil {
 		return nil, err
@@ -352,7 +352,7 @@ func ObtainVias(from int, to int, vias []int, dateTime string, regionly bool) (m
 	return c.stations, nil
 }
 
-func ObtainData(from int, to int, vias []int, dateTime string, regionly bool) (map[int]*Station, map[string]*Line, *ErrorCode) {
+func ObtainData(from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
 	c := prepare(from, to, vias, dateTime, regionly)
 	if err := c.callProviders(callDeparturesArrivals); err != nil {
 		return nil, nil, err

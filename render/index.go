@@ -30,7 +30,7 @@ func Index(wr io.Writer) {
 	m.template(wr)
 }
 
-func Vias(stations map[int]*internal.Station, from int, to int, dateTime string, wr io.Writer, err error) {
+func Vias(stations map[string]*internal.Station, from string, to string, dateTime string, wr io.Writer, err error) {
 	m := &model{
 		LegalLink: os.Getenv("TSTP_LEGAL"),
 		From:      makeStationLabel(stations[from]),
@@ -44,7 +44,7 @@ func Vias(stations map[int]*internal.Station, from int, to int, dateTime string,
 	m.template(wr)
 }
 
-func ViasApi(stations map[int]*internal.Station, from int, to int, dateTime string, wr http.ResponseWriter, err error) {
+func ViasApi(stations map[string]*internal.Station, from string, to string, dateTime string, wr http.ResponseWriter, err error) {
 	m := &model{
 		From:     makeStationLabel(stations[from]),
 		To:       makeStationLabel(stations[to]),

@@ -25,7 +25,7 @@ type dijkstraVertex interface {
 	earlierConnectionWithSameDist(fixedEdge *dijkstra, looseEdge *dijkstra) bool
 }
 
-func shortestPaths(stations map[int]*Station, origin *Station, destination *Station, regionly bool) {
+func shortestPaths(stations map[string]*Station, origin *Station, destination *Station, regionly bool) {
 
 	for _, edgeToDestination := range destination.Arrivals {
 		shortestPathsToTarget(stations, &dijkstraToDestination{edgeToDestination}, regionly)
@@ -39,7 +39,7 @@ func shortestPaths(stations map[int]*Station, origin *Station, destination *Stat
 	markEdgesAsRedundant(stations, origin, destination, regionly)
 }
 
-func shortestPathsToTarget(stations map[int]*Station, edgeToTarget dijkstraVertex, regionly bool) {
+func shortestPathsToTarget(stations map[string]*Station, edgeToTarget dijkstraVertex, regionly bool) {
 	if isNotEligible(edgeToTarget.getEdge(), regionly) {
 		return
 	}
@@ -125,7 +125,7 @@ func deltaMinutes(from time.Time, to time.Time) int {
 	return int(to.Sub(from).Minutes())
 }
 
-func markEdgesAsRedundant(stations map[int]*Station, origin *Station, destination *Station, regionly bool) {
+func markEdgesAsRedundant(stations map[string]*Station, origin *Station, destination *Station, regionly bool) {
 	for _, station := range stations {
 		for _, departure := range station.Departures {
 			markEdgeAsRedundant(departure, origin, destination, regionly)
@@ -161,7 +161,7 @@ func markEdgeAsRedundant(edge *Edge, origin *Station, destination *Station, regi
 }
 
 func markEdgeAsDiscarded(edge *Edge) {
-	if edge.Redundant && edge.From.GroupNumber != nil && edge.To.GroupNumber != nil && *edge.From.GroupNumber == *edge.To.GroupNumber {
+	if edge.Redundant && edge.From.GroupID != nil && edge.To.GroupID != nil && *edge.From.GroupID == *edge.To.GroupID {
 		edge.Discarded = true
 	}
 	if edge.Redundant && edge.Line.Type == "Foot" {
@@ -204,12 +204,12 @@ func calculateTravelLength(startEdge *Edge, destination *Station) (hops int32, a
 }
 
 func revisitsSameStation(edge *Edge) bool {
-	from := edge.From.EvaNumber
+	from := edge.From.ID
 	nextEdge := edge
 	for {
 		if nextEdge.ShortestPath != nil {
 			nextEdge = nextEdge.ShortestPath
-			if nextEdge.To.EvaNumber == from {
+			if nextEdge.To.ID == from {
 				return true
 			}
 		} else {
@@ -218,7 +218,7 @@ func revisitsSameStation(edge *Edge) bool {
 	}
 }
 
-func followShortestPaths(stations map[int]*Station) {
+func followShortestPaths(stations map[string]*Station) {
 	for _, l := range stations {
 		for _, origin := range l.Departures {
 			for e := origin; e != nil; e = e.ShortestPath {

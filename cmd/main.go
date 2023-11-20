@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"traines.eu/time-space-train-planner/internal"
 	"traines.eu/time-space-train-planner/render"
@@ -23,9 +22,9 @@ func main() {
 }
 
 func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
-	var from = queryIntList(r.URL.Query()["from"])
-	var to = queryIntList(r.URL.Query()["to"])
-	var vias = queryIntList(r.URL.Query()["vias"])
+	var from = queryStationList(r.URL.Query()["from"])
+	var to = queryStationList(r.URL.Query()["to"])
+	var vias = queryStationList(r.URL.Query()["vias"])
 
 	var form = r.URL.Query()["form"]
 	var datetime = r.URL.Query().Get("datetime")
@@ -54,9 +53,9 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiVias(w http.ResponseWriter, r *http.Request) {
-	var from = queryIntList(r.URL.Query()["from"])
-	var to = queryIntList(r.URL.Query()["to"])
-	var vias = queryIntList(r.URL.Query()["vias"])
+	var from = queryStationList(r.URL.Query()["from"])
+	var to = queryStationList(r.URL.Query()["to"])
+	var vias = queryStationList(r.URL.Query()["vias"])
 
 	var datetime = r.URL.Query().Get("datetime")
 	var regionly = r.URL.Query().Get("regionly") == "true"
@@ -75,9 +74,9 @@ func apiVias(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiTimespace(w http.ResponseWriter, r *http.Request) {
-	var from = queryIntList(r.URL.Query()["from"])
-	var to = queryIntList(r.URL.Query()["to"])
-	var vias = queryIntList(r.URL.Query()["vias"])
+	var from = queryStationList(r.URL.Query()["from"])
+	var to = queryStationList(r.URL.Query()["to"])
+	var vias = queryStationList(r.URL.Query()["vias"])
 
 	var datetime = r.URL.Query().Get("datetime")
 	var regionly = r.URL.Query().Get("regionly") == "true"
@@ -96,20 +95,13 @@ func apiTimespace(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusBadRequest)
 }
 
-func queryIntList(params []string) []int {
-	var ints = []int{}
-	for _, i := range params {
-		if i == "" {
+func queryStationList(params []string) []string {
+	var ids = []string{}
+	for _, id := range params {
+		if id == "" || id == "0" {
 			continue
 		}
-		j, err := strconv.Atoi(i)
-		if err != nil {
-			panic(err)
-		}
-		if j == 0 {
-			continue
-		}
-		ints = append(ints, j)
+		ids = append(ids, id)
 	}
-	return ints
+	return ids
 }

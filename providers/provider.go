@@ -12,7 +12,7 @@ type Consumer interface {
 	RequestStationDataBetween(station *ProviderStation) (from time.Time, to time.Time)
 	Stations() []ProviderStation
 	StationByName(name string) (ProviderStation, error)
-	StationByEva(evaNumber int) (ProviderStation, error)
+	StationByID(id string) (ProviderStation, error)
 	RegionalOnly() bool
 	UpsertStation(station ProviderStation)
 	UpsertLine(line ProviderLine)
@@ -22,9 +22,9 @@ type Consumer interface {
 }
 
 type ProviderStation struct {
-	EvaNumber        int
+	ID               string
 	Code100          string
-	GroupNumber      *int
+	GroupID          *string
 	Name             string
 	Lat              float32
 	Lon              float32
@@ -32,7 +32,7 @@ type ProviderStation struct {
 }
 
 type ProviderLineStop struct {
-	EvaNumber int
+	ID        string
 	LineID    string
 	Planned   *ProviderLineStopInfo
 	Current   *ProviderLineStopInfo
@@ -57,8 +57,8 @@ type ProviderLine struct {
 }
 
 type ProviderLineEdge struct {
-	EvaNumberFrom        int
-	EvaNumberTo          int
+	IDFrom               string
+	IDTo                 string
 	LineID               string
 	ProviderShortestPath *bool
 	Planned              *ProviderLineStopInfo

@@ -2,7 +2,6 @@ package render
 
 import (
 	"sort"
-	"strconv"
 	"time"
 
 	"traines.eu/time-space-train-planner/internal"
@@ -58,10 +57,10 @@ type Coord struct {
 	SpaceAxis string
 }
 
-func makeVias(stations map[int]*internal.Station, from int, to int) []StationLabel {
+func makeVias(stations map[string]*internal.Station, from string, to string) []StationLabel {
 	list := []StationLabel{}
 	for _, s := range stations {
-		if s.EvaNumber == from || s.EvaNumber == to || s.GroupNumber != nil && *s.GroupNumber != s.EvaNumber {
+		if s.ID == from || s.ID == to || s.GroupID != nil && *s.GroupID != s.ID {
 			continue
 		}
 		list = append(list, makeStationLabel(s))
@@ -76,5 +75,5 @@ func makeStationLabel(s *internal.Station) StationLabel {
 	if s == nil {
 		return StationLabel{}
 	}
-	return StationLabel{ID: strconv.Itoa(s.EvaNumber), Name: s.Name, Rank: s.Rank}
+	return StationLabel{ID: s.ID, Name: s.Name, Rank: s.Rank}
 }

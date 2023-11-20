@@ -108,7 +108,7 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 
 func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, departure time.Time, arrival time.Time) {
 
-	var lineID = fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%d_%d_%d", from.EvaNumber, to.EvaNumber, departure.Unix()))))[:10]
+	var lineID = fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%s_%s_%d", from.ID, to.ID, departure.Unix()))))[:10]
 	for {
 		_, ok := c.lines[lineID]
 		if !ok {

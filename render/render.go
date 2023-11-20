@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strconv"
 	"time"
 
 	"traines.eu/time-space-train-planner/internal"
@@ -41,7 +40,7 @@ const (
 	spaceAxisSize = 1500
 )
 
-func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
+func TimeSpace(stations map[string]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
 	c := &container{
 		Stations:     map[string]*StationLabel{},
 		Edges:        map[string]*EdgePath{},
@@ -58,7 +57,7 @@ func TimeSpace(stations map[int]*internal.Station, lines map[string]*internal.Li
 	c.render(wr)
 }
 
-func TimeSpaceApi(stations map[int]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
+func TimeSpaceApi(stations map[string]*internal.Station, lines map[string]*internal.Line, wr io.Writer, query string) {
 	c := &container{
 		Stations:     map[string]*StationLabel{},
 		Edges:        map[string]*EdgePath{},
@@ -73,27 +72,24 @@ func TimeSpaceApi(stations map[int]*internal.Station, lines map[string]*internal
 	json.NewEncoder(wr).Encode(c)
 }
 
-func (c *container) setupStations(stations map[int]*internal.Station) {
-	var from int
-	var to int
+func (c *container) setupStations(stations map[string]*internal.Station) {
+	var from string
+	var to string
 	for _, s := range stations {
 		if len(s.Arrivals) > 0 || len(s.Departures) > 0 {
 			station := &StationLabel{
-				ID:             strconv.Itoa(s.EvaNumber),
+				ID:             s.ID,
 				Name:           s.Name,
 				Rank:           s.Rank,
 				BestDepartures: []string{},
 			}
-			if s.GroupNumber != nil {
-				g := strconv.Itoa(*s.GroupNumber)
-				station.GroupID = &g
-			}
+			station.GroupID = s.GroupID
 			if s.Rank == 0 {
-				from = s.EvaNumber
+				from = s.ID
 				c.From = *station
 			}
 			if s.Rank+1 == len(stations) {
-				to = s.EvaNumber
+				to = s.ID
 				c.To = *station
 			}
 			station.Coord.SpaceAxis = station.ID
@@ -154,7 +150,7 @@ func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
 	}
 }
 
-func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
+func (c *container) setupPreviousAndNext(stations map[string]*internal.Station) {
 	var stationsSlice []*internal.Station
 	for _, s := range stations {
 		stationsSlice = append(stationsSlice, s)
@@ -165,13 +161,13 @@ func (c *container) setupPreviousAndNext(stations map[int]*internal.Station) {
 	c.preselectShortestPath(stationsSlice[0], stationsSlice[len(stationsSlice)-1])
 	var arrivals []*internal.Edge
 	var departures []*internal.Edge
-	var lastGroup *int
+	var lastGroup *string
 	for _, s := range stationsSlice {
-		if s.GroupNumber == nil || lastGroup == nil || *lastGroup != *s.GroupNumber {
+		if s.GroupID == nil || lastGroup == nil || *lastGroup != *s.GroupID {
 			c.flushStationGroup(departures, arrivals)
 			arrivals = []*internal.Edge{}
 			departures = []*internal.Edge{}
-			lastGroup = s.GroupNumber
+			lastGroup = s.GroupID
 		}
 		arrivals = append(arrivals, s.Arrivals...)
 		departures = append(departures, s.Departures...)
@@ -240,7 +236,7 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 
 func (c *container) preselectShortestPath(origin *internal.Station, destination *internal.Station) {
 	for _, s := range destination.Arrivals {
-		if s.ReverseShortestPath != nil || s.From.EvaNumber == origin.EvaNumber && !s.Redundant {
+		if s.ReverseShortestPath != nil || s.From.ID == origin.ID && !s.Redundant {
 			start := s
 			for start.ReverseShortestPath != nil {
 				start = start.ReverseShortestPath
@@ -274,8 +270,8 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 	edgeID := c.generateEdgeID(e)
 	edge := &EdgePath{
 		ID:                         edgeID,
-		From:                       Coord{SpaceAxis: strconv.Itoa(e.From.EvaNumber), TimeAxis: e.Actual.Departure},
-		To:                         Coord{SpaceAxis: strconv.Itoa(e.To.EvaNumber), TimeAxis: e.Actual.Arrival},
+		From:                       Coord{SpaceAxis: e.From.ID, TimeAxis: e.Actual.Departure},
+		To:                         Coord{SpaceAxis: e.To.ID, TimeAxis: e.Actual.Arrival},
 		Redundant:                  e.Redundant,
 		Discarded:                  e.Discarded,
 		Cancelled:                  e.Cancelled,
@@ -304,7 +300,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		edge.ReverseShortestPath = append(edge.ReverseShortestPath, ShortestPathAlternative{EdgeID: c.generateEdgeID(e.ReverseShortestPath)})
 	}
 	if !e.Discarded {
-		if station, ok := c.Stations[strconv.Itoa(e.From.EvaNumber)]; ok && !edge.EarliestDestinationArrival.IsZero() {
+		if station, ok := c.Stations[e.From.ID]; ok && !edge.EarliestDestinationArrival.IsZero() {
 			station.BestDepartures = append(station.BestDepartures, edgeID)
 		}
 	}
@@ -317,7 +313,7 @@ func (c *container) generateEdgeID(e *internal.Edge) string {
 	if edgeID, ok := c.edgeIDByEdge[e]; ok {
 		return edgeID
 	}
-	hash := fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%s_%d_%d_%d", e.Line.ID, e.From.EvaNumber, e.To.EvaNumber, e.Planned.Departure.Unix()))))[:7]
+	hash := fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%s_%s_%s_%d", e.Line.ID, e.From.ID, e.To.ID, e.Planned.Departure.Unix()))))[:7]
 	for {
 		if _, ok := c.edgeByEdgeID[hash]; !ok {
 			c.edgeIDByEdge[e] = hash
@@ -338,7 +334,7 @@ func (c *container) generateStationEdgeID(last *internal.Edge, this *internal.Ed
 
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
 	if last.To != this.From {
-		log.Print("Tried to create stationEdge for line segments of different stations ", last.To.EvaNumber, this.From.EvaNumber)
+		log.Print("Tried to create stationEdge for line segments of different stations ", last.To.ID, this.From.ID)
 		return nil
 	}
 	if this.Actual.Departure.Sub(last.Actual.Arrival).Minutes() > 30 {
@@ -349,8 +345,8 @@ func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) 
 		ShortestPathFor:     []string{},
 		ShortestPath:        []ShortestPathAlternative{},
 		ReverseShortestPath: []ShortestPathAlternative{},
-		From:                Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: last.Actual.Arrival},
-		To:                  Coord{SpaceAxis: strconv.Itoa(this.From.EvaNumber), TimeAxis: this.Actual.Departure},
+		From:                Coord{SpaceAxis: this.From.ID, TimeAxis: last.Actual.Arrival},
+		To:                  Coord{SpaceAxis: this.From.ID, TimeAxis: this.Actual.Departure},
 		Redundant:           last.Redundant || this.Redundant,
 	}
 	c.Edges[edge.ID] = edge
