@@ -9,3 +9,5 @@ FROM nginx
 COPY --from=builder /tmp/working/build/ /usr/share/nginx/html/
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+RUN rm /usr/share/nginx/html/index.html
