@@ -364,6 +364,7 @@ func ObtainData(from string, to string, vias []string, dateTime string, regionly
 	if err := c.callProviders(callEnrich); err != nil {
 		return nil, nil, err
 	}
+	StostEnrich(c.lines, c.stations, from, to, c.dateTime, time.Now())
 	c.rankStations(c.stations[from], c.stations[to])
 	return c.stations, c.lines, nil
 }

@@ -14,7 +14,8 @@ require (
 require (
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.9 // indirect
-	github.com/jackc/pgx/v5 v5.3.1
+	github.com/kr/pretty v0.3.0 // indirect
 	go.mongodb.org/mongo-driver v1.11.6 // indirect
 	go.opentelemetry.io/otel v1.16.0 // indirect
+	google.golang.org/protobuf v1.31.0
 )

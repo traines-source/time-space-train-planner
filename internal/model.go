@@ -27,6 +27,7 @@ type Edge struct {
 	ShortestPathFor            map[*Edge]struct{}
 	EarliestDestinationArrival time.Time
 	LatestOriginDeparture      time.Time
+	DestinationArrival         Distribution
 	Redundant                  bool
 	Discarded                  bool
 	Cancelled                  bool
@@ -55,4 +56,11 @@ type LineStop struct {
 	Current   StopInfo
 	Message   string
 	Cancelled bool
+}
+
+type Distribution struct {
+	Histogram           []float32
+	Start               time.Time
+	Mean                time.Time
+	FeasibleProbability float32
 }

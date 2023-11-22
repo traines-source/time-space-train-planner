@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+message Distribution {
+    repeated float histogram = 1;
+    int64 start = 2;
+    int64 mean = 3;
+    float feasible_probability = 4;
+}
+
+message StopInfo {
+    int64 scheduled = 1;
+    optional sint32 delay_minutes = 2;
+    bool is_live = 3;
+    optional string scheduled_track = 4;
+    optional string projected_track = 5;
+}
+
+message Connection {  
+  string from_id = 1;
+  string to_id = 2;
+  bool cancelled = 3;
+  StopInfo departure = 4;
+  StopInfo arrival = 5;
+  optional string message = 6;
+  optional Distribution destination_arrival = 7;
+}
+
+message Trip {
+    repeated Connection connections = 1;
+}
+
+message Route {
+    string id = 1;
+	string name = 2;
+	int32 product_type = 3;
+	optional string message = 4;
+	optional string direction = 5;
+    repeated Trip trips = 6;
+}
+
+message Station {
+    string id = 1;
+	string name = 2;
+    optional float lat = 3;
+    optional float lon = 4;
+}
+
+message Timetable {
+    repeated Station stations = 1;
+    repeated Route routes = 2;
+    int64 start_time = 3;
+}
+
+message Query {
+    string origin = 1;
+    string destination = 2;
+    int64 now = 3;
+}
+
+message Message {
+    optional Timetable timetable = 1;
+    optional Query query = 2;
+    string system = 3;
+}
