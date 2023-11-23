@@ -124,7 +124,9 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			return c.Edges[s.BestDepartures[i]].Planned.Departure.Before(c.Edges[s.BestDepartures[j]].Planned.Departure)
 		})
 		sort.SliceStable(s.BestDepartures, func(i, j int) bool {
-			return c.Edges[s.BestDepartures[i]].EarliestDestinationArrival.Before(c.Edges[s.BestDepartures[j]].EarliestDestinationArrival)
+			a := c.Edges[s.BestDepartures[i]].DestinationArrival.Mean
+			b := c.Edges[s.BestDepartures[j]].DestinationArrival.Mean
+			return !a.IsZero() && a.Before(b)
 		})
 	}
 }

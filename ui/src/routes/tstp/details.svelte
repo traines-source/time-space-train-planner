@@ -79,6 +79,7 @@
                 continue;
             }
             candidates.push(e);
+            if (!hasDistribution(e)) continue;
             const bounds = getBounds(e);
             if (lowerBound == undefined || bounds[0] < lowerBound) {
                 lowerBound = bounds[0];
@@ -118,7 +119,7 @@
     }
 
     function hasDistribution(e: Edge) {
-        return e.DestinationArrival && e.DestinationArrival.Histogram.length;
+        return e.DestinationArrival && e.DestinationArrival.Histogram && e.DestinationArrival.Histogram.length;
     }
 
     function getDrawXRatio() {
