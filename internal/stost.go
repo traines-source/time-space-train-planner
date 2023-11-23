@@ -118,6 +118,9 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 	for _, r := range responseMessage.Timetable.Routes {
 		for _, t := range r.Trips {
 			for i, c := range t.Connections {
+				if c.DestinationArrival == nil {
+					continue
+				}
 				lines[r.Id].Route[i].DestinationArrival = Distribution{
 					Histogram:           c.DestinationArrival.Histogram,
 					Start:               time.Unix(c.DestinationArrival.Start, 0),

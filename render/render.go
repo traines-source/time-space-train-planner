@@ -284,6 +284,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		ProviderShortestPath:       e.ProviderShortestPath,
 		ShortestPathFor:            []string{},
 		EarliestDestinationArrival: e.EarliestDestinationArrival,
+		DestinationArrival:         e.DestinationArrival,
 	}
 	if e.Line != nil {
 		edge.Line = &LineLabel{

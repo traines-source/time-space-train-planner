@@ -35,6 +35,7 @@ type EdgePath struct {
 	ProviderShortestPath       bool
 	ShortestPathFor            []string
 	EarliestDestinationArrival time.Time
+	DestinationArrival         internal.Distribution
 	PreviousDeparture          string
 	NextDeparture              string
 	PreviousArrival            string

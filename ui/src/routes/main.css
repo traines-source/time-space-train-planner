@@ -516,3 +516,20 @@ a text {
 .forcewrap {
   overflow-wrap: anywhere;
 }
+
+.histogram {
+  stroke: none;
+  fill: #707070;
+}
+
+.histogram-label {
+  font-size: 12px;
+}
+
+.histogram-pointer {
+  stroke: black;
+}
+
+.twosigma {
+  stroke: #dbdbdb;
+}

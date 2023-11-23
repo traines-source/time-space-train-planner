@@ -17,6 +17,7 @@
     let selectedEdgeHistory: Edge[] = [];
 
     let nextBestDepartures: Edge[] | undefined = undefined;
+    let nextBestDeparturesBoundsMinutes: number[] = [0,0];
     const maxNextBestDepartures = 5;
     const negativeTransferMinutes = 5;
     $: {
@@ -49,15 +50,42 @@
         updateNextBestDepartures(selection.station, selection.from);
     }
 
+    function getBounds(e: Edge): number[] {
+        const h = e.DestinationArrival.Histogram;
+        const start = parseTime(e.DestinationArrival.Start)/60/1000;
+        let lower = undefined;
+        let upper = undefined;
+        let lowerAccum = 0;
+        let upperAccum = 0;
+        let thresh = 0.05;
+        for (let i=0;i<h.length;i++) {
+            lowerAccum += h[i];
+            upperAccum += h[h.length-1-i];
+            if (lower == undefined && lowerAccum > thresh) lower = start+i-1;
+            if (upper == undefined && upperAccum > thresh) upper = start+h.length-i;
+            if (lower && upper) break;
+        }
+        return [lower, upper];
+    }
+
     function updateNextBestDepartures(station: Station, time: Date) {        
         const candidates = [];
         
+        let lowerBound = undefined;
+        let upperBound = undefined;
         for (let i=0; i<station.BestDepartures.length; i++) {
             const e = edgeResolver(station.BestDepartures[i]);
             if (parseTime(e.Actual.Departure) < time.getTime()) {
                 continue;
             }
             candidates.push(e);
+            const bounds = getBounds(e);
+            if (lowerBound == undefined || bounds[0] < lowerBound) {
+                lowerBound = bounds[0];
+            }
+            if (upperBound == undefined || bounds[1] > upperBound) {
+                upperBound = bounds[1];
+            }
             if (candidates.length >= maxNextBestDepartures) {
                 break;
             }
@@ -65,6 +93,10 @@
         candidates.sort((a, b) => {
             return parseTime(a.Planned.Departure)-parseTime(b.Planned.Departure);
         });
+        
+        const drawWidth = 100;
+        const padding = (upperBound-lowerBound)/(drawWidth/20-1);
+        nextBestDeparturesBoundsMinutes = [lowerBound-padding, upperBound+padding];
         nextBestDepartures = candidates;
     }
 
@@ -83,6 +115,45 @@
     function stationResolver(id: string): Station {
         if (!id) return undefined;
         return data.Stations[id];
+    }
+
+    function hasDistribution(e: Edge) {
+        return e.DestinationArrival && e.DestinationArrival.Histogram.length;
+    }
+
+    function getDrawXRatio() {
+        const drawWidth = 100;
+        return (nextBestDeparturesBoundsMinutes[1]-nextBestDeparturesBoundsMinutes[0])/drawWidth;
+    }
+
+    function histogram(e: Edge) {
+        console.log(e.Line.Name, e.DestinationArrival.Start, e.DestinationArrival.Mean, e.DestinationArrival.Histogram.map(p => Math.round(p*1000)/1000));
+        const drawXRatio = getDrawXRatio();
+        const drawHeight = 50;
+        const drawYRatio = 0.5/drawHeight;
+        
+        const start = parseTime(e.DestinationArrival.Start)/60/1000;
+        const d = [[(start-1-nextBestDeparturesBoundsMinutes[0])/drawXRatio, drawHeight]];
+        for (let i=0; i<e.DestinationArrival.Histogram.length; i++) {
+            const pos = start+i;
+            if (pos < nextBestDeparturesBoundsMinutes[0] || pos > nextBestDeparturesBoundsMinutes[1]) continue;
+            d.push([(pos-nextBestDeparturesBoundsMinutes[0])/drawXRatio, drawHeight-e.DestinationArrival.Histogram[i]/drawYRatio]);
+        }
+        d.push([(start+e.DestinationArrival.Histogram.length-nextBestDeparturesBoundsMinutes[0])/drawXRatio, drawHeight]);
+        return 'M '+d.map(p => p.join(' ')).join('L')+' Z';
+    }
+
+    function meanDestinationArrival(e: Edge) {
+        return simpleTime(parseTime(e.DestinationArrival.Mean));
+    }
+
+    function meanDestinationArrivalPos(e: Edge) {
+        return (parseTime(e.DestinationArrival.Mean)/60/1000-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio();
+    }
+
+    function twoSigmaDestinationArrivalPos(e: Edge) {
+        const bounds = getBounds(e);
+        return (bounds[1]-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio();
     }
 
     function isShortestPath(d: Edge) {
@@ -212,9 +283,18 @@
                     {/if}
                 </td>
                 <td class="nowrap">
-                    <span class="micon">flag</span>
-                    {simpleTime(d.EarliestDestinationArrival)}
-                    {#if isShortestPath(d)}<span class="micon">speed</span>{/if}
+                    {#if hasDistribution(d)}
+                        <svg width="100" height="70">
+                            <path d={histogram(d)} class="histogram" />
+                            <path d={'M '+meanDestinationArrivalPos(d)+' 50 v 5'} class="histogram-pointer" />
+                            <text x={meanDestinationArrivalPos(d)} y="65" class="histogram-label label">{meanDestinationArrival(d)}</text>
+                            <path d={'M '+twoSigmaDestinationArrivalPos(d)+' 50 v 5'} class="histogram-pointer twosigma" />
+                        </svg>
+                    {:else}
+                        <span class="micon">flag</span>
+                        {simpleTime(d.EarliestDestinationArrival)}
+                        {#if isShortestPath(d)}<span class="micon">speed</span>{/if}
+                    {/if}
                 </td>
             </tr>    
         {/each}
