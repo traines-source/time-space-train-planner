@@ -43,7 +43,12 @@
 
     function nextBestDeparturesForStation() {
         if (!selection.from) {
-            const n = selectedEdgeHistory.length > 0 ? parseTime(selectedEdgeHistory[selectedEdgeHistory.length-1].Actual.Departure) : new Date().getTime();
+            let n = new Date().getTime();
+            if (selectedEdgeHistory.length > 0) {
+                n = parseTime(selectedEdgeHistory[selectedEdgeHistory.length-1].Actual.Departure);
+            } else if (n < new Date(data.MinTime).getTime() || n > new Date(data.MaxTime).getTime()) {
+                n = new Date(data.MinTime).getTime();
+            }            
             selection.from = new Date(n-negativeTransferMinutes*60*1000);
         }
         selectedEdgeHistory = [];
@@ -152,9 +157,12 @@
         return (parseTime(e.DestinationArrival.Mean)/60/1000-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio();
     }
 
-    function twoSigmaDestinationArrivalPos(e: Edge) {
+    function twoSigmaDestinationArrival(e: Edge) {
         const bounds = getBounds(e);
-        return (bounds[1]-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio();
+        return [
+            {pos: (bounds[0]-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(), time: simpleTime(bounds[0]*60*1000)},
+            {pos: (bounds[1]-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(), time: simpleTime(bounds[1]*60*1000)}
+        ]
     }
 
     function isShortestPath(d: Edge) {
@@ -267,6 +275,11 @@
     {#if nextBestDepartures}
         <h4>{$t('c.next_best_departures')} {selectedStationName(selection)}, <input type="time" value={simpleTime(selection.from)} on:change={updateTime}></h4>
         <table class="next-best-departures">
+            <tr>
+                <th>{$t('c.header_departure')}</th>
+                <th>{$t('c.header_direction')}</th>
+                <th>{$t('c.header_destination_arrival')}</th>
+            </tr>
         {#each nextBestDepartures as d}
             <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
                 <td>{@html departure(d)}</td>
@@ -285,11 +298,17 @@
                 </td>
                 <td class="nowrap">
                     {#if hasDistribution(d)}
-                        <svg width="100" height="70">
+                        <svg width="100" height="70" class="histogram-canvas">
                             <path d={histogram(d)} class="histogram" />
+                            {#each [twoSigmaDestinationArrival(d)] as twoSigma}
+                                <path d={'M '+twoSigma[0].pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                                <text x={twoSigma[0].pos} y="65" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
+                                <path d={'M '+twoSigma[1].pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                                <text x={twoSigma[1].pos} y="65" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
+                                <path d={'M '+twoSigma[0].pos+' 52.5 H '+twoSigma[1].pos+''} class="histogram-pointer twosigma" />
+                            {/each}
                             <path d={'M '+meanDestinationArrivalPos(d)+' 50 v 5'} class="histogram-pointer" />
                             <text x={meanDestinationArrivalPos(d)} y="65" class="histogram-label label">{meanDestinationArrival(d)}</text>
-                            <path d={'M '+twoSigmaDestinationArrivalPos(d)+' 50 v 5'} class="histogram-pointer twosigma" />
                         </svg>
                     {:else}
                         <span class="micon">flag</span>

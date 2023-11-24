@@ -30,8 +30,9 @@
                 } else if (selection.station && data.Stations[selection.station.ID]) {
                     selectStation(selection.station.ID);
                 } else {
-                    selectEdge(data.DefaultShortestPathID);
-                }                
+                    selectStation(data.From.ID);
+                }      
+                window.location.hash = 'details';
             });
         })
         .catch((err) => {

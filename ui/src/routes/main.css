@@ -59,6 +59,10 @@ svg, body {
   line-height: 18px;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -90,10 +94,12 @@ noscript {
 
 #details {
   position: absolute;
-  top: 80%;
+  top: 70%;
   left: 0;
   right: 0;
   color: black;
+  scroll-margin-top: 200px;
+  z-index: 1001;
 }
 
 #details > div {
@@ -501,6 +507,11 @@ a text {
   cursor: pointer;
 }
 
+.next-best-departures th {
+  font-weight: normal;
+  font-size: 12px;
+}
+
 .next-best-departures .shortest {
   font-weight: bold;
 }
@@ -530,6 +541,14 @@ a text {
   stroke: black;
 }
 
-.twosigma {
+.histogram-pointer.twosigma {
   stroke: #dbdbdb;
+}
+
+.histogram-label.twosigma {
+  fill: #dbdbdb;
+}
+
+.histogram-canvas {
+  overflow-x: visible;
 }
