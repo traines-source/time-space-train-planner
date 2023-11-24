@@ -131,7 +131,7 @@
         console.log(e.Line.Name, e.DestinationArrival.Start, e.DestinationArrival.Mean, e.DestinationArrival.Histogram.map(p => Math.round(p*1000)/1000));
         const drawXRatio = getDrawXRatio();
         const drawHeight = 50;
-        const drawYRatio = 0.5/drawHeight;
+        const drawYRatio = 0.25/drawHeight;
         
         const start = parseTime(e.DestinationArrival.Start)/60/1000;
         const d = [[(start-1-nextBestDeparturesBoundsMinutes[0])/drawXRatio, drawHeight]];

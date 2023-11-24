@@ -70,6 +70,9 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 			}},
 		}
 		for _, c := range l.Route {
+			if c.Discarded {
+				continue
+			}
 			route.Trips[0].Connections = append(route.Trips[0].Connections, &stost.Connection{
 				FromId:    c.From.ID,
 				ToId:      c.To.ID,
