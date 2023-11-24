@@ -36,12 +36,13 @@ func delay(planned time.Time, current time.Time) *int32 {
 	return &d
 }
 
-func StostEnrich(lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) error {
+func StostEnrich(lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) {
+	//d, _ := time.ParseDuration("0h")
 	requestMessage := &stost.Message{
 		Query: &stost.Query{
 			Origin:      from,
 			Destination: to,
-			Now:         now.Unix(),
+			Now:         now.Unix(), //startTime.Add(d).Unix(),
 		},
 		Timetable: &stost.Timetable{
 			Stations:  []*stost.Station{},
@@ -94,20 +95,23 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 
 	out, err := proto.Marshal(requestMessage)
 	if err != nil {
-		log.Fatalln("Failed to encode proto message:", err)
+		log.Println("Failed to encode proto message:", err)
+		return
 	}
 
 	url := "http://localhost:1234/calculation"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 	req.Header.Set("Content-Type", "application/octet-stream")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return
 	}
 	defer resp.Body.Close()
 
@@ -116,7 +120,8 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 	body, _ := io.ReadAll(resp.Body)
 	responseMessage := &stost.Message{}
 	if err := proto.Unmarshal(body, responseMessage); err != nil {
-		log.Fatalln("Failed to parse responseMessage:", err)
+		log.Println("Failed to parse responseMessage:", err)
+		return
 	}
 	for _, r := range responseMessage.Timetable.Routes {
 		for _, t := range r.Trips {
@@ -133,5 +138,4 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 			}
 		}
 	}
-	return nil
 }

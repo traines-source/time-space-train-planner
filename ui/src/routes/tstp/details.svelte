@@ -79,6 +79,9 @@
         let lowerBound = undefined;
         let upperBound = undefined;
         for (let i=0; i<station.BestDepartures.length; i++) {
+            if (candidates.length >= maxNextBestDepartures) {
+                break;
+            }
             const e = edgeResolver(station.BestDepartures[i]);
             if (parseTime(e.Actual.Departure) < time.getTime()) {
                 continue;
@@ -91,10 +94,7 @@
             }
             if (upperBound == undefined || bounds[1] > upperBound) {
                 upperBound = bounds[1];
-            }
-            if (candidates.length >= maxNextBestDepartures) {
-                break;
-            }
+            }            
         }
         candidates.sort((a, b) => {
             return parseTime(a.Planned.Departure)-parseTime(b.Planned.Departure);

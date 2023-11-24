@@ -10,7 +10,7 @@ import (
 )
 
 const maxFootDistMeters = 5000
-const footKmh = 6
+const footKmh = 5
 
 func relevantDeparture(stop *LineStop) time.Time {
 	return stop.Planned.Departure

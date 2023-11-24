@@ -501,6 +501,7 @@ a text {
   padding: 0 8px;
   height: 40px;
   border-top: 1px solid #dbdbdb;
+  overflow: hidden;
 }
 
 .next-best-departures tr {
@@ -550,5 +551,5 @@ a text {
 }
 
 .histogram-canvas {
-  overflow-x: visible;
+  overflow: visible;
 }
