@@ -1,8 +1,11 @@
 FROM golang:alpine
 
 ENV PORT=3000
+ENV PROTOVER=25.1
 
 WORKDIR /app
+
+RUN apk add unzip && wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOVER}/protoc-${PROTOVER}-linux-x86_64.zip && unzip *.zip && mv bin/protoc /usr/bin  
 
 COPY go.mod ./
 COPY go.sum ./
