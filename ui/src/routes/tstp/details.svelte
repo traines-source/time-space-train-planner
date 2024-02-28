@@ -270,6 +270,20 @@
                 <span class="micon">info</span> {selection.edge.Message}
             </div>
         {/if}
+        {#if hasDistribution(selection.edge)}
+            <svg width="100" height="70" class="histogram-canvas">
+                <path d={histogram(selection.edge)} class="histogram" />
+                {#each [twoSigmaDestinationArrival(selection.edge)] as twoSigma}
+                    <path d={'M '+twoSigma[0].pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                    <text x={twoSigma[0].pos} y="65" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
+                    <path d={'M '+twoSigma[1].pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                    <text x={twoSigma[1].pos} y="65" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
+                    <path d={'M '+twoSigma[0].pos+' 52.5 H '+twoSigma[1].pos+''} class="histogram-pointer twosigma" />
+                {/each}
+                <path d={'M '+meanDestinationArrivalPos(selection.edge)+' 50 v 5'} class="histogram-pointer" />
+                <text x={meanDestinationArrivalPos(selection.edge)} y="65" class="histogram-label label">{meanDestinationArrival(selection.edge)}</text>
+            </svg>
+        {/if}
     {/if}
 
     {#if nextBestDepartures}

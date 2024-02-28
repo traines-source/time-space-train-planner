@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"time"
 
 	proto "google.golang.org/protobuf/proto"
@@ -99,7 +100,7 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 		return
 	}
 
-	url := "http://localhost:1234/calculation"
+	url := os.Getenv("STOST_API_URL")
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
 	if err != nil {
 		log.Println(err)
