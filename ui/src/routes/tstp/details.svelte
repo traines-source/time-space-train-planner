@@ -270,7 +270,7 @@
                 <span class="micon">info</span> {selection.edge.Message}
             </div>
         {/if}
-        {#if hasDistribution(selection.edge)}
+        <!--{#if hasDistribution(selection.edge)}
             <svg width="100" height="70" class="histogram-canvas">
                 <path d={histogram(selection.edge)} class="histogram" />
                 {#each [twoSigmaDestinationArrival(selection.edge)] as twoSigma}
@@ -283,7 +283,7 @@
                 <path d={'M '+meanDestinationArrivalPos(selection.edge)+' 50 v 5'} class="histogram-pointer" />
                 <text x={meanDestinationArrivalPos(selection.edge)} y="65" class="histogram-label label">{meanDestinationArrival(selection.edge)}</text>
             </svg>
-        {/if}
+        {/if}-->
     {/if}
 
     {#if nextBestDepartures}

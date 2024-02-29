@@ -15,17 +15,17 @@ import (
 )
 
 var productTypes = map[string]int32{
-	"bus":             1,
-	"subway":          2,
-	"tram":            3,
-	"regional":        4,
-	"suburban":        5,
-	"nationalExpress": 6,
-	"national":        7,
-	"regionalExpress": 8,
-	"ferry":           9,
-	"taxi":            10,
-	"regionalExp":     8,
+	"bus":             10,
+	"subway":          7,
+	"tram":            9,
+	"regional":        6,
+	"suburban":        8,
+	"nationalExpress": 1,
+	"national":        2,
+	"regionalExpress": 5,
+	"ferry":           11,
+	"taxi":            12,
+	"regionalExp":     5,
 	"Foot":            100,
 }
 
@@ -56,10 +56,15 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 		requestMessage.Timetable.Stations = append(requestMessage.Timetable.Stations, &stost.Station{
 			Id:   s.ID,
 			Name: s.Name,
+			Lat: &s.Lat,
+			Lon: &s.Lon,
 		})
 	}
 	for _, l := range lines {
 		var p int32 = -1
+		if l.Type == "Foot" {
+			continue
+		}
 		if val, ok := productTypes[l.Type]; ok {
 			p = val
 		}
