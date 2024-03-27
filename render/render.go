@@ -326,7 +326,7 @@ func (c *container) generateEdgeID(e *internal.Edge) string {
 			c.edgeByEdgeID[hash] = e
 			return hash
 		}
-		log.Print("Prevented id collision for edge", e)
+		log.Print("Prevented id collision for line", e.Line.ID, hash)
 		hash += "C"
 	}
 }
@@ -339,8 +339,11 @@ func (c *container) generateStationEdgeID(last *internal.Edge, this *internal.Ed
 }
 
 func (c *container) insertStationEdge(last *internal.Edge, this *internal.Edge) *EdgePath {
+	if this.Line.Type == "Foot" {
+		return nil
+	}
 	if last.To != this.From {
-		log.Print("Tried to create stationEdge for line segments of different stations ", last.To.ID, this.From.ID)
+		log.Print("Tried to create stationEdge for line segments of different stations ", last.To.ID, this.From.ID, last.Message)
 		return nil
 	}
 	if this.Actual.Departure.Sub(last.Actual.Arrival).Minutes() > 30 {

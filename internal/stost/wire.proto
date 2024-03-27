@@ -41,8 +41,9 @@ message Route {
 message Station {
     string id = 1;
 	string name = 2;
-    optional float lat = 3;
-    optional float lon = 4;
+    optional double lat = 3;
+    optional double lon = 4;
+    optional string parent = 5;
 }
 
 message Timetable {

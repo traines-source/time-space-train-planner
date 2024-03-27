@@ -344,31 +344,6 @@ func prepare(from string, to string, vias []string, dateTime string, regionly bo
 	return c
 }
 
-func ObtainVias(from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, *ErrorCode) {
-	c := prepare(from, to, vias, dateTime, regionly)
-	if err := c.callProviders(callVias); err != nil {
-		return nil, err
-	}
-	return c.stations, nil
-}
-
-func ObtainData(from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
-	c := prepare(from, to, vias, dateTime, regionly)
-	if err := c.callProviders(callDeparturesArrivals); err != nil {
-		return nil, nil, err
-	}
-	if err := c.generateEdges(c.stations[from], c.stations[to]); err != nil {
-		return nil, nil, err
-	}
-	shortestPaths(c.stations, c.stations[from], c.stations[to], regionly)
-	if err := c.callProviders(callEnrich); err != nil {
-		return nil, nil, err
-	}
-	StostEnrich(c.lines, c.stations, from, to, c.dateTime, time.Now())
-	c.rankStations(c.stations[from], c.stations[to])
-	return c.stations, c.lines, nil
-}
-
 func (c *consumer) parseDate(dateTime string) {
 	layout := "2006-01-02T15:04"
 	t, err := time.ParseInLocation(layout, dateTime, loc)
@@ -379,4 +354,40 @@ func (c *consumer) parseDate(dateTime string) {
 	} else {
 		c.dateTime = t
 	}
+}
+
+func (c *consumer) apiFlow(system string, from string, to string, vias []string, dateTime string, regionly bool) *ErrorCode {
+	if err := c.callProviders(callDeparturesArrivals); err != nil {
+		return err
+	}
+	if err := c.generateEdges(c.stations[from], c.stations[to]); err != nil {
+		return err
+	}
+	shortestPaths(c.stations, c.stations[from], c.stations[to], regionly)
+	if err := c.callProviders(callEnrich); err != nil {
+		return err
+	}
+	StostEnrich(system, c.lines, c.stations, from, to, c.dateTime, time.Now())
+	return nil
+}
+
+func ObtainVias(from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly)
+	if err := c.callProviders(callVias); err != nil {
+		return nil, err
+	}
+	return c.stations, nil
+}
+
+func ObtainData(system string, from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly)
+	if system == "" {
+		if err := c.apiFlow(system, from, to, vias, dateTime, regionly); err != nil {
+			return nil, nil, err
+		}
+	} else {
+		StostProduce(system, c.lines, c.stations, from, to, c.dateTime, time.Now());
+	}
+	c.rankStations(c.stations[from], c.stations[to])
+	return c.stations, c.lines, nil
 }

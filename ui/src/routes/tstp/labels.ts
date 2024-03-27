@@ -53,7 +53,7 @@ function timeString(e: Edge, timeResolver: (stop: any) => string, trackResolver:
     if (!e.Line) {
         return '';
     }
-    const timeLabel = simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned));
+    const timeLabel = simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned), e);
     let label = makeSpan(span, liveDataClass(e, timeResolver), timeLabel);
     if (trackResolver(e.Actual)) {
         label += ' ' + makeSpan(span, trackChangedClass(e, trackResolver), t.get('c.platform') + trackResolver(e.Actual).replace(' ', '&nbsp;'));
@@ -89,8 +89,8 @@ function delayMinutes(current: string, planned: string) {
     return Math.round((parseTime(current)-parseTime(planned))/1000/60);
 }
 
-function delay(current: string, planned: string) {
-    if (parseTime(current) != 0) {
+function delay(current: string, planned: string, e: Edge) {
+    if (parseTime(current) != 0 && e.Line.Type != 'Foot') {
         return "&nbsp;(+" + delayMinutes(current, planned) + ")";
     }
     return ''

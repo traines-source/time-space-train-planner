@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	proto "google.golang.org/protobuf/proto"
@@ -29,7 +30,7 @@ var productTypes = map[string]int32{
 	"Foot":            100,
 }
 
-func delay(planned time.Time, current time.Time) *int32 {
+func toDelay(planned time.Time, current time.Time) *int32 {
 	if current.IsZero() {
 		return nil
 	}
@@ -37,9 +38,16 @@ func delay(planned time.Time, current time.Time) *int32 {
 	return &d
 }
 
-func StostEnrich(lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) {
+func toCurrent(stopInfo *stost.StopInfo, actual bool) time.Time {
+	if !stopInfo.IsLive && !actual {
+		return time.Time{}
+	}
+	return time.Unix(stopInfo.Scheduled, 0).Add(time.Duration(stopInfo.GetDelayMinutes()) * time.Minute)
+}
+
+func createRequestMessage(system string, from string, to string, startTime time.Time, now time.Time) *stost.Message {
 	//d, _ := time.ParseDuration("0h")
-	requestMessage := &stost.Message{
+	return &stost.Message{
 		Query: &stost.Query{
 			Origin:      from,
 			Destination: to,
@@ -50,14 +58,17 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 			Routes:    []*stost.Route{},
 			StartTime: startTime.Unix(),
 		},
-		System: "de_db",
+		System: system,
 	}
+}
+
+func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line, stations map[string]*Station) {
 	for _, s := range stations {
 		requestMessage.Timetable.Stations = append(requestMessage.Timetable.Stations, &stost.Station{
 			Id:   s.ID,
 			Name: s.Name,
-			Lat: &s.Lat,
-			Lon: &s.Lon,
+			Lat:  &s.Lat,
+			Lon:  &s.Lon,
 		})
 	}
 	for _, l := range lines {
@@ -86,30 +97,32 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 				Cancelled: c.Cancelled,
 				Departure: &stost.StopInfo{
 					Scheduled:    c.Planned.Departure.Unix(),
-					DelayMinutes: delay(c.Planned.Departure, c.Current.Departure),
+					DelayMinutes: toDelay(c.Planned.Departure, c.Current.Departure),
 					IsLive:       !c.Current.Departure.IsZero(),
 				},
 				Arrival: &stost.StopInfo{
 					Scheduled:    c.Planned.Arrival.Unix(),
-					DelayMinutes: delay(c.Planned.Arrival, c.Current.Arrival),
+					DelayMinutes: toDelay(c.Planned.Arrival, c.Current.Arrival),
 					IsLive:       !c.Current.Arrival.IsZero(),
 				},
 			})
 		}
 		requestMessage.Timetable.Routes = append(requestMessage.Timetable.Routes, route)
 	}
+}
 
+func queryStost(requestMessage *stost.Message) *stost.Message {
 	out, err := proto.Marshal(requestMessage)
 	if err != nil {
 		log.Println("Failed to encode proto message:", err)
-		return
+		return nil
 	}
 
 	url := os.Getenv("STOST_API_URL")
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
 	if err != nil {
 		log.Println(err)
-		return
+		return nil
 	}
 	req.Header.Set("Content-Type", "application/octet-stream")
 
@@ -117,7 +130,7 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil
 	}
 	defer resp.Body.Close()
 
@@ -127,21 +140,127 @@ func StostEnrich(lines map[string]*Line, stations map[string]*Station, from stri
 	responseMessage := &stost.Message{}
 	if err := proto.Unmarshal(body, responseMessage); err != nil {
 		log.Println("Failed to parse responseMessage:", err)
-		return
+		return nil
 	}
+	return responseMessage
+}
+
+func convertDistribution(distr *stost.Distribution) Distribution {
+	if distr == nil {
+		return Distribution{}
+	}
+	d := Distribution{
+		Histogram:           distr.Histogram,
+		Start:               time.Unix(distr.Start, 0),
+		FeasibleProbability: distr.FeasibleProbability,
+	}
+	if len(distr.Histogram) > 0 {
+		d.Mean = time.Unix(distr.Mean, 0)
+	}
+	return d
+}
+
+func enrichWithDistributions(responseMessage *stost.Message, lines map[string]*Line) {
 	for _, r := range responseMessage.Timetable.Routes {
 		for _, t := range r.Trips {
 			for i, c := range t.Connections {
-				if c.DestinationArrival == nil {
-					continue
-				}
-				lines[r.Id].Route[i].DestinationArrival = Distribution{
-					Histogram:           c.DestinationArrival.Histogram,
-					Start:               time.Unix(c.DestinationArrival.Start, 0),
-					Mean:                time.Unix(c.DestinationArrival.Mean, 0),
-					FeasibleProbability: c.DestinationArrival.FeasibleProbability,
-				}
+				lines[r.Id].Route[i].DestinationArrival = convertDistribution(c.DestinationArrival)
 			}
 		}
 	}
+}
+
+func reverseMap(m map[string]int32) map[int32]string {
+	newM := map[int32]string{}
+	for k, v := range m {
+		newM[v] = k
+	}
+	return newM
+}
+
+func produce(responseMessage *stost.Message, lines map[string]*Line, stations map[string]*Station) {
+	for _, s := range responseMessage.Timetable.Stations {
+		var group *string = nil
+		if s.Parent != nil && *s.Parent != "" {
+			group = s.Parent
+		}
+		stations[s.Id] = &Station{
+			ID:      s.Id,
+			Name:    s.Name,
+			Lat:     s.GetLat(),
+			Lon:     s.GetLon(),
+			GroupID: group,
+		}
+	}
+	productTypesReverse := reverseMap(productTypes)
+	i := 0
+	for _, r := range responseMessage.Timetable.Routes {
+		for _, t := range r.Trips {
+			line := Line{
+				ID:        strconv.Itoa(i),
+				Name:      r.Name,
+				Type:      productTypesReverse[r.ProductType],
+				Direction: r.GetDirection(),
+				Message:   r.GetMessage(),
+			}
+			lines[line.ID] = &line
+			for _, c := range t.Connections {
+				from := stations[c.FromId]
+				to := stations[c.ToId]
+				distr := convertDistribution(c.DestinationArrival)
+				edge := &Edge{
+					Line:    &line,
+					From:    from,
+					To:      to,
+					Message: c.GetMessage(),
+					Planned: StopInfo{
+						Departure:      time.Unix(c.Departure.Scheduled, 0),
+						DepartureTrack: c.Departure.GetScheduledTrack(),
+						Arrival:        time.Unix(c.Arrival.Scheduled, 0),
+						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
+					},
+					Current: StopInfo{
+						Departure:      toCurrent(c.Departure, false),
+						DepartureTrack: c.Departure.GetScheduledTrack(),
+						Arrival:        toCurrent(c.Arrival, false),
+						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
+					},
+					Actual: StopInfo{
+						Departure:      toCurrent(c.Departure, true),
+						DepartureTrack: c.Departure.GetScheduledTrack(),
+						Arrival:        toCurrent(c.Arrival, true),
+						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
+					},
+					Cancelled:          c.Cancelled,
+					DestinationArrival: distr,
+					EarliestDestinationArrival: distr.Mean,
+					
+				}
+				line.Route = append(line.Route, edge)
+				from.Departures = append(from.Departures, edge)
+				to.Arrivals = append(to.Arrivals, edge)
+			}
+			i++
+		}
+	}
+}
+
+func StostEnrich(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) {
+	requestMessage := createRequestMessage("de_db", from, to, startTime, now)
+	prepareForEnrichment(requestMessage, lines, stations)
+	responseMessage := queryStost(requestMessage)
+	if responseMessage == nil {
+		return
+	}
+	enrichWithDistributions(responseMessage, lines)
+}
+
+func StostProduce(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) {
+	log.Print("Producing based on stost...")
+	requestMessage := createRequestMessage(system, from, to, startTime, now)
+	responseMessage := queryStost(requestMessage)
+	if responseMessage == nil {
+		log.Panic("Empty response, stopping.")
+	}
+	produce(responseMessage, lines, stations)
 }

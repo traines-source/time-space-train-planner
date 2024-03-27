@@ -26,8 +26,8 @@ type ProviderStation struct {
 	Code100          string
 	GroupID          *string
 	Name             string
-	Lat              float32
-	Lon              float32
+	Lat              float64
+	Lon              float64
 	NoLocalTransport bool
 }
 

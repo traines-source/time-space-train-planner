@@ -141,8 +141,8 @@ func (p *DbRest) parseStation(stop *models.DepartureArrival, stationID string, g
 		ID:      stationID,
 		GroupID: &groupID,
 		Name:    *stop.Stop.Name,
-		Lat:     float32(*stop.Stop.Location.Latitude),
-		Lon:     float32(*stop.Stop.Location.Longitude),
+		Lat:     *stop.Stop.Location.Latitude,
+		Lon:     *stop.Stop.Location.Longitude,
 	})
 }
 
@@ -245,14 +245,14 @@ func (p *DbRest) parseStationsFromJourneys() {
 			from := providers.ProviderStation{
 				ID:   *leg.Origin.ID,
 				Name: *leg.Origin.Name,
-				Lat:  float32(*leg.Origin.Location.Latitude),
-				Lon:  float32(*leg.Origin.Location.Longitude),
+				Lat:  *leg.Origin.Location.Latitude,
+				Lon:  *leg.Origin.Location.Longitude,
 			}
 			to := providers.ProviderStation{
 				ID:   *leg.Destination.ID,
 				Name: *leg.Destination.Name,
-				Lat:  float32(*leg.Destination.Location.Latitude),
-				Lon:  float32(*leg.Destination.Location.Longitude),
+				Lat:  *leg.Destination.Location.Latitude,
+				Lon:  *leg.Destination.Location.Longitude,
 			}
 			p.fallbackStations(from, to)
 			p.consumer.UpsertStation(from)

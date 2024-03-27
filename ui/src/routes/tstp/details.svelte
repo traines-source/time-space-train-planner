@@ -86,15 +86,16 @@
             if (parseTime(e.Actual.Departure) < time.getTime()) {
                 continue;
             }
+            if (hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1) continue;
             candidates.push(e);
-            if (!hasDistribution(e)) continue;
+            if (!hasDistribution(e) || e.DestinationArrival.FeasibleProbability < 0.1) continue;
             const bounds = getBounds(e);
             if (lowerBound == undefined || bounds[0] < lowerBound) {
                 lowerBound = bounds[0];
             }
             if (upperBound == undefined || bounds[1] > upperBound) {
                 upperBound = bounds[1];
-            }            
+            }       
         }
         candidates.sort((a, b) => {
             return parseTime(a.Planned.Departure)-parseTime(b.Planned.Departure);
@@ -250,7 +251,7 @@
                     <a href="javascript:void(0)" on:click={() => popHistory()} class="back"><span class="micon">arrow_back_ios_new</span></a>
                 {/if}
             </span>
-            <span class="dep">
+            <span class="dep" title="{stationResolver(selection.edge.From.SpaceAxis).ID}">
                 {@html departure(selection.edge)}
                 {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
                 <br />{stationResolver(selection.edge.From.SpaceAxis).Name}
@@ -258,7 +259,7 @@
             <svg viewBox="0 0 50 10" class="miniature">
                 <path d="M 10,5 L40,5" class="edge type-{type(selection.edge)} redundant-false"/>
             </svg>
-            <span class="arr">
+            <span class="arr" title="{stationResolver(selection.edge.To.SpaceAxis).ID}">
                 {@html arrival(selection.edge)}
                 {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
                 <br />{stationResolver(selection.edge.To.SpaceAxis).Name}

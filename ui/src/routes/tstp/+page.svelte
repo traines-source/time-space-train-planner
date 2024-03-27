@@ -13,6 +13,7 @@
         if (vias.length > 0) store.vias = fillupStations(vias);
         store.datetime = $page.url.searchParams.get('datetime');
         store.regionly = $page.url.searchParams.get('regionly') == 'true';
+        store.system = $page.url.searchParams.get('system');
     }
 
     let showForm = false;

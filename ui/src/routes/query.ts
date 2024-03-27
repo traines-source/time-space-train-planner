@@ -26,7 +26,8 @@ function optionsQueryString(query: any, datetime?: string): any {
         to: query.to.id,
         vias: query.vias.map((v: any) => v.id),
         datetime: query.datetime || datetime,
-        regionly: query.regionly
+        regionly: query.regionly,
+        system: query.system
     };
     return queryString(q);        
 }

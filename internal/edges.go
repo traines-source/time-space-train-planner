@@ -140,15 +140,15 @@ func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station
 	edge.To.Arrivals = append(edge.To.Arrivals, edge)
 }
 
-func degreesToRadians(degrees float32) float64 {
-	return float64(degrees) * math.Pi / 180
+func degreesToRadians(degrees float64) float64 {
+	return degrees * math.Pi / 180
 }
 
 func geoDistStations(from *Station, to *Station) float64 {
 	return geoDist(from.Lat, from.Lon, to.Lat, to.Lon)
 }
 
-func geoDist(fromLat float32, fromLon float32, toLat float32, toLon float32) float64 {
+func geoDist(fromLat float64, fromLon float64, toLat float64, toLon float64) float64 {
 	var earthRadiusM float64 = 6371000
 
 	var dLat = degreesToRadians(toLat - fromLat)
@@ -164,7 +164,7 @@ func geoDist(fromLat float32, fromLon float32, toLat float32, toLon float32) flo
 	return earthRadiusM * c
 }
 
-func (c *consumer) sortEdges() {
+func (c *consumer) sortEdges() { // TODO zero minute edges order?
 	for _, station := range c.stations {
 		sort.Slice(station.Departures, func(i, j int) bool {
 			return station.Departures[i].Actual.Departure.Before(station.Departures[j].Actual.Departure)

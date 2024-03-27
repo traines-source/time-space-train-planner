@@ -32,7 +32,7 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 
 	if len(from) > 0 && len(to) > 0 {
 		if len(vias) > 0 && len(form) == 0 {
-			stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
+			stations, lines, err := internal.ObtainData("de_db", from[0], to[0], vias, datetime, regionly)
 			if err == nil {
 				log.Print("Request:", r.URL.RawQuery)
 				w.Header().Set("Content-Type", "image/svg+xml")
@@ -74,6 +74,7 @@ func apiVias(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiTimespace(w http.ResponseWriter, r *http.Request) {
+	var system = r.URL.Query().Get("system")
 	var from = queryStationList(r.URL.Query()["from"])
 	var to = queryStationList(r.URL.Query()["to"])
 	var vias = queryStationList(r.URL.Query()["vias"])
@@ -83,7 +84,7 @@ func apiTimespace(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 && len(vias) > 0 {
-		stations, lines, err := internal.ObtainData(from[0], to[0], vias, datetime, regionly)
+		stations, lines, err := internal.ObtainData(system, from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 			return

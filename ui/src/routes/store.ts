@@ -9,6 +9,7 @@ class Store {
     vias: StationLabel[] = [];
     datetime: string | null = null;
     regionly = false;
+    system: string | null = null;
     initialized = false;
 }
 

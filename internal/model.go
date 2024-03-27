@@ -7,8 +7,8 @@ type Station struct {
 	ID         string
 	Departures []*Edge
 	Arrivals   []*Edge
-	Lat        float32
-	Lon        float32
+	Lat        float64
+	Lon        float64
 	Rank       int
 	GroupID    *string
 }
