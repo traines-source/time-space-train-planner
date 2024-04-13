@@ -73,9 +73,9 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 	}
 	for _, l := range lines {
 		var p int32 = -1
-		if l.Type == "Foot" {
+		/*if l.Type == "Foot" {
 			continue
-		}
+		}*/
 		if val, ok := productTypes[l.Type]; ok {
 			p = val
 		}
@@ -83,6 +83,8 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 			Id:          l.ID,
 			Name:        l.Name,
 			ProductType: p,
+			Direction:   &l.Direction,
+			Message:     &l.Message,
 			Trips: []*stost.Trip{{
 				Connections: []*stost.Connection{},
 			}},
@@ -95,6 +97,7 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 				FromId:    c.From.ID,
 				ToId:      c.To.ID,
 				Cancelled: c.Cancelled,
+				Message:   &c.Message,
 				Departure: &stost.StopInfo{
 					Scheduled:    c.Planned.Departure.Unix(),
 					DelayMinutes: toDelay(c.Planned.Departure, c.Current.Departure),
@@ -231,10 +234,9 @@ func produce(responseMessage *stost.Message, lines map[string]*Line, stations ma
 						Arrival:        toCurrent(c.Arrival, true),
 						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
 					},
-					Cancelled:          c.Cancelled,
-					DestinationArrival: distr,
+					Cancelled:                  c.Cancelled,
+					DestinationArrival:         distr,
 					EarliestDestinationArrival: distr.Mean,
-					
 				}
 				line.Route = append(line.Route, edge)
 				from.Departures = append(from.Departures, edge)
