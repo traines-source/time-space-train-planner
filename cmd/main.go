@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	log.Print("Starting...")
 	main := http.NewServeMux()
 	main.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("./res"))))
 	main.HandleFunc("/tstp", renderTimeSpace)

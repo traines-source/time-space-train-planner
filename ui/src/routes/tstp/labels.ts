@@ -62,7 +62,7 @@ function timeString(e: Edge, timeResolver: (stop: any) => string, trackResolver:
 }
 
 function liveDataClass(e: Edge, timeResolver: (stop: any) => string) {
-    if (!e.Line) {
+    if (!e.Line || e.Line.Type == 'Foot') {
         return '';
     }
     const current = timeResolver(e.Current);
@@ -91,7 +91,8 @@ function delayMinutes(current: string, planned: string) {
 
 function delay(current: string, planned: string, e: Edge) {
     if (parseTime(current) != 0 && e.Line.Type != 'Foot') {
-        return "&nbsp;(+" + delayMinutes(current, planned) + ")";
+        let m = delayMinutes(current, planned);
+        return "&nbsp;(" + (m >= 0 ? '+' : '') + m + ")";
     }
     return ''
 }

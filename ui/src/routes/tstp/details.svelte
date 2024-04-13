@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { page } from '$app/stores';
     import { t } from '$lib/translations';
     import { store } from "../store"
     import { optionsQueryString } from "../query"
@@ -17,6 +18,7 @@
     let selectedEdgeHistory: Edge[] = [];
 
     let nextBestDepartures: Edge[] | undefined = undefined;
+    let nextBestDeparture: Edge | undefined = undefined;
     let nextBestDeparturesBoundsMinutes: number[] = [0,0];
     const maxNextBestDepartures = 5;
     const negativeTransferMinutes = 5;
@@ -78,13 +80,19 @@
         
         let lowerBound = undefined;
         let upperBound = undefined;
+        let shortestPathFound = false;
         for (let i=0; i<station.BestDepartures.length; i++) {
-            if (candidates.length >= maxNextBestDepartures) {
+            if (candidates.length >= maxNextBestDepartures && shortestPathFound || candidates.length >= maxNextBestDepartures*maxNextBestDepartures) {
                 break;
             }
             const e = edgeResolver(station.BestDepartures[i]);
-            if (parseTime(e.Actual.Departure) < time.getTime()) {
+            let departure = parseTime(e.Actual.Departure);
+            if (departure < time.getTime()) {
                 continue;
+            }
+            if (departure >= time.getTime()+negativeTransferMinutes*60*1000 && !shortestPathFound) {
+                shortestPathFound = true;
+                nextBestDeparture = e;
             }
             if (hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1) continue;
             candidates.push(e);
@@ -167,7 +175,8 @@
     }
 
     function isShortestPath(d: Edge) {
-        return selection.edge?.ShortestPath.length > 0 && d.ID == selection.edge?.ShortestPath[0].EdgeID;
+        return d == nextBestDeparture;
+        //return selection.edge?.ShortestPath.length > 0 && d.ID == selection.edge?.ShortestPath[0].EdgeID;
     }
 
     function pushHistory(edge: Edge) {
@@ -276,13 +285,13 @@
                 <path d={histogram(selection.edge)} class="histogram" />
                 {#each [twoSigmaDestinationArrival(selection.edge)] as twoSigma}
                     <path d={'M '+twoSigma[0].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                    <text x={twoSigma[0].pos} y="65" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
+                    <text x={twoSigma[0].pos} y="67" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
                     <path d={'M '+twoSigma[1].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                    <text x={twoSigma[1].pos} y="65" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
+                    <text x={twoSigma[1].pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
                     <path d={'M '+twoSigma[0].pos+' 52.5 H '+twoSigma[1].pos+''} class="histogram-pointer twosigma" />
                 {/each}
                 <path d={'M '+meanDestinationArrivalPos(selection.edge)+' 50 v 5'} class="histogram-pointer" />
-                <text x={meanDestinationArrivalPos(selection.edge)} y="65" class="histogram-label label">{meanDestinationArrival(selection.edge)}</text>
+                <text x={meanDestinationArrivalPos(selection.edge)} y="67" class="histogram-label label">{meanDestinationArrival(selection.edge)}</text>
             </svg>
         {/if}-->
     {/if}
@@ -317,13 +326,13 @@
                             <path d={histogram(d)} class="histogram" />
                             {#each [twoSigmaDestinationArrival(d)] as twoSigma}
                                 <path d={'M '+twoSigma[0].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                                <text x={twoSigma[0].pos} y="65" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
+                                <text x={twoSigma[0].pos} y="67" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
                                 <path d={'M '+twoSigma[1].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                                <text x={twoSigma[1].pos} y="65" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
+                                <text x={twoSigma[1].pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
                                 <path d={'M '+twoSigma[0].pos+' 52.5 H '+twoSigma[1].pos+''} class="histogram-pointer twosigma" />
                             {/each}
                             <path d={'M '+meanDestinationArrivalPos(d)+' 50 v 5'} class="histogram-pointer" />
-                            <text x={meanDestinationArrivalPos(d)} y="65" class="histogram-label label">{meanDestinationArrival(d)}</text>
+                            <text x={meanDestinationArrivalPos(d)} y="67" class="histogram-label label">{meanDestinationArrival(d)}</text>
                         </svg>
                     {:else}
                         <span class="micon">flag</span>
@@ -342,7 +351,7 @@
     <a href="?{optionsQueryString(store)}&form" class="submit">
         {$t('c.modify_query')}
     </a>
-
+    {#if $page.url.searchParams.get('tsd') != 'no'}
     <div class="legend">
         <h4>{$t('c.legend')}</h4>
         <svg viewBox="125 1430 500 160" style="width: 100%">
@@ -398,5 +407,6 @@
             </g>
         </svg>
     </div>
+    {/if}
     <Footer />
 </div></div>

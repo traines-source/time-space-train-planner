@@ -98,13 +98,13 @@ noscript {
   left: 0;
   right: 0;
   color: black;
-  scroll-margin-top: 200px;
+  scroll-margin-top: 0px;
   z-index: 1001;
 }
 
 #details > div {
   background-color: white;
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
@@ -152,6 +152,11 @@ noscript {
 
 #details .dep {
   text-align: right;
+}
+
+#details .legend {
+  margin: 0 auto;
+  max-width: 500px;
 }
 
 #details .legend h4 {
@@ -523,6 +528,7 @@ a text {
 
 .nowrap {
   white-space: nowrap;
+  text-align: center;
 }
 
 .forcewrap {
@@ -535,7 +541,7 @@ a text {
 }
 
 .histogram-label {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .histogram-pointer {

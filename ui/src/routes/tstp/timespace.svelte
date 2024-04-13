@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { page } from '$app/stores';
     import { t } from '$lib/translations';
     import { onMount, tick } from "svelte";
     import { defaultDatetime, setFromApi, store } from "../store"
@@ -195,7 +196,7 @@
         <feMorphology operator="erode" radius="8"/>
     </filter>
 </defs>
-{#if data}
+{#if data && $page.url.searchParams.get('tsd') != 'no'}
 {#each Object.values(data.Stations) as s (s.ID)}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label" on:click={() => selectStation(s.GroupID || s.ID)}>
     {s.Name}
