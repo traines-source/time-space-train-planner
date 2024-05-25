@@ -81,9 +81,9 @@ func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Statio
 	if from == destination || to == origin {
 		return
 	}
-	correspondances := to.Departures
-	if to == destination {
-		correspondances = from.Arrivals
+	correspondances := from.Arrivals
+	if from == origin {
+		correspondances = to.Departures
 	}
 	var duration = time.Minute * time.Duration(math.Ceil(dist/1000/footKmh*60))
 	for _, correspondance := range correspondances {
