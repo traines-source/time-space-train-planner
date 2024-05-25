@@ -56,7 +56,7 @@ function timeString(e: Edge, timeResolver: (stop: any) => string, trackResolver:
     const timeLabel = simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned), e);
     let label = makeSpan(span, liveDataClass(e, timeResolver), timeLabel);
     if (trackResolver(e.Actual)) {
-        label += ' ' + makeSpan(span, trackChangedClass(e, trackResolver), t.get('c.platform') + trackResolver(e.Actual).replace(' ', '&nbsp;'));
+        label += ' <br />' + makeSpan(span, trackChangedClass(e, trackResolver), t.get('c.platform') + trackResolver(e.Actual).replace(' ', '&nbsp;'));
     }
     return label;
 }

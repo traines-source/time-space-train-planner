@@ -28,7 +28,7 @@
     "header_departure": "Abfahrt",
     "header_direction": "Verbindung",
     "header_destination_arrival": "⌀ Ankunft Ziel",
-    "no_known_connections": "Keine bekannten Verbindungen zur gewählten Zeit.",
+    "no_known_connections": "Keine bekannten Verbindungen zur gewählten Zeit. Passen Sie die Abfrage an oder wählen sie einen anderen Zeitraum für die Anzeige aus.",
     "error": "Fehler",
     "error_http_400": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise ist der angefragte Zeitraum zu weit in der Vergangenheit oder Zukunft, oder Start oder Ziel existieren nicht oder haben keine Ankünfte/Abfahrten.",
     "error_http_500": "Unerwarteter Serverfehler.",
@@ -40,5 +40,12 @@
     "tip_0": "Durch Klicken auf eine Verbindung wird die kürzeste Route vom Start zum Ziel über diese Verbindung blau hervorgehoben.",
     "tip_1": "Wenn Datum/Uhrzeit nicht gesetzt sind, kann man ein Browser-Bookmark auf die Diagramm-Seite anlegen und jederzeit einfach das aktuelle Diagramm aufrufen.",
     "tip_2": "Mit den Pfeilen, die über und unter ausgewählten Verbindungen erscheinen, kann zu früheren Ankünften und späteren Abfahrten an der entsprechenden Station gesprungen werden.",
-    "tip_3": "Durch Klicken auf einen Stationsnamen im Diagramm oder auf den Zurück-Pfeil in der Detailansicht können die nächsten besten Verbindungen von der entsprechenden Station angezeigt werden."
+    "tip_3": "Durch Klicken auf einen Stationsnamen im Diagramm oder auf den Zurück-Pfeil in der Detailansicht können die nächsten besten Verbindungen von der entsprechenden Station angezeigt werden.",
+    "explain_mean": "Durchschnittliche Ankunft an {{destination}}",
+    "explain_mode": "Wahrscheinlichste Ankunft an {{destination}}",
+    "explain_95th": "Ankunft zu 95% bis dahin",
+    "explain_share_mean": "Durchschnittlich werde ich an {{destination}} um {{time}} ankommen.",
+    "explain_share_mode": "Meine wahrscheinlichste Ankunftszeit ist {{time}}.",
+    "explain_share_95th": "Mit einer geschätzten Wahrscheinlichkeit von 95% werde ich bis spätestens {{time}} ankommen.",
+    "explain_share_title": "Meine Ankunftszeit an {{destination}}"
 }

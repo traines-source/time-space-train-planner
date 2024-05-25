@@ -28,7 +28,7 @@
     "header_departure": "départ",
     "header_direction": "mission",
     "header_destination_arrival": "⌀ arrivée destination",
-    "no_known_connections": "Aucune correspondance trouvée à cette heure-ci.",
+    "no_known_connections": "Aucune correspondance trouvée à cette heure-ci. Modifiez la requête ou choisissez un autre temps à afficher.",
     "error": "Erreur",
     "error_http_400": "Échec de la requête des données d'horaire. Peut-être l'heure requise est trop loin dans le futur ou dans le passé, ou la station de départ ou d'arrivée n'existe pas ou n'a pas de départs ou d'arrivées.",
     "error_http_500": "Erreur de serveur inattendu.",
@@ -40,5 +40,12 @@
     "tip_0": "En cliquant sur une connexion, l'itinéraire le plus court de la station de départ à la station d'arrivée via cette connexion est marquée en bleu.",
     "tip_1": "Laissez la date/heure non définie et créez un signet de la page de diagramme afin de toujours accéder facilement au diagramme actuel.",
     "tip_2": "Utilisez les flèches apparaissant au-dessus et au-dessous des connexions sélectionnées pour trouver les arrivées d'avant et les départs d'après des stations respectives.",
-    "tip_3": "En cliquant sur un nom de station dans le diagramme ou sur la flèche de retour dans la vue détaillée, les prochaines meilleures connexions de la station peuvent être affichées."
+    "tip_3": "En cliquant sur un nom de station dans le diagramme ou sur la flèche de retour dans la vue détaillée, les prochaines meilleures connexions de la station peuvent être affichées.",
+    "explain_mean": "Arrivée en moyenne à {{destination}}",
+    "explain_mode": "Temps d'arrivée le plus probable",
+    "explain_95th": "Arrivée avec 95% jusque-là",
+    "explain_share_mean": "En moyenne, j'arriverai à {{destination}} à {{time}}.",
+    "explain_share_mode": "Mon temps d'arrivée le plus probable est {{time}}.",
+    "explain_share_95th": "Avec une probabilité estimée de 95%, j'arriverai avant {{time}}.",
+    "explain_share_title": "Mon temps d'arrivée à {{destination}}"
 }

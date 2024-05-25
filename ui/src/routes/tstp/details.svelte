@@ -80,6 +80,11 @@
         
         let lowerBound = undefined;
         let upperBound = undefined;
+        if (selection.edge) {
+            let b = getBounds(selection.edge);
+            lowerBound = b[0];
+            upperBound = b[1];
+        }
         let shortestPathFound = false;
         for (let i=0; i<station.BestDepartures.length; i++) {
             if (candidates.length >= maxNextBestDepartures && shortestPathFound || candidates.length >= maxNextBestDepartures*maxNextBestDepartures) {
@@ -166,12 +171,32 @@
         return (parseTime(e.DestinationArrival.Mean)/60/1000-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio();
     }
 
-    function twoSigmaDestinationArrival(e: Edge) {
+    function getMode(e: Edge) {
+        const h = e.DestinationArrival.Histogram;
+        const start = parseTime(e.DestinationArrival.Start)/60/1000;
+        let modeY = undefined;
+        let modeX = 0;
+        for (let i=0;i<h.length;i++) {
+            if (modeY == undefined || modeY < h[i]) {
+                modeY = h[i];
+                modeX = i;
+            }
+        }
+        return start+modeX;
+    }
+
+    function toPosAndTime(minutes: number) {
+        return {pos: (minutes-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(), time: simpleTime(minutes*60*1000)}
+    }
+
+    function destinationArrivalMetrics(e: Edge) {
         const bounds = getBounds(e);
-        return [
-            {pos: (bounds[0]-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(), time: simpleTime(bounds[0]*60*1000)},
-            {pos: (bounds[1]-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(), time: simpleTime(bounds[1]*60*1000)}
-        ]
+        return {
+            "p5": toPosAndTime(bounds[0]),
+            "p95": toPosAndTime(bounds[1]),
+            "mode": toPosAndTime(getMode(e)),
+            "mean": toPosAndTime(parseTime(e.DestinationArrival.Mean)/60/1000)
+        }
     }
 
     function isShortestPath(d: Edge) {
@@ -232,6 +257,63 @@
         }
         selection.from = candidate;
     }
+
+    function shareDestArr() {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1100;
+        canvas.height = 180;
+        const ctx = canvas.getContext("2d");
+        const svgEl = document.getElementById('destarr-histogram');
+        if (svgEl && ctx) {
+            var sheets = document.styleSheets;
+            var styleStr = '';
+            Array.prototype.forEach.call(sheets, function(sheet){
+                try { 
+                    styleStr += Array.prototype.reduce.call(sheet.cssRules, function(a, b) {
+                            return a + b.cssText;
+                        }, "");
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            });
+            document.getElementById('inherit-style')!.innerHTML = styleStr;
+            const svgString = new XMLSerializer().serializeToString(svgEl);
+            const domUrl = self.URL || self.webkitURL || self;
+            const img = new Image();
+            const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+            const url = domUrl.createObjectURL(svg);
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        return;
+                    }
+                    const files = [new File([blob], 'destination_arrival.png', { type: blob.type })];
+                    const metrics = destinationArrivalMetrics(selection.edge);
+                    const destName = stationResolver(data.To.ID).Name;
+                    const shareData = {
+                        text: t.get('c.explain_share_mean', {destination: destName, time: metrics.mean.time}) + ' ' +
+                            t.get('c.explain_share_mode', {time: metrics.mode.time}) + ' ' +
+                            t.get('c.explain_share_95th', {time: metrics.p95.time}),
+                        title: t.get('c.explain_share_title', {destination: destName}),
+                        files,
+                    };
+                    if (navigator.canShare(shareData)) {
+                        try {
+                            await navigator.share(shareData);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    } else {
+                        console.warn('Sharing not supported', shareData);
+                    }
+                });
+                domUrl.revokeObjectURL(url);
+            }
+            img.src = url;
+        }
+    }
 </script>
 
 <div id="details"><div>
@@ -280,24 +362,34 @@
                 <span class="micon">info</span> {selection.edge.Message}
             </div>
         {/if}
-        <!--{#if hasDistribution(selection.edge)}
-            <svg width="100" height="70" class="histogram-canvas">
-                <path d={histogram(selection.edge)} class="histogram" />
-                {#each [twoSigmaDestinationArrival(selection.edge)] as twoSigma}
-                    <path d={'M '+twoSigma[0].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                    <text x={twoSigma[0].pos} y="67" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
-                    <path d={'M '+twoSigma[1].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                    <text x={twoSigma[1].pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
-                    <path d={'M '+twoSigma[0].pos+' 52.5 H '+twoSigma[1].pos+''} class="histogram-pointer twosigma" />
-                {/each}
-                <path d={'M '+meanDestinationArrivalPos(selection.edge)+' 50 v 5'} class="histogram-pointer" />
-                <text x={meanDestinationArrivalPos(selection.edge)} y="67" class="histogram-label label">{meanDestinationArrival(selection.edge)}</text>
-            </svg>
-        {/if}-->
+        {#if hasDistribution(selection.edge)}
+        {#each [destinationArrivalMetrics(selection.edge)] as metrics}
+            <a href="javascript:void(0)" on:click={() => shareDestArr()} class="unstyled-link destarr" style="position:relative;display:block">
+                <svg width="1100" height="180" class="histogram-canvas" id="destarr-histogram" viewBox="-225 0 550 90" preserveAspectRatio="xMidYMid slice" style="max-width:100%;max-height:90px;">
+                    <defs><style id="inherit-style"></style></defs>
+                    <rect x="-225" y="0" width="550" height="90" fill="white" />
+                    <path d={histogram(selection.edge)} class="histogram" />
+                    <path d={'M '+metrics.p5.pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                    <path d={'M '+metrics.p95.pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                    <text x={metrics.p95.pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{metrics.p95.time} <tspan class="explain">&nbsp;({$t('c.explain_95th', {time: metrics.p95.time})})</tspan></text>
+                    <path d={'M '+metrics.p5.pos+' 52.5 H '+metrics.p95.pos+''} class="histogram-pointer twosigma" />
+                    <path d={'M '+metrics.mode.pos+' 19 v 5'} class="histogram-pointer twosigma" />
+                    <text x={metrics.mode.pos} y="7" class="histogram-label label twosigma" style="dominant-baseline:hanging;">{metrics.mode.time}</text>
+                    <text x={metrics.mode.pos+20} y="7" class="histogram-label label twosigma explain" style="dominant-baseline:hanging;text-anchor:start;">({$t('c.explain_mode', {destination: stationResolver(data.To.ID).Name, time: metrics.mode.time})})</text>
+                    <path d={'M '+metrics.mean.pos+' 50 v 5'} class="histogram-pointer" />
+                    <text x={metrics.mean.pos} y="67" class="histogram-label label">{metrics.mean.time}</text>
+                    <text x={metrics.mean.pos} y="82" class="histogram-label label explain">({$t('c.explain_mean', {destination: stationResolver(data.To.ID).Name, time: metrics.mean.time})})</text>
+                </svg>
+                <span class="histogram-label explain" style="position: absolute;bottom:50%;right:0">
+                    <span class="micon">share</span>
+                </span>
+            </a>
+        {/each}
+        {/if}
     {/if}
 
     {#if nextBestDepartures}
-        <h4>{$t('c.next_best_departures')} {selectedStationName(selection)}, <input type="time" value={simpleTime(selection.from)} on:change={updateTime}></h4>
+        <h3><span class="small">{$t('c.next_best_departures')}</span><br /><span class="highlight">{selectedStationName(selection)}</span>, <input type="time" value={simpleTime(selection.from)} on:change={updateTime}></h3>
         <table class="next-best-departures">
             <tr>
                 <th>{$t('c.header_departure')}</th>
@@ -308,7 +400,7 @@
             <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
                 <td>{@html departure(d)}</td>
                 <td class="forcewrap">
-                    {d.Line?.ID == selection.edge?.Line?.ID ? $t('c.stay_on') : ''}
+                    <span class="stay-on">{d.Line?.ID == selection.edge?.Line?.ID ? $t('c.stay_on') : ''}</span>
                     <span>{@html label(d, true)}</span>
                     <span>
                         {#if d.Line?.Direction}
@@ -324,15 +416,17 @@
                     {#if hasDistribution(d)}
                         <svg width="100" height="70" class="histogram-canvas">
                             <path d={histogram(d)} class="histogram" />
-                            {#each [twoSigmaDestinationArrival(d)] as twoSigma}
-                                <path d={'M '+twoSigma[0].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                                <text x={twoSigma[0].pos} y="67" class="histogram-label label twosigma" style="text-anchor:end;">{twoSigma[0].time}</text>
-                                <path d={'M '+twoSigma[1].pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                                <text x={twoSigma[1].pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{twoSigma[1].time}</text>
-                                <path d={'M '+twoSigma[0].pos+' 52.5 H '+twoSigma[1].pos+''} class="histogram-pointer twosigma" />
+                            {#each [destinationArrivalMetrics(d)] as metrics}
+                            <path d={'M '+metrics.p5.pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                            <!--<text x={metrics.p5.pos} y="67" class="histogram-label label twosigma" style="text-anchor:end;">{metrics.p5.time}</text>-->
+                            <path d={'M '+metrics.p95.pos+' 50 v 5'} class="histogram-pointer twosigma" />
+                            <text x={metrics.p95.pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{metrics.p95.time}</text>
+                            <path d={'M '+metrics.p5.pos+' 52.5 H '+metrics.p95.pos+''} class="histogram-pointer twosigma" />
+                            <path d={'M '+metrics.mode.pos+' 19 v 5'} class="histogram-pointer twosigma" />
+                            <text x={metrics.mode.pos} y="7" class="histogram-label label twosigma" style="dominant-baseline:hanging;">{metrics.mode.time}</text>
+                            <path d={'M '+metrics.mean.pos+' 50 v 5'} class="histogram-pointer" />
+                            <text x={metrics.mean.pos} y="67" class="histogram-label label">{metrics.mean.time}</text>
                             {/each}
-                            <path d={'M '+meanDestinationArrivalPos(d)+' 50 v 5'} class="histogram-pointer" />
-                            <text x={meanDestinationArrivalPos(d)} y="67" class="histogram-label label">{meanDestinationArrival(d)}</text>
                         </svg>
                     {:else}
                         <span class="micon">flag</span>

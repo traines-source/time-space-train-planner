@@ -7,6 +7,15 @@
        url('/res/fonts/roboto-condensed-v25-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
        url('/res/fonts/roboto-condensed-v25-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
 }
+/* roboto-condensed-italic - latin-ext_latin */
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: italic;
+  font-weight: 400;
+  src: local(''),
+  url('/res/fonts/roboto-condensed-v25-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+  url('/res/fonts/roboto-condensed-v25-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
 /* roboto-condensed-700 - latin */
 @font-face {
   font-family: 'Roboto Condensed';
@@ -123,9 +132,19 @@ noscript {
   width: 50px;
 }
 
-#details .arrdep {
+#details .arrdep{
   display: flex;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+}
+
+#details .destarr {
+  margin-bottom: 20px;
+}
+
+.unstyled-link * {
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
 }
 
 .arrdep .left, .arrdep .right {
@@ -134,8 +153,16 @@ noscript {
 
 .arrdep .back .micon {
   color: black;
-  font-size: 26px;
+  font-size: 28px;
   padding: 5px 10px 5px 0;
+}
+
+.explain {
+  font-style: italic;
+}
+
+h3 .small {
+  font-size: 16px;
 }
 
 #details .message {
@@ -305,7 +332,6 @@ noscript {
 
 a text {
   dominant-baseline: middle;
-  fill: #707070;
   text-anchor: middle;
   text-decoration: underline;
 }
@@ -524,6 +550,11 @@ a text {
 
 .next-best-departures .redundant {
   color: #dbdbdb;
+}
+
+.next-best-departures .stay-on {
+  font-style: italic;
+  font-weight: normal;
 }
 
 .nowrap {
