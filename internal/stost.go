@@ -62,7 +62,7 @@ func createRequestMessage(system string, from string, to string, startTime time.
 	}
 }
 
-func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line, stations map[string]*Station) {
+func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line, stations map[string]*Station, regionly bool) {
 	for _, s := range stations {
 		requestMessage.Timetable.Stations = append(requestMessage.Timetable.Stations, &stost.Station{
 			Id:   s.ID,
@@ -76,6 +76,9 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 		/*if l.Type == "Foot" {
 			continue
 		}*/
+		if regionly && (l.Type == "national" || l.Type == "nationalExpress") {
+			continue
+		}
 		if val, ok := productTypes[l.Type]; ok {
 			p = val
 		}
@@ -247,9 +250,9 @@ func produce(responseMessage *stost.Message, lines map[string]*Line, stations ma
 	}
 }
 
-func StostEnrich(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) {
+func StostEnrich(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time, regionly bool) {
 	requestMessage := createRequestMessage("de_db", from, to, startTime, now)
-	prepareForEnrichment(requestMessage, lines, stations)
+	prepareForEnrichment(requestMessage, lines, stations, regionly)
 	responseMessage := queryStost(requestMessage)
 	if responseMessage == nil {
 		return

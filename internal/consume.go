@@ -367,7 +367,7 @@ func (c *consumer) apiFlow(system string, from string, to string, vias []string,
 	if err := c.callProviders(callEnrich); err != nil {
 		return err
 	}
-	StostEnrich(system, c.lines, c.stations, from, to, c.dateTime, time.Now())
+	StostEnrich(system, c.lines, c.stations, from, to, c.dateTime, time.Now(), regionly)
 	return nil
 }
 
