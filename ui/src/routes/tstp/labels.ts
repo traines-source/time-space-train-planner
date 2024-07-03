@@ -25,7 +25,7 @@ function label(e: Edge, detail: boolean): string {
     if (e.Line.Type == 'Foot' && !detail) {
         return '<tspan class="micon">directions_walk</tspan> ' + label;
     } else if (e.Line.Type == 'Foot'  && detail) {
-        return '<span class="micon">directions_walk</span> ' + label;
+        return '<span class="micon">directions_walk</span>&nbsp;' + label;
     }
     return label;
 }
@@ -56,7 +56,8 @@ function timeString(e: Edge, timeResolver: (stop: any) => string, trackResolver:
     const timeLabel = simpleTime(timeResolver(e.Actual)) + delay(timeResolver(e.Current), timeResolver(e.Planned), e);
     let label = makeSpan(span, liveDataClass(e, timeResolver), timeLabel);
     if (trackResolver(e.Actual)) {
-        label += ' <br />' + makeSpan(span, trackChangedClass(e, trackResolver), t.get('c.platform') + trackResolver(e.Actual).replace(' ', '&nbsp;'));
+        const platform_label = e.Line.Type == "bus" || e.Line.Type == "tram" ? t.get('c.bus_platform') : t.get('c.platform');
+        label += ' <br />' + makeSpan(span, trackChangedClass(e, trackResolver), platform_label + trackResolver(e.Actual).replace(' ', '&nbsp;'));
     }
     return label;
 }

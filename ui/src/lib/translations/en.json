@@ -12,6 +12,7 @@
     "data_retrieval_waiting": "Data retrieval can take up to one minute.",
     "no_results": "No results.",
     "platform": "Pl.",
+    "bus_platform": "Bay ",
     "cancelled": "cancelled",
     "modify_query": "Modify query",
     "legend": "Legend",
@@ -47,5 +48,7 @@
     "explain_share_mean": "I will arrive at {{destination}} on average at {{time}}.",
     "explain_share_mode": "My most likely time of arrival is {{time}}.",
     "explain_share_95th": "With an estimated probability of 95%, I will arrive before {{time}}.",
-    "explain_share_title": "My arrival time at {{destination}}"
+    "explain_share_title": "My arrival time at {{destination}}",
+    "walking_to": "to",
+    "walking_from": "from"
 }

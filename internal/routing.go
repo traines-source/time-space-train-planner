@@ -147,6 +147,10 @@ func markEdgeAsRedundant(edge *Edge, origin *Station, destination *Station, regi
 		edge.Redundant = true
 		return
 	}
+	if edge.Line.Type == "Foot" && edge.From.GroupID != nil && edge.To.GroupID != nil && *edge.From.GroupID == *edge.To.GroupID {
+		edge.Redundant = true
+		return
+	}
 	if len(edge.ShortestPathFor) > 1 {
 		edge.Redundant = false
 		return

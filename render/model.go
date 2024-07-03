@@ -16,6 +16,8 @@ type StationLabel struct {
 	GroupID        *string
 	Rank           int
 	BestDepartures []string
+	Lon            float64
+	Lat            float64
 }
 
 type EdgePath struct {

@@ -82,6 +82,8 @@ func (c *container) setupStations(stations map[string]*internal.Station) {
 				Name:           s.Name,
 				Rank:           s.Rank,
 				BestDepartures: []string{},
+				Lon:            s.Lon,
+				Lat:            s.Lat,
 			}
 			station.GroupID = s.GroupID
 			if s.Rank == 0 {
@@ -131,8 +133,33 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			b := c.Edges[s.BestDepartures[j]].DestinationArrival.Mean
 			return !a.IsZero() && a.Before(b)
 		})
+		/*var latestDeparture time.Time
+		var p95ArrOfLatestDeparture time.Time
+		for _, d := range s.BestDepartures {
+			e := c.Edges[d]
+			if !e.Actual.Departure.Before(latestDeparture) {
+				e.Redundant = false
+				latestDeparture = e.Actual.Departure
+				p95ArrOfLatestDeparture = p95(e)
+			} else if !p95ArrOfLatestDeparture.Before(p95(e)) {
+				e.Redundant = false
+			} else {
+				e.Redundant = true
+			}
+		}*/
 	}
 }
+
+/*func p95(e *EdgePath) time.Time {
+	var accum float32 = 0.0
+	for i := len(e.DestinationArrival.Histogram) - 1; i >= 0; i-- {
+		accum += e.DestinationArrival.Histogram[i]
+		if accum >= 0.05 {
+			return e.DestinationArrival.Start.Add(time.Minute * time.Duration(i))
+		}
+	}
+	return e.DestinationArrival.Start
+}*/
 
 func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
 	for _, l := range lines {

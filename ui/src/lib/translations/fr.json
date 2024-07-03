@@ -12,6 +12,7 @@
     "data_retrieval_waiting": "La récupération des données peut prendre jusqu'à une minute.",
     "no_results": "Pas de résultats.",
     "platform": "Voie ",
+    "bus_platform": "Quai ",
     "cancelled": "supprimé",
     "modify_query": "Modifier la requête",
     "legend": "Légende",
@@ -47,5 +48,7 @@
     "explain_share_mean": "En moyenne, j'arriverai à {{destination}} à {{time}}.",
     "explain_share_mode": "Mon temps d'arrivée le plus probable est {{time}}.",
     "explain_share_95th": "Avec une probabilité estimée de 95%, j'arriverai avant {{time}}.",
-    "explain_share_title": "Mon temps d'arrivée à {{destination}}"
+    "explain_share_title": "Mon temps d'arrivée à {{destination}}",
+    "walking_to": "à",
+    "walking_from": "départ de"
 }

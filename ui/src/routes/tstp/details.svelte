@@ -38,7 +38,7 @@
         }
         const station = stationResolver(selection.edge.To.SpaceAxis);
         if (!selection.from) {
-            selection.from = new Date(parseTime(selection.edge.Actual.Arrival)-negativeTransferMinutes*60*1000);
+            selection.from = new Date(parseTime(selection.edge.Actual.Arrival));
         }
         updateNextBestDepartures(station, selection.from);
     }
@@ -51,7 +51,7 @@
             } else if (n < new Date(data.MinTime).getTime() || n > new Date(data.MaxTime).getTime()) {
                 n = new Date(data.MinTime).getTime();
             }            
-            selection.from = new Date(n-negativeTransferMinutes*60*1000);
+            selection.from = new Date(n);
         }
         selectedEdgeHistory = [];
         updateNextBestDepartures(selection.station, selection.from);
@@ -59,6 +59,7 @@
 
     function getBounds(e: Edge): number[] {
         const h = e.DestinationArrival.Histogram;
+        if (!h) return [0,0];
         const start = parseTime(e.DestinationArrival.Start)/60/1000;
         let lower = undefined;
         let upper = undefined;
@@ -72,7 +73,20 @@
             if (upper == undefined && upperAccum > thresh) upper = start+h.length-i;
             if (lower && upper) break;
         }
-        return [lower, upper];
+        if (lower != undefined && upper != undefined) {
+            return [lower, upper];
+        }
+        return [start, start];
+    }
+
+    function getStationsInGroup(station: Station): Station[] {
+        const relevantStations = [];
+        for (let s of Object.values(data.Stations)) {
+            if (s.ID == station.ID || s.GroupID == station.GroupID) {
+                relevantStations.push(s);
+            }
+        }
+        return relevantStations;
     }
 
     function updateNextBestDepartures(station: Station, time: Date) {        
@@ -86,32 +100,68 @@
             upperBound = b[1];
         }
         let shortestPathFound = false;
-        for (let i=0; i<station.BestDepartures.length; i++) {
+        let relevantStations = getStationsInGroup(station);
+        let indices = new Array(relevantStations.length).fill(0);
+        let latestDeparture = 0
+        let p95ArrOfLatestDeparture = 0
+        while (true) {
+            let nextDepartureIndex = undefined;
             if (candidates.length >= maxNextBestDepartures && shortestPathFound || candidates.length >= maxNextBestDepartures*maxNextBestDepartures) {
                 break;
             }
-            const e = edgeResolver(station.BestDepartures[i]);
-            let departure = parseTime(e.Actual.Departure);
-            if (departure < time.getTime()) {
-                continue;
+            for (let s=0; s<relevantStations.length; s++) {
+                let e;
+                while(true) {
+                    if (indices[s] >= relevantStations[s].BestDepartures.length) {
+                        e = undefined;
+                        break;
+                    }
+                    e = edgeResolver(relevantStations[s].BestDepartures[indices[s]]);
+                    let departure = parseTime(e.Actual.Departure);
+                    if (departure >= time.getTime()-negativeTransferMinutes*60*1000) {
+                        break;
+                    }
+                    indices[s]++;
+                }
+                if (!e || hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1 || e.Line?.Type == "Foot" && station.ID != relevantStations[s].ID || stationResolver(e.To.SpaceAxis).GroupID == station.GroupID) {
+                    indices[s]++;
+                    continue;
+                }
+                if (nextDepartureIndex == undefined || edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]).DestinationArrival.Mean > e.DestinationArrival.Mean) {
+                    nextDepartureIndex = s;    
+                }
             }
-            if (departure >= time.getTime()+negativeTransferMinutes*60*1000 && !shortestPathFound) {
+            if (nextDepartureIndex == undefined) {
+                break;
+            }
+            const e = edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]);
+            let departure = parseTime(e.Actual.Departure);
+            candidates.push(e);
+            indices[nextDepartureIndex]++;
+            if (!hasDistribution(e)) continue;
+            if (departure >= time.getTime()+walkingDistance(station.ID, e.From.SpaceAxis)/5*3600 && (!shortestPathFound || nextBestDeparture.DestinationArrival.Mean > e.DestinationArrival.Mean)) {
                 shortestPathFound = true;
                 nextBestDeparture = e;
             }
-            if (hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1) continue;
-            candidates.push(e);
-            if (!hasDistribution(e) || e.DestinationArrival.FeasibleProbability < 0.1) continue;
             const bounds = getBounds(e);
             if (lowerBound == undefined || bounds[0] < lowerBound) {
                 lowerBound = bounds[0];
             }
             if (upperBound == undefined || bounds[1] > upperBound) {
                 upperBound = bounds[1];
-            }       
+            }
+            if (departure >= latestDeparture) {
+				e.Redundant = false;
+				latestDeparture = departure;
+				p95ArrOfLatestDeparture = bounds[1];
+			} else if (p95ArrOfLatestDeparture > bounds[1]) {
+				e.Redundant = false;
+			} else {
+				e.Redundant = true;
+			}
         }
         candidates.sort((a, b) => {
-            return parseTime(a.Planned.Departure)-parseTime(b.Planned.Departure);
+            return parseTime(a.Actual.Departure)-parseTime(b.Actual.Departure);
         });
         
         const drawWidth = 100;
@@ -147,7 +197,6 @@
     }
 
     function histogram(e: Edge) {
-        console.log(e.Line.Name, e.DestinationArrival.Start, e.DestinationArrival.Mean, e.DestinationArrival.Histogram.map(p => Math.round(p*1000)/1000));
         const drawXRatio = getDrawXRatio();
         const drawHeight = 50;
         const drawYRatio = 0.25/drawHeight;
@@ -214,10 +263,10 @@
             selectedEdgeHistory.pop();
             selectEdge(selectedEdgeHistory[selectedEdgeHistory.length-1].ID);
             selectedEdgeHistory = selectedEdgeHistory;
-        } else if (selection.edge?.ReverseShortestPath.length > 0) {
+        } else if (selection.edge?.ReverseShortestPath.length > 0 && data.Edges[selection.edge.ReverseShortestPath[0].EdgeID]) {
             selectEdge(selection.edge.ReverseShortestPath[0].EdgeID);
-        } else if (selection.edge?.From.SpaceAxis == data.From.ID) {
-            selectStation(data.From.ID);
+        } else {
+            selectStation(selection.edge?.From.SpaceAxis);
         }
     }
 
@@ -225,6 +274,10 @@
         return selection.edge
             ? stationResolver(selection.edge?.To.SpaceAxis).Name
             : selection.station?.Name;
+    }
+
+    function selectedStationId(s: Selection) {
+        return selection.edge?.To.SpaceAxis || selection.station?.ID
     }
 
     function tryDate(old: Date, n: Date, minTime?: Date, maxTime?: Date) {
@@ -256,6 +309,17 @@
             candidate = tryDate(old, n);
         }
         selection.from = candidate;
+    }
+
+    function walkingDistance(fromId: string, toId: string): number {
+        const from = stationResolver(fromId);
+        const to = stationResolver(toId);
+        const φ1 = from.Lat * Math.PI/180, φ2 = to.Lat * Math.PI/180, Δλ = (to.Lon-from.Lon) * Math.PI/180, R = 6371e3;
+        return Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ) )*R;
+    }
+
+    function walkingDistanceRounded(fromId: string, toId: string): number {
+        return Math.max(Math.round(walkingDistance(fromId, toId)/100)*100, 100);
     }
 
     function shareDestArr() {
@@ -400,16 +464,17 @@
             <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
                 <td>{@html departure(d)}</td>
                 <td class="forcewrap">
-                    <span class="stay-on">{d.Line?.ID == selection.edge?.Line?.ID ? $t('c.stay_on') : ''}</span>
+                    <span class="stay-on">{d.Line?.ID == selection.edge?.Line?.ID && selection.edge?.To.SpaceAxis == d.From.SpaceAxis ? $t('c.stay_on') : ''}</span>
                     <span>{@html label(d, true)}</span>
                     <span>
                         {#if d.Line?.Direction}
                         <span class="micon">east</span> {d.Line.Direction}
                         {/if}
                         {#if d.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
+                        {#if d.Line?.Type == 'Foot'}{$t('c.walking_to')} {stationResolver(d.To.SpaceAxis).Name}{/if}
                     </span>
-                    {#if d.Line?.Type == 'Foot' && d.ShortestPath.length > 0}
-                    <span>– {@html label(edgeResolver(d.ShortestPath[0].EdgeID), true)}</span>
+                    {#if d.From.SpaceAxis != selectedStationId(selection)}
+                    <span class="walking-from">{$t('c.walking_from')} {stationResolver(d.From.SpaceAxis).Name}, <span class="micon">directions_walk</span>&nbsp;{walkingDistanceRounded(selectedStationId(selection), d.From.SpaceAxis)}m</span>
                     {/if}
                 </td>
                 <td class="nowrap">

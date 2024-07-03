@@ -12,6 +12,7 @@
     "data_retrieval_waiting": "Datenabruf kann bis zu einer Minute dauern.",
     "no_results": "Keine Ergebnisse.",
     "platform": "Gl.",
+    "bus_platform": "Steig ",
     "cancelled": "fällt aus",
     "modify_query": "Abfrage anpassen",
     "legend": "Legende",
@@ -47,5 +48,7 @@
     "explain_share_mean": "Durchschnittlich werde ich an {{destination}} um {{time}} ankommen.",
     "explain_share_mode": "Meine wahrscheinlichste Ankunftszeit ist {{time}}.",
     "explain_share_95th": "Mit einer geschätzten Wahrscheinlichkeit von 95% werde ich bis spätestens {{time}} ankommen.",
-    "explain_share_title": "Meine Ankunftszeit an {{destination}}"
+    "explain_share_title": "Meine Ankunftszeit an {{destination}}",
+    "walking_to": "bis",
+    "walking_from": "ab"
 }

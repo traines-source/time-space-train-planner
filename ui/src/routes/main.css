@@ -40,7 +40,7 @@
   font-family: 'Material Icons Outlined';
   font-weight: normal;
   font-style: normal;
-  font-size: 16px;  /* Preferred icon size */
+  font-size: inherit;  /* Preferred icon size */
   display: inline-block;
   line-height: 1;
   text-transform: none;
@@ -141,10 +141,10 @@ noscript {
   margin-bottom: 20px;
 }
 
-.unstyled-link * {
+.unstyled-link, .unstyled-link * {
   text-decoration: none;
   color: black;
-  cursor: pointer;
+  cursor: default;
 }
 
 .arrdep .left, .arrdep .right {
@@ -193,6 +193,11 @@ h3 .small {
 
 #details .submit {
   margin: 10px 0 0 0;
+}
+
+.walking-from {
+  font-size: 14px;
+  display: block;
 }
 
 .edge {
@@ -549,7 +554,7 @@ a text {
 }
 
 .next-best-departures .redundant {
-  color: #dbdbdb;
+  color: #c0c0c0;
 }
 
 .next-best-departures .stay-on {
@@ -580,11 +585,11 @@ a text {
 }
 
 .histogram-pointer.twosigma {
-  stroke: #dbdbdb;
+  stroke: #c0c0c0;
 }
 
 .histogram-label.twosigma {
-  fill: #dbdbdb;
+  fill: #c0c0c0;
 }
 
 .histogram-canvas {
