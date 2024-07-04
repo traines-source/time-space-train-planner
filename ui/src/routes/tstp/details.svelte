@@ -59,7 +59,10 @@
 
     function getBounds(e: Edge): number[] {
         const h = e.DestinationArrival.Histogram;
-        if (!h) return [0,0];
+        if (!h) {
+            const fallback = parseTime(e.EarliestDestinationArrival)/60/1000;
+            return [fallback, fallback];
+        }
         const start = parseTime(e.DestinationArrival.Start)/60/1000;
         let lower = undefined;
         let upper = undefined;
@@ -118,17 +121,24 @@
                     }
                     e = edgeResolver(relevantStations[s].BestDepartures[indices[s]]);
                     let departure = parseTime(e.Actual.Departure);
-                    if (departure >= time.getTime()-negativeTransferMinutes*60*1000) {
+                    if (departure >= time.getTime()-negativeTransferMinutes*60*1000
+                    && !(hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1)
+                    && !(e.Line?.Type == "Foot" && station.ID != relevantStations[s].ID)
+                    && !(stationResolver(e.To.SpaceAxis).GroupID == station.GroupID)) {
                         break;
                     }
                     indices[s]++;
                 }
-                if (!e || hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1 || e.Line?.Type == "Foot" && station.ID != relevantStations[s].ID || stationResolver(e.To.SpaceAxis).GroupID == station.GroupID) {
-                    indices[s]++;
+                if (!e) {
                     continue;
                 }
-                if (nextDepartureIndex == undefined || edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]).DestinationArrival.Mean > e.DestinationArrival.Mean) {
+                if (nextDepartureIndex == undefined) {
                     nextDepartureIndex = s;    
+                } else {
+                    const nextDeparture = edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]);
+                    if ((nextDeparture.DestinationArrival?.Mean || nextDeparture.EarliestDestinationArrival) > (e.DestinationArrival?.Mean || e.EarliestDestinationArrival)) {
+                        nextDepartureIndex = s;
+                    }
                 }
             }
             if (nextDepartureIndex == undefined) {
@@ -139,7 +149,7 @@
             candidates.push(e);
             indices[nextDepartureIndex]++;
             if (!hasDistribution(e)) continue;
-            if (departure >= time.getTime()+walkingDistance(station.ID, e.From.SpaceAxis)/5*3600 && (!shortestPathFound || nextBestDeparture.DestinationArrival.Mean > e.DestinationArrival.Mean)) {
+            if (departure >= time.getTime()+walkingDistance(station.ID, e.From.SpaceAxis)/5*3600 && (!shortestPathFound || nextBestDeparture.DestinationArrival?.Mean > e.DestinationArrival?.Mean)) {
                 shortestPathFound = true;
                 nextBestDeparture = e;
             }
@@ -460,6 +470,9 @@
                 <th>{$t('c.header_direction')}</th>
                 <th>{$t('c.header_destination_arrival')}</th>
             </tr>
+        {#if selection.from < new Date(data.MinTime)}
+            <tr><td colspan="3" class="no-conns">{$t('c.no_earlier_connections')}</td></tr>
+        {/if}
         {#each nextBestDepartures as d}
             <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
                 <td>{@html departure(d)}</td>
@@ -474,7 +487,7 @@
                         {#if d.Line?.Type == 'Foot'}{$t('c.walking_to')} {stationResolver(d.To.SpaceAxis).Name}{/if}
                     </span>
                     {#if d.From.SpaceAxis != selectedStationId(selection)}
-                    <span class="walking-from">{$t('c.walking_from')} {stationResolver(d.From.SpaceAxis).Name}, <span class="micon">directions_walk</span>&nbsp;{walkingDistanceRounded(selectedStationId(selection), d.From.SpaceAxis)}m</span>
+                    <span class="walking-from">{$t('c.walking_from')} {stationResolver(d.From.SpaceAxis).Name.split(',')[0]}, <span class="micon">directions_walk</span>{walkingDistanceRounded(selectedStationId(selection), d.From.SpaceAxis)}m</span>
                     {/if}
                 </td>
                 <td class="nowrap">
@@ -501,10 +514,10 @@
                 </td>
             </tr>    
         {/each}
-        </table>
-        {#if nextBestDepartures.length == 0}
-            <p>{$t('c.no_known_connections')}</p>
+        {#if nextBestDepartures.length < maxNextBestDepartures}
+            <tr><td colspan="3" class="no-conns">{$t('c.no_later_connections')}</td></tr>
         {/if}
+        </table>
     {/if}
 
     <a href="?{optionsQueryString(store)}&form" class="submit">

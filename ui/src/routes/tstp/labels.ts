@@ -23,9 +23,9 @@ function label(e: Edge, detail: boolean): string {
         label += ' <tspan class="micon">info</tspan>';
     }
     if (e.Line.Type == 'Foot' && !detail) {
-        return '<tspan class="micon">directions_walk</tspan> ' + label;
+        return '<tspan class="micon">directions_walk</tspan>' + label;
     } else if (e.Line.Type == 'Foot'  && detail) {
-        return '<span class="micon">directions_walk</span>&nbsp;' + label;
+        return '<span class="micon">directions_walk</span>' + label;
     }
     return label;
 }

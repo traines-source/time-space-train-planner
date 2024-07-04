@@ -198,6 +198,7 @@ h3 .small {
 .walking-from {
   font-size: 14px;
   display: block;
+  font-weight: normal;
 }
 
 .edge {
@@ -418,6 +419,18 @@ a text {
   background: #dbdbdb;
 }
 
+#fromto {
+  position: relative;
+}
+#fromto #swap {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: block;
+  margin-top: -13px;
+  border-radius: 13px;
+  background-color: #dbdbdb;
+}
 
 #datetime {
   width: 50%;
@@ -465,6 +478,14 @@ a text {
 }
 #submit-container .indicator .micon {
   font-size: 20px;
+}
+
+#show-tsd {
+  position: absolute;
+  top: 100px;
+  left: 50px;
+  right: 50px;
+  text-align: center;
 }
 
 .loading-screen {
@@ -534,10 +555,14 @@ a text {
   line-height: 16px;
 }
 .next-best-departures td {
-  padding: 0 8px;
+  padding: 0 6px;
   height: 40px;
   border-top: 1px solid #dbdbdb;
   overflow: hidden;
+}
+.next-best-departures .no-conns {
+  padding: 6px;
+  font-style: italic;
 }
 
 .next-best-departures tr {

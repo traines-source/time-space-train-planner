@@ -13,6 +13,7 @@
     let query = store;
     let data: Response;
     let error: string | undefined;
+    let displayTsd = false;
     let selection: Selection = new Selection();
     let selectedShortestPath: Edge[] = [];
     const arrowMargin = 25;
@@ -158,6 +159,10 @@
         return 'tip_'+Math.floor(Math.random()*tipCount);
     }
 
+    function showTsd() {
+        displayTsd = true;
+    }
+
     onMount(() => {
         fetchTimespace();
         const e = document.getElementById('timespace-canvas')
@@ -196,7 +201,7 @@
         <feMorphology operator="erode" radius="8"/>
     </filter>
 </defs>
-{#if data && $page.url.searchParams.get('tsd') != 'no'}
+{#if data && displayTsd}
 {#each Object.values(data.Stations) as s (s.ID)}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label" on:click={() => selectStation(s.GroupID || s.ID)}>
     {s.Name}
@@ -246,5 +251,13 @@
 {/if}
 
 </svg>
+
+{#if data && !displayTsd}
+    <div id="show-tsd">
+    <a href="javascript:void(0)" on:click={showTsd} class="submit">
+        {$t('c.show_tsd')}
+    </a>
+    </div>
+{/if}
 </div>
 <Details bind:selection={selection} loading={loading} doRefresh={refresh} selectEdge={selectEdge} selectStation={selectStation} data={data} error={error}/>

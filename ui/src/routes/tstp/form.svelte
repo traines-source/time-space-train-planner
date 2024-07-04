@@ -35,6 +35,12 @@
         }
     }
 
+    function swap(): void {
+        const tmp = query.from;
+        query.from = query.to;
+        query.to = tmp;
+    }
+
     onMount(() => {
         if (!query.from.name || !query.to.name) {
             if (query.from.id && query.to.id) {
@@ -63,12 +69,16 @@
         
     <form autocomplete="off" id="query">
 
+    
+        <div id="fromto">
         <div>
             <StationInput placeholder="{$t('c.from')}" bind:selectedStation={query.from} />
         </div>
         <div>
             <StationInput placeholder="{$t('c.to')}" bind:selectedStation={query.to} />
         </div>
+        <a href="javascript:void(0)" id="swap" class="indicator" on:click={swap}><span class="micon">swap_vert</span></a>
+    </div>
         {#if query.vias.length > 0}
             <p>
                 {$t('c.interchanges_explanation')}
