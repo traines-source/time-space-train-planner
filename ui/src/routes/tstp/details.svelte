@@ -20,9 +20,29 @@
     let nextBestDepartures: Edge[] | undefined = undefined;
     let nextBestDeparture: Edge | undefined = undefined;
     let nextBestDeparturesBoundsMinutes: number[] = [0,0];
-    const maxNextBestDepartures = 5;
-    const negativeTransferMinutes = 5;
+    const defaultNextBestDepartures = 5;
+    const defaultNegativeTransferMinutes = 5;
+    let numDepartures = defaultNextBestDepartures;
+    let negativeTransferMinutes = defaultNegativeTransferMinutes;
+
     $: {
+        console.log("upd");
+        numDepartures = defaultNextBestDepartures;
+        negativeTransferMinutes = defaultNegativeTransferMinutes;
+        nextBestDepartureForSelection(selection);
+    }
+
+    function displayEarlierDepartures() {
+        negativeTransferMinutes += 30;
+        nextBestDepartureForSelection(selection);
+    }
+
+    function displayLaterDepartures() {
+        numDepartures += defaultNextBestDepartures;
+        nextBestDepartureForSelection(selection);
+    }
+
+    function nextBestDepartureForSelection(selection: Edge) {
         if (selection.edge) {
             nextBestDeparturesForEdge();
             rectifyEdgeHistory();
@@ -109,7 +129,7 @@
         let p95ArrOfLatestDeparture = 0
         while (true) {
             let nextDepartureIndex = undefined;
-            if (candidates.length >= maxNextBestDepartures && shortestPathFound || candidates.length >= maxNextBestDepartures*maxNextBestDepartures) {
+            if (candidates.length >= numDepartures && shortestPathFound || candidates.length >= numDepartures*numDepartures) {
                 break;
             }
             for (let s=0; s<relevantStations.length; s++) {
@@ -465,12 +485,15 @@
     {#if nextBestDepartures}
         <h3><span class="small">{$t('c.next_best_departures')}</span><br /><span class="highlight">{selectedStationName(selection)}</span>, <input type="time" value={simpleTime(selection.from)} on:change={updateTime}></h3>
         <table class="next-best-departures">
+            <tr><td class="nosep right" colspan="3"><a href="javascript:void(0)" on:click={displayEarlierDepartures} class="submit small">
+                {$t('c.earlier_departures')}
+            </a></td></tr>
             <tr>
                 <th>{$t('c.header_departure')}</th>
                 <th>{$t('c.header_direction')}</th>
                 <th>{$t('c.header_destination_arrival')}</th>
             </tr>
-        {#if selection.from < new Date(data.MinTime)}
+        {#if selection.from.getTime()-negativeTransferMinutes*60*1000 < new Date(data.MinTime).getTime()}
             <tr><td colspan="3" class="no-conns">{$t('c.no_earlier_connections')}</td></tr>
         {/if}
         {#each nextBestDepartures as d}
@@ -514,10 +537,14 @@
                 </td>
             </tr>    
         {/each}
-        {#if nextBestDepartures.length < maxNextBestDepartures}
+        {#if nextBestDepartures.length < numDepartures}
             <tr><td colspan="3" class="no-conns">{$t('c.no_later_connections')}</td></tr>
         {/if}
+        <tr><td class="right" colspan="3"><a href="javascript:void(0)" on:click={displayLaterDepartures} class="submit small">
+            {$t('c.later_departures')}
+        </a></td></tr>
         </table>
+        
     {/if}
 
     <a href="?{optionsQueryString(store)}&form" class="submit">

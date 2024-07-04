@@ -52,5 +52,7 @@
     "explain_share_95th": "Mit einer geschätzten Wahrscheinlichkeit von 95% werde ich bis spätestens {{time}} ankommen.",
     "explain_share_title": "Meine Ankunftszeit an {{destination}}",
     "walking_to": "bis",
-    "walking_from": "ab"
+    "walking_from": "ab",
+    "earlier_departures": "Früher",
+    "later_departures": "Später"
 }

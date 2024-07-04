@@ -52,5 +52,7 @@
     "explain_share_95th": "Avec une probabilité estimée de 95%, j'arriverai avant {{time}}.",
     "explain_share_title": "Mon temps d'arrivée à {{destination}}",
     "walking_to": "à",
-    "walking_from": "départ de"
+    "walking_from": "départ de",
+    "earlier_departures": "Plus tôt",
+    "later_departures": "Plus tard"
 }
