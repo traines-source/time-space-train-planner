@@ -73,9 +73,9 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 	}
 	for _, l := range lines {
 		var p int32 = -1
-		/*if l.Type == "Foot" {
+		if l.Type == "Foot" && len(l.Route) > 0 && l.Route[0].Discarded {
 			continue
-		}*/
+		}
 		if regionly && (l.Type == "national" || l.Type == "nationalExpress") {
 			continue
 		}
@@ -93,9 +93,6 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 			}},
 		}
 		for _, c := range l.Route {
-			if c.Discarded {
-				continue
-			}
 			route.Trips[0].Connections = append(route.Trips[0].Connections, &stost.Connection{
 				FromId:    c.From.ID,
 				ToId:      c.To.ID,
