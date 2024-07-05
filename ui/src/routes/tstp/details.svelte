@@ -52,11 +52,11 @@
     }
 
     function nextBestDeparturesForEdge() {
-        if (selection.edge.To.SpaceAxis == data.To.ID) {
+        const station = stationResolver(selection.edge.To.SpaceAxis);
+        if (selection.edge.To.SpaceAxis == data.To.ID || station.GroupID == stationResolver(data.To.ID).GroupID) {
             nextBestDepartures = undefined;
             return;
         }
-        const station = stationResolver(selection.edge.To.SpaceAxis);
         if (!selection.from) {
             selection.from = new Date(parseTime(selection.edge.Actual.Arrival));
         }
