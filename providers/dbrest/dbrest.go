@@ -130,10 +130,17 @@ func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupID
 			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
 			continue
 		}
+		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr)
 		p.parseStation(stop, *stop.Stop.ID, groupID)
-		p.parseLine(stop, *stop.TripID, lineID)
-		p.parseLineStop(stop, arrival, *stop.Stop.ID, *stop.TripID)
+		p.parseLine(stop, tripID, lineID)
+		p.parseLineStop(stop, arrival, *stop.Stop.ID, tripID)
 	}
+}
+func getNormalizedTripID(tripID *string, lineID *string, fahrtNr *string) string {
+	if lineID != nil && *lineID != "" && fahrtNr != nil && *fahrtNr != "" {
+		return *lineID + "###" + *fahrtNr
+	}
+	return *tripID
 }
 
 func (p *DbRest) parseStation(stop *models.DepartureArrival, stationID string, groupID string) {
@@ -301,7 +308,7 @@ func (p *DbRest) parseEdgesFromJourneys() {
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
 				IDFrom:               *leg.Origin.ID,
 				IDTo:                 *leg.Destination.ID,
-				LineID:               *leg.TripID,
+				LineID:               getNormalizedTripID(leg.TripID, leg.Line.ID, leg.Line.FahrtNr),
 				ProviderShortestPath: &hafas,
 				Planned:              planned,
 			})
