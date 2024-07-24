@@ -232,6 +232,8 @@ func (p *DbRest) requestJourneysApi() error {
 	params.From = &from
 	params.To = &to
 	params.Departure = (*strfmt.DateTime)(&departure)
+	var resultNum int64 = 10
+	params.Results = &resultNum
 	if p.consumer.RegionalOnly() {
 		falsey := false
 		params.National = &falsey
@@ -291,6 +293,7 @@ func (p *DbRest) fallbackStations(from providers.ProviderStation, to providers.P
 }
 
 func (p *DbRest) parseEdgesFromJourneys() {
+	log.Println("Num Journeys: ", len(p.cachedJourneys.Journeys))
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
 			if leg.Line == nil {
