@@ -137,7 +137,7 @@ func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupID
 	}
 }
 func getNormalizedTripID(tripID *string, lineID *string, fahrtNr *string) string {
-	if lineID != nil && *lineID != "" && fahrtNr != nil && *fahrtNr != "" {
+	if lineID != nil && len(*lineID) >= 3 && fahrtNr != nil && len(*fahrtNr) >= 3 {
 		return *lineID + "###" + *fahrtNr
 	}
 	return *tripID
