@@ -7,6 +7,7 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -45,7 +46,7 @@ func (o *GetJourneysReader) ReadResponse(response runtime.ClientResponse, consum
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /journeys] GetJourneys", response, response.Code())
 	}
 }
 
@@ -94,11 +95,13 @@ func (o *GetJourneysOK) Code() int {
 }
 
 func (o *GetJourneysOK) Error() string {
-	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK %s", 200, payload)
 }
 
 func (o *GetJourneysOK) String() string {
-	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysOK %s", 200, payload)
 }
 
 func (o *GetJourneysOK) GetPayload() *GetJourneysOKBody {
@@ -162,11 +165,13 @@ func (o *GetJourneysBadGateway) Code() int {
 }
 
 func (o *GetJourneysBadGateway) Error() string {
-	return fmt.Sprintf("[GET /journeys][%d] getJourneysBadGateway  %+v", 502, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysBadGateway %s", 502, payload)
 }
 
 func (o *GetJourneysBadGateway) String() string {
-	return fmt.Sprintf("[GET /journeys][%d] getJourneysBadGateway  %+v", 502, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysBadGateway %s", 502, payload)
 }
 
 func (o *GetJourneysBadGateway) GetPayload() *GetJourneysBadGatewayBody {
@@ -230,11 +235,13 @@ func (o *GetJourneysServiceUnavailable) Code() int {
 }
 
 func (o *GetJourneysServiceUnavailable) Error() string {
-	return fmt.Sprintf("[GET /journeys][%d] getJourneysServiceUnavailable  %+v", 503, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysServiceUnavailable %s", 503, payload)
 }
 
 func (o *GetJourneysServiceUnavailable) String() string {
-	return fmt.Sprintf("[GET /journeys][%d] getJourneysServiceUnavailable  %+v", 503, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /journeys][%d] getJourneysServiceUnavailable %s", 503, payload)
 }
 
 func (o *GetJourneysServiceUnavailable) GetPayload() string {
@@ -364,6 +371,11 @@ func (o *GetJourneysOKBody) contextValidateJourneys(ctx context.Context, formats
 	for i := 0; i < len(o.Journeys); i++ {
 
 		if o.Journeys[i] != nil {
+
+			if swag.IsZero(o.Journeys[i]) { // not required
+				return nil
+			}
+
 			if err := o.Journeys[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("getJourneysOK" + "." + "journeys" + "." + strconv.Itoa(i))
@@ -545,6 +557,7 @@ func (o *GetJourneysOKBodyJourneysItems0) ContextValidate(ctx context.Context, f
 func (o *GetJourneysOKBodyJourneysItems0) contextValidateCycle(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Cycle != nil {
+
 		if err := o.Cycle.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cycle")
@@ -563,6 +576,11 @@ func (o *GetJourneysOKBodyJourneysItems0) contextValidateLegs(ctx context.Contex
 	for i := 0; i < len(o.Legs); i++ {
 
 		if o.Legs[i] != nil {
+
+			if swag.IsZero(o.Legs[i]) { // not required
+				return nil
+			}
+
 			if err := o.Legs[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("legs" + "." + strconv.Itoa(i))
@@ -1044,6 +1062,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0) ContextValidate(ctx context.
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateCycle(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Cycle != nil {
+
 		if err := o.Cycle.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cycle")
@@ -1060,6 +1079,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateCycle(ctx con
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateDestination(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Destination != nil {
+
 		if err := o.Destination.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("destination")
@@ -1076,6 +1096,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateDestination(c
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateLine(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Line != nil {
+
 		if err := o.Line.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line")
@@ -1092,6 +1113,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateLine(ctx cont
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0) contextValidateOrigin(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Origin != nil {
+
 		if err := o.Origin.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("origin")
@@ -1359,6 +1381,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) ContextValidate(c
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Location != nil {
+
 		if err := o.Location.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("destination" + "." + "location")
@@ -1375,6 +1398,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) contextValidateLo
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0Destination) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Products != nil {
+
 		if err := o.Products.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("destination" + "." + "products")
@@ -1758,6 +1782,10 @@ type GetJourneysOKBodyJourneysItems0LegsItems0Line struct {
 	// Required: true
 	Product *string `json:"product"`
 
+	// product name
+	// Required: true
+	ProductName *string `json:"productName"`
+
 	// public
 	// Required: true
 	Public *bool `json:"public"`
@@ -1796,6 +1824,10 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) Validate(formats strfmt.
 	}
 
 	if err := o.validateProduct(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateProductName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -1887,6 +1919,15 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateProduct(formats 
 	return nil
 }
 
+func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validateProductName(formats strfmt.Registry) error {
+
+	if err := validate.Required("line"+"."+"productName", "body", o.ProductName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) validatePublic(formats strfmt.Registry) error {
 
 	if err := validate.Required("line"+"."+"public", "body", o.Public); err != nil {
@@ -1922,6 +1963,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) ContextValidate(ctx cont
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0Line) contextValidateOperator(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Operator != nil {
+
 		if err := o.Operator.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line" + "." + "operator")
@@ -2189,6 +2231,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) ContextValidate(ctx co
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Location != nil {
+
 		if err := o.Location.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("origin" + "." + "location")
@@ -2205,6 +2248,7 @@ func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) contextValidateLocatio
 func (o *GetJourneysOKBodyJourneysItems0LegsItems0Origin) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Products != nil {
+
 		if err := o.Products.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("origin" + "." + "products")

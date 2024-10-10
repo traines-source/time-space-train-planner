@@ -873,6 +873,9 @@
                                   "product": {
                                     "type": "string"
                                   },
+                                  "productName": {
+                                    "type": "string"
+                                  },
                                   "operator": {
                                     "type": "object",
                                     "properties": {
@@ -902,6 +905,7 @@
                                   "adminCode",
                                   "mode",
                                   "product",
+                                  "productName",
                                   "operator"
                                 ]
                               },

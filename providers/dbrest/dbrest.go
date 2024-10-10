@@ -3,7 +3,9 @@ package dbrest
 import (
 	"log"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	httptransport "github.com/go-openapi/runtime/client"
@@ -130,15 +132,20 @@ func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupID
 			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
 			continue
 		}
-		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr)
+		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr, stop.Line.ProductName)
 		p.parseStation(stop, *stop.Stop.ID, groupID)
 		p.parseLine(stop, tripID, lineID)
 		p.parseLineStop(stop, arrival, *stop.Stop.ID, tripID)
 	}
 }
-func getNormalizedTripID(tripID *string, lineID *string, fahrtNr *string) string {
-	if lineID != nil && len(*lineID) >= 3 && fahrtNr != nil && len(*fahrtNr) >= 3 {
-		return *lineID + "###" + *fahrtNr
+func getNormalizedTripID(tripID *string, lineID *string, fahrtNr *string, productName *string) string {
+	if lineID != nil && len(*lineID) >= 4 && fahrtNr != nil && len(*fahrtNr) >= 3 && productName != nil && *productName != "Bus" {
+		parts := strings.Split(*tripID, "#")
+		if matched, _ := regexp.MatchString("[0-9]", *lineID); matched && len(parts) == 42 {
+			date := parts[12]
+			id := *lineID + "###" + *fahrtNr + "###" + date
+			return id
+		}
 	}
 	return *tripID
 }
@@ -311,7 +318,7 @@ func (p *DbRest) parseEdgesFromJourneys() {
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
 				IDFrom:               *leg.Origin.ID,
 				IDTo:                 *leg.Destination.ID,
-				LineID:               getNormalizedTripID(leg.TripID, leg.Line.ID, leg.Line.FahrtNr),
+				LineID:               getNormalizedTripID(leg.TripID, leg.Line.ID, leg.Line.FahrtNr, leg.Line.ProductName),
 				ProviderShortestPath: &hafas,
 				Planned:              planned,
 			})

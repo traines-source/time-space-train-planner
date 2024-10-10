@@ -6,6 +6,7 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -28,7 +29,7 @@ func (o *GetLocationsReader) ReadResponse(response runtime.ClientResponse, consu
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /locations] GetLocations", response, response.Code())
 	}
 }
 
@@ -77,11 +78,13 @@ func (o *GetLocationsOK) Code() int {
 }
 
 func (o *GetLocationsOK) Error() string {
-	return fmt.Sprintf("[GET /locations][%d] getLocationsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /locations][%d] getLocationsOK %s", 200, payload)
 }
 
 func (o *GetLocationsOK) String() string {
-	return fmt.Sprintf("[GET /locations][%d] getLocationsOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /locations][%d] getLocationsOK %s", 200, payload)
 }
 
 func (o *GetLocationsOK) GetPayload() []interface{} {

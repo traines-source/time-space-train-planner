@@ -309,6 +309,7 @@ func (m *DepartureArrival) ContextValidate(ctx context.Context, formats strfmt.R
 func (m *DepartureArrival) contextValidateLine(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Line != nil {
+
 		if err := m.Line.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line")
@@ -327,6 +328,11 @@ func (m *DepartureArrival) contextValidateRemarks(ctx context.Context, formats s
 	for i := 0; i < len(m.Remarks); i++ {
 
 		if m.Remarks[i] != nil {
+
+			if swag.IsZero(m.Remarks[i]) { // not required
+				return nil
+			}
+
 			if err := m.Remarks[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("remarks" + "." + strconv.Itoa(i))
@@ -345,6 +351,7 @@ func (m *DepartureArrival) contextValidateRemarks(ctx context.Context, formats s
 func (m *DepartureArrival) contextValidateStop(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Stop != nil {
+
 		if err := m.Stop.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stop")
@@ -590,6 +597,7 @@ func (m *DepartureArrivalLine) ContextValidate(ctx context.Context, formats strf
 func (m *DepartureArrivalLine) contextValidateOperator(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Operator != nil {
+
 		if err := m.Operator.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("line" + "." + "operator")
@@ -892,6 +900,7 @@ func (m *DepartureArrivalStop) ContextValidate(ctx context.Context, formats strf
 func (m *DepartureArrivalStop) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Location != nil {
+
 		if err := m.Location.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stop" + "." + "location")
@@ -908,6 +917,7 @@ func (m *DepartureArrivalStop) contextValidateLocation(ctx context.Context, form
 func (m *DepartureArrivalStop) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Products != nil {
+
 		if err := m.Products.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("stop" + "." + "products")

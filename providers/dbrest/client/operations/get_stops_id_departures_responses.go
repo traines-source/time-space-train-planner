@@ -7,6 +7,7 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -44,7 +45,7 @@ func (o *GetStopsIDDeparturesReader) ReadResponse(response runtime.ClientRespons
 		}
 		return nil, result
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /stops/{id}/departures] GetStopsIDDepartures", response, response.Code())
 	}
 }
 
@@ -93,11 +94,13 @@ func (o *GetStopsIDDeparturesOK) Code() int {
 }
 
 func (o *GetStopsIDDeparturesOK) Error() string {
-	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesOK %s", 200, payload)
 }
 
 func (o *GetStopsIDDeparturesOK) String() string {
-	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesOK %s", 200, payload)
 }
 
 func (o *GetStopsIDDeparturesOK) GetPayload() []*models.DepartureArrival {
@@ -159,11 +162,13 @@ func (o *GetStopsIDDeparturesBadGateway) Code() int {
 }
 
 func (o *GetStopsIDDeparturesBadGateway) Error() string {
-	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesBadGateway  %+v", 502, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesBadGateway %s", 502, payload)
 }
 
 func (o *GetStopsIDDeparturesBadGateway) String() string {
-	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesBadGateway  %+v", 502, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesBadGateway %s", 502, payload)
 }
 
 func (o *GetStopsIDDeparturesBadGateway) GetPayload() *GetStopsIDDeparturesBadGatewayBody {
@@ -227,11 +232,13 @@ func (o *GetStopsIDDeparturesServiceUnavailable) Code() int {
 }
 
 func (o *GetStopsIDDeparturesServiceUnavailable) Error() string {
-	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesServiceUnavailable  %+v", 503, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesServiceUnavailable %s", 503, payload)
 }
 
 func (o *GetStopsIDDeparturesServiceUnavailable) String() string {
-	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesServiceUnavailable  %+v", 503, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stops/{id}/departures][%d] getStopsIdDeparturesServiceUnavailable %s", 503, payload)
 }
 
 func (o *GetStopsIDDeparturesServiceUnavailable) GetPayload() string {

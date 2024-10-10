@@ -7,6 +7,7 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,7 +32,7 @@ func (o *GetStationsIDReader) ReadResponse(response runtime.ClientResponse, cons
 		}
 		return result, nil
 	default:
-		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
+		return nil, runtime.NewAPIError("[GET /stations/{id}] GetStationsID", response, response.Code())
 	}
 }
 
@@ -80,11 +81,13 @@ func (o *GetStationsIDOK) Code() int {
 }
 
 func (o *GetStationsIDOK) Error() string {
-	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK %s", 200, payload)
 }
 
 func (o *GetStationsIDOK) String() string {
-	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /stations/{id}][%d] getStationsIdOK %s", 200, payload)
 }
 
 func (o *GetStationsIDOK) GetPayload() *GetStationsIDOKBody {
@@ -241,6 +244,11 @@ func (o *GetStationsIDOKBody) ContextValidate(ctx context.Context, formats strfm
 func (o *GetStationsIDOKBody) contextValidateAddress(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Address != nil {
+
+		if swag.IsZero(o.Address) { // not required
+			return nil
+		}
+
 		if err := o.Address.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getStationsIdOK" + "." + "address")
@@ -257,6 +265,11 @@ func (o *GetStationsIDOKBody) contextValidateAddress(ctx context.Context, format
 func (o *GetStationsIDOKBody) contextValidateLocation(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Location != nil {
+
+		if swag.IsZero(o.Location) { // not required
+			return nil
+		}
+
 		if err := o.Location.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getStationsIdOK" + "." + "location")
@@ -273,6 +286,11 @@ func (o *GetStationsIDOKBody) contextValidateLocation(ctx context.Context, forma
 func (o *GetStationsIDOKBody) contextValidateOperator(ctx context.Context, formats strfmt.Registry) error {
 
 	if o.Operator != nil {
+
+		if swag.IsZero(o.Operator) { // not required
+			return nil
+		}
+
 		if err := o.Operator.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("getStationsIdOK" + "." + "operator")
