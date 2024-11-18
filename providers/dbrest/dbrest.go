@@ -95,7 +95,7 @@ func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when 
 	if err != nil {
 		return err
 	}
-	p.parseDepartureArrival(res.Payload, station.ID, true)
+	p.parseDepartureArrival(res.Payload.Arrivals, station.ID, true)
 	return nil
 }
 
@@ -118,94 +118,94 @@ func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, whe
 	if err != nil {
 		return err
 	}
-	p.parseDepartureArrival(res.Payload, station.ID, false)
+	p.parseDepartureArrival(res.Payload.Departures, station.ID, false)
 	return nil
 }
 
-func (p *DbRest) parseDepartureArrival(stops []*models.DepartureArrival, groupID string, arrival bool) {
+func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID string, arrival bool) {
 	if len(stops) >= results {
 		log.Printf("Warning: Potentially missing arrivals/departures (max. results of %d exceeded)", len(stops))
 	}
 	for _, stop := range stops {
-		lineID, err := strconv.Atoi(*stop.Line.FahrtNr)
+		lineID, err := strconv.Atoi(stop.Line.FahrtNr)
 		if err != nil {
 			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
 			continue
 		}
 		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr, stop.Line.ProductName)
-		p.parseStation(stop, *stop.Stop.ID, groupID)
+		p.parseStation(stop, stop.Stop.ID, groupID)
 		p.parseLine(stop, tripID, lineID)
-		p.parseLineStop(stop, arrival, *stop.Stop.ID, tripID)
+		p.parseLineStop(stop, arrival, stop.Stop.ID, tripID)
 	}
 }
-func getNormalizedTripID(tripID *string, lineID *string, fahrtNr *string, productName *string) string {
-	if lineID != nil && len(*lineID) >= 4 && fahrtNr != nil && len(*fahrtNr) >= 3 && productName != nil && *productName != "Bus" {
-		parts := strings.Split(*tripID, "#")
-		if matched, _ := regexp.MatchString("[0-9]", *lineID); matched && len(parts) == 42 {
+func getNormalizedTripID(tripID string, lineID string, fahrtNr string, productName string) string {
+	if len(lineID) >= 4 && len(fahrtNr) >= 3 && productName != "Bus" {
+		parts := strings.Split(tripID, "#")
+		if matched, _ := regexp.MatchString("[0-9]", lineID); matched && len(parts) == 42 {
 			date := parts[12]
-			id := *lineID + "###" + *fahrtNr + "###" + date
+			id := lineID + "###" + fahrtNr + "###" + date
 			return id
 		}
 	}
-	return *tripID
+	return tripID
 }
 
-func (p *DbRest) parseStation(stop *models.DepartureArrival, stationID string, groupID string) {
+func (p *DbRest) parseStation(stop *models.Alternative, stationID string, groupID string) {
 	p.consumer.UpsertStation(providers.ProviderStation{
 		ID:      stationID,
 		GroupID: &groupID,
-		Name:    *stop.Stop.Name,
-		Lat:     *stop.Stop.Location.Latitude,
-		Lon:     *stop.Stop.Location.Longitude,
+		Name:    stop.Stop.Name,
+		Lat:     stop.Stop.Location.Latitude,
+		Lon:     stop.Stop.Location.Longitude,
 	})
 }
 
-func (p *DbRest) parseLine(stop *models.DepartureArrival, tripID string, lineID int) {
+func (p *DbRest) parseLine(stop *models.Alternative, tripID string, lineID int) {
 	lineName := ""
-	if stop.Line.Name != nil {
-		lineName = *stop.Line.Name
+	if stop.Line.Name != "" {
+		lineName = stop.Line.Name
 	}
 	productName := ""
-	if stop.Line.Product != nil {
-		productName = *stop.Line.Product
+	if stop.Line.Product != "" {
+		productName = stop.Line.Product
 	}
 	direction := ""
-	if stop.Direction != nil {
-		direction = *stop.Direction
+	if stop.Direction != "" {
+		direction = stop.Direction
 	}
 	p.consumer.UpsertLine(providers.ProviderLine{ID: tripID, TripName: lineID, Type: productName, Name: lineName, Direction: direction})
 }
 
-func (p *DbRest) parseLineStop(stop *models.DepartureArrival, arrival bool, stationID string, tripID string) {
+func (p *DbRest) parseLineStop(stop *models.Alternative, arrival bool, stationID string, tripID string) {
 
 	planned := &providers.ProviderLineStopInfo{}
 	current := &providers.ProviderLineStopInfo{}
 
 	if arrival {
-		if stop.PlannedWhen != nil {
-			planned.Arrival = time.Time(*stop.PlannedWhen)
+		if !stop.PlannedWhen.IsZero() {
+			planned.Arrival = time.Time(stop.PlannedWhen)
 		}
-		if stop.PlannedPlatform != nil {
-			planned.ArrivalTrack = *stop.PlannedPlatform
+		if stop.PlannedPlatform != "" {
+			planned.ArrivalTrack = stop.PlannedPlatform
 		}
-		if stop.When != nil && stop.Delay != nil {
-			current.Arrival = time.Time(*stop.When)
+		if !stop.When.IsZero() && stop.Delay != nil {
+			current.Arrival = time.Time(stop.When)
 		}
-		if stop.Platform != nil {
-			current.ArrivalTrack = *stop.Platform
+		if stop.Platform != "" {
+			current.ArrivalTrack = stop.Platform
 		}
 	} else {
-		if stop.PlannedWhen != nil {
-			planned.Departure = time.Time(*stop.PlannedWhen)
+		if !stop.PlannedWhen.IsZero() {
+			planned.Departure = time.Time(stop.PlannedWhen)
 		}
-		if stop.PlannedPlatform != nil {
-			planned.DepartureTrack = *stop.PlannedPlatform
+		if stop.PlannedPlatform != "" {
+			planned.DepartureTrack = stop.PlannedPlatform
 		}
-		if stop.When != nil && stop.Delay != nil {
-			current.Departure = time.Time(*stop.When)
+		if !stop.When.IsZero() && stop.Delay != nil {
+			current.Departure = time.Time(stop.When)
 		}
-		if stop.Platform != nil {
-			current.DepartureTrack = *stop.Platform
+		if stop.Platform != "" {
+			current.DepartureTrack = stop.Platform
 		}
 	}
 	pls := providers.ProviderLineStop{ID: stationID, LineID: tripID, Planned: planned, Current: current, Cancelled: stop.Cancelled}
@@ -258,23 +258,24 @@ func (p *DbRest) parseStationsFromJourneys() {
 	var end time.Time
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
+			log.Println(leg.Arrival)
 			from := providers.ProviderStation{
-				ID:   *leg.Origin.ID,
-				Name: *leg.Origin.Name,
-				Lat:  *leg.Origin.Location.Latitude,
-				Lon:  *leg.Origin.Location.Longitude,
+				ID:   leg.Origin.ID,
+				Name: leg.Origin.Name,
+				Lat:  leg.Origin.Location.Latitude,
+				Lon:  leg.Origin.Location.Longitude,
 			}
 			to := providers.ProviderStation{
-				ID:   *leg.Destination.ID,
-				Name: *leg.Destination.Name,
-				Lat:  *leg.Destination.Location.Latitude,
-				Lon:  *leg.Destination.Location.Longitude,
+				ID:   leg.Destination.ID,
+				Name: leg.Destination.Name,
+				Lat:  leg.Destination.Location.Latitude,
+				Lon:  leg.Destination.Location.Longitude,
 			}
 			p.fallbackStations(from, to)
 			p.consumer.UpsertStation(from)
 			p.consumer.UpsertStation(to)
-			if leg.Arrival != nil && end.Before(time.Time(*leg.Arrival)) {
-				end = time.Time(*leg.Arrival)
+			if !leg.Arrival.IsZero() && end.Before(time.Time(leg.Arrival)) {
+				end = time.Time(leg.Arrival)
 			}
 		}
 	}
@@ -309,15 +310,15 @@ func (p *DbRest) parseEdgesFromJourneys() {
 			}
 			hafas := true
 			planned := &providers.ProviderLineStopInfo{}
-			if leg.Departure != nil {
-				planned.Departure = time.Time(*leg.Departure)
+			if !leg.Departure.IsZero() {
+				planned.Departure = time.Time(leg.Departure)
 			}
-			if leg.Arrival != nil {
-				planned.Arrival = time.Time(*leg.Arrival)
+			if !leg.Arrival.IsZero() {
+				planned.Arrival = time.Time(leg.Arrival)
 			}
 			p.consumer.UpsertLineEdge(providers.ProviderLineEdge{
-				IDFrom:               *leg.Origin.ID,
-				IDTo:                 *leg.Destination.ID,
+				IDFrom:               leg.Origin.ID,
+				IDTo:                 leg.Destination.ID,
 				LineID:               getNormalizedTripID(leg.TripID, leg.Line.ID, leg.Line.FahrtNr, leg.Line.ProductName),
 				ProviderShortestPath: &hafas,
 				Planned:              planned,

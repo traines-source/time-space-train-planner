@@ -116,6 +116,12 @@ type GetStopsIDDeparturesParams struct {
 	// Default: true
 	NationalExpress *bool
 
+	/* Pretty.
+
+	   Pretty-print JSON responses?
+	*/
+	Pretty *bool
+
 	// Regional.
 	//
 	// Default: true
@@ -370,6 +376,17 @@ func (o *GetStopsIDDeparturesParams) SetNationalExpress(nationalExpress *bool) {
 	o.NationalExpress = nationalExpress
 }
 
+// WithPretty adds the pretty to the get stops ID departures params
+func (o *GetStopsIDDeparturesParams) WithPretty(pretty *bool) *GetStopsIDDeparturesParams {
+	o.SetPretty(pretty)
+	return o
+}
+
+// SetPretty adds the pretty to the get stops ID departures params
+func (o *GetStopsIDDeparturesParams) SetPretty(pretty *bool) {
+	o.Pretty = pretty
+}
+
 // WithRegional adds the regional to the get stops ID departures params
 func (o *GetStopsIDDeparturesParams) WithRegional(regional *bool) *GetStopsIDDeparturesParams {
 	o.SetRegional(regional)
@@ -613,6 +630,23 @@ func (o *GetStopsIDDeparturesParams) WriteToRequest(r runtime.ClientRequest, reg
 		if qNationalExpress != "" {
 
 			if err := r.SetQueryParam("nationalExpress", qNationalExpress); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Pretty != nil {
+
+		// query param pretty
+		var qrPretty bool
+
+		if o.Pretty != nil {
+			qrPretty = *o.Pretty
+		}
+		qPretty := swag.FormatBool(qrPretty)
+		if qPretty != "" {
+
+			if err := r.SetQueryParam("pretty", qPretty); err != nil {
 				return err
 			}
 		}

@@ -10,10 +10,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	"traines.eu/time-space-train-planner/providers/dbrest/models"
 )
@@ -32,18 +35,6 @@ func (o *GetStopsIDArrivalsReader) ReadResponse(response runtime.ClientResponse,
 			return nil, err
 		}
 		return result, nil
-	case 502:
-		result := NewGetStopsIDArrivalsBadGateway()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
-	case 503:
-		result := NewGetStopsIDArrivalsServiceUnavailable()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
 	default:
 		return nil, runtime.NewAPIError("[GET /stops/{id}/arrivals] GetStopsIDArrivals", response, response.Code())
 	}
@@ -57,10 +48,10 @@ func NewGetStopsIDArrivalsOK() *GetStopsIDArrivalsOK {
 /*
 GetStopsIDArrivalsOK describes a response with status code 200, with default header values.
 
-An array of arrivals, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/5/docs/arrivals.md).
+An object with an array of arrivals, in the [`hafas-client` format](https://github.com/public-transport/hafas-client/blob/6/docs/arrivals.md).
 */
 type GetStopsIDArrivalsOK struct {
-	Payload []*models.DepartureArrival
+	Payload *GetStopsIDArrivalsOKBody
 }
 
 // IsSuccess returns true when this get stops Id arrivals o k response has a 2xx status code
@@ -103,81 +94,13 @@ func (o *GetStopsIDArrivalsOK) String() string {
 	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsOK %s", 200, payload)
 }
 
-func (o *GetStopsIDArrivalsOK) GetPayload() []*models.DepartureArrival {
+func (o *GetStopsIDArrivalsOK) GetPayload() *GetStopsIDArrivalsOKBody {
 	return o.Payload
 }
 
 func (o *GetStopsIDArrivalsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewGetStopsIDArrivalsBadGateway creates a GetStopsIDArrivalsBadGateway with default headers values
-func NewGetStopsIDArrivalsBadGateway() *GetStopsIDArrivalsBadGateway {
-	return &GetStopsIDArrivalsBadGateway{}
-}
-
-/*
-GetStopsIDArrivalsBadGateway describes a response with status code 502, with default header values.
-
-HAFAS error.
-*/
-type GetStopsIDArrivalsBadGateway struct {
-	Payload *GetStopsIDArrivalsBadGatewayBody
-}
-
-// IsSuccess returns true when this get stops Id arrivals bad gateway response has a 2xx status code
-func (o *GetStopsIDArrivalsBadGateway) IsSuccess() bool {
-	return false
-}
-
-// IsRedirect returns true when this get stops Id arrivals bad gateway response has a 3xx status code
-func (o *GetStopsIDArrivalsBadGateway) IsRedirect() bool {
-	return false
-}
-
-// IsClientError returns true when this get stops Id arrivals bad gateway response has a 4xx status code
-func (o *GetStopsIDArrivalsBadGateway) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this get stops Id arrivals bad gateway response has a 5xx status code
-func (o *GetStopsIDArrivalsBadGateway) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this get stops Id arrivals bad gateway response a status code equal to that given
-func (o *GetStopsIDArrivalsBadGateway) IsCode(code int) bool {
-	return code == 502
-}
-
-// Code gets the status code for the get stops Id arrivals bad gateway response
-func (o *GetStopsIDArrivalsBadGateway) Code() int {
-	return 502
-}
-
-func (o *GetStopsIDArrivalsBadGateway) Error() string {
-	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsBadGateway %s", 502, payload)
-}
-
-func (o *GetStopsIDArrivalsBadGateway) String() string {
-	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsBadGateway %s", 502, payload)
-}
-
-func (o *GetStopsIDArrivalsBadGateway) GetPayload() *GetStopsIDArrivalsBadGatewayBody {
-	return o.Payload
-}
-
-func (o *GetStopsIDArrivalsBadGateway) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	o.Payload = new(GetStopsIDArrivalsBadGatewayBody)
+	o.Payload = new(GetStopsIDArrivalsOKBody)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -187,96 +110,102 @@ func (o *GetStopsIDArrivalsBadGateway) readResponse(response runtime.ClientRespo
 	return nil
 }
 
-// NewGetStopsIDArrivalsServiceUnavailable creates a GetStopsIDArrivalsServiceUnavailable with default headers values
-func NewGetStopsIDArrivalsServiceUnavailable() *GetStopsIDArrivalsServiceUnavailable {
-	return &GetStopsIDArrivalsServiceUnavailable{}
-}
-
 /*
-GetStopsIDArrivalsServiceUnavailable describes a response with status code 503, with default header values.
-
-Too many requests.
+GetStopsIDArrivalsOKBody get stops ID arrivals o k body
+swagger:model GetStopsIDArrivalsOKBody
 */
-type GetStopsIDArrivalsServiceUnavailable struct {
-	Payload string
+type GetStopsIDArrivalsOKBody struct {
+
+	// arrivals
+	// Required: true
+	Arrivals []*models.Alternative `json:"arrivals"`
+
+	// realtime data updated at
+	RealtimeDataUpdatedAt int64 `json:"realtimeDataUpdatedAt,omitempty"`
 }
 
-// IsSuccess returns true when this get stops Id arrivals service unavailable response has a 2xx status code
-func (o *GetStopsIDArrivalsServiceUnavailable) IsSuccess() bool {
-	return false
+// Validate validates this get stops ID arrivals o k body
+func (o *GetStopsIDArrivalsOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateArrivals(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
 }
 
-// IsRedirect returns true when this get stops Id arrivals service unavailable response has a 3xx status code
-func (o *GetStopsIDArrivalsServiceUnavailable) IsRedirect() bool {
-	return false
-}
+func (o *GetStopsIDArrivalsOKBody) validateArrivals(formats strfmt.Registry) error {
 
-// IsClientError returns true when this get stops Id arrivals service unavailable response has a 4xx status code
-func (o *GetStopsIDArrivalsServiceUnavailable) IsClientError() bool {
-	return false
-}
-
-// IsServerError returns true when this get stops Id arrivals service unavailable response has a 5xx status code
-func (o *GetStopsIDArrivalsServiceUnavailable) IsServerError() bool {
-	return true
-}
-
-// IsCode returns true when this get stops Id arrivals service unavailable response a status code equal to that given
-func (o *GetStopsIDArrivalsServiceUnavailable) IsCode(code int) bool {
-	return code == 503
-}
-
-// Code gets the status code for the get stops Id arrivals service unavailable response
-func (o *GetStopsIDArrivalsServiceUnavailable) Code() int {
-	return 503
-}
-
-func (o *GetStopsIDArrivalsServiceUnavailable) Error() string {
-	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsServiceUnavailable %s", 503, payload)
-}
-
-func (o *GetStopsIDArrivalsServiceUnavailable) String() string {
-	payload, _ := json.Marshal(o.Payload)
-	return fmt.Sprintf("[GET /stops/{id}/arrivals][%d] getStopsIdArrivalsServiceUnavailable %s", 503, payload)
-}
-
-func (o *GetStopsIDArrivalsServiceUnavailable) GetPayload() string {
-	return o.Payload
-}
-
-func (o *GetStopsIDArrivalsServiceUnavailable) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := validate.Required("getStopsIdArrivalsOK"+"."+"arrivals", "body", o.Arrivals); err != nil {
 		return err
+	}
+
+	for i := 0; i < len(o.Arrivals); i++ {
+		if swag.IsZero(o.Arrivals[i]) { // not required
+			continue
+		}
+
+		if o.Arrivals[i] != nil {
+			if err := o.Arrivals[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getStopsIdArrivalsOK" + "." + "arrivals" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getStopsIdArrivalsOK" + "." + "arrivals" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
 }
 
-/*
-GetStopsIDArrivalsBadGatewayBody get stops ID arrivals bad gateway body
-swagger:model GetStopsIDArrivalsBadGatewayBody
-*/
-type GetStopsIDArrivalsBadGatewayBody struct {
+// ContextValidate validate this get stops ID arrivals o k body based on the context it is used
+func (o *GetStopsIDArrivalsOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
 
-	// msg
-	Msg string `json:"msg,omitempty"`
-}
+	if err := o.contextValidateArrivals(ctx, formats); err != nil {
+		res = append(res, err)
+	}
 
-// Validate validates this get stops ID arrivals bad gateway body
-func (o *GetStopsIDArrivalsBadGatewayBody) Validate(formats strfmt.Registry) error {
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
 	return nil
 }
 
-// ContextValidate validates this get stops ID arrivals bad gateway body based on context it is used
-func (o *GetStopsIDArrivalsBadGatewayBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+func (o *GetStopsIDArrivalsOKBody) contextValidateArrivals(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(o.Arrivals); i++ {
+
+		if o.Arrivals[i] != nil {
+
+			if swag.IsZero(o.Arrivals[i]) { // not required
+				return nil
+			}
+
+			if err := o.Arrivals[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getStopsIdArrivalsOK" + "." + "arrivals" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("getStopsIdArrivalsOK" + "." + "arrivals" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (o *GetStopsIDArrivalsBadGatewayBody) MarshalBinary() ([]byte, error) {
+func (o *GetStopsIDArrivalsOKBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -284,8 +213,8 @@ func (o *GetStopsIDArrivalsBadGatewayBody) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetStopsIDArrivalsBadGatewayBody) UnmarshalBinary(b []byte) error {
-	var res GetStopsIDArrivalsBadGatewayBody
+func (o *GetStopsIDArrivalsOKBody) UnmarshalBinary(b []byte) error {
+	var res GetStopsIDArrivalsOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

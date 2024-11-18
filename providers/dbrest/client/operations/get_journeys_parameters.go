@@ -82,6 +82,11 @@ type GetJourneysParams struct {
 	*/
 	Bike *bool
 
+	// Bus.
+	//
+	// Default: true
+	Bus *bool
+
 	/* Departure.
 
 	   Compute journeys departing at this date/time. Mutually exclusive with `arrival`. – Default: *now*
@@ -96,8 +101,42 @@ type GetJourneysParams struct {
 	*/
 	EarlierThan *string
 
-	// From.
+	/* Entrances.
+
+	   Parse & return entrances of stops/stations?
+
+	   Default: true
+	*/
+	Entrances *bool
+
+	// Ferry.
+	//
+	// Default: true
+	Ferry *bool
+
+	/* From.
+
+	   "from" as stop/station ID (e.g. from=8010159 for Halle (Saale) Hbf)
+	*/
 	From *string
+
+	/* FromAddress.
+
+	   "from" as an address (e.g. from.latitude=51.25639&from.longitude=7.46685&from.address=Hansestadt+Breckerfeld,+Hansering+3 for Hansestadt Breckerfeld, Hansering 3)
+	*/
+	FromAddress *string
+
+	/* FromID.
+
+	   "from" as POI (e.g. from.id=991561765&from.latitude=51.48364&from.longitude=11.98084 for Halle+(Saale),+Stadtpark+Halle+(Grünanlagen))
+	*/
+	FromID *string
+
+	// FromLatitude.
+	FromLatitude *float64
+
+	// FromLongitude.
+	FromLongitude *float64
 
 	/* Language.
 
@@ -128,6 +167,22 @@ type GetJourneysParams struct {
 	   Fetch & parse a shape for each journey leg?
 	*/
 	Polylines *bool
+
+	/* Pretty.
+
+	   Pretty-print JSON responses?
+	*/
+	Pretty *bool
+
+	// Regional.
+	//
+	// Default: true
+	Regional *bool
+
+	// RegionalExp.
+	//
+	// Default: true
+	RegionalExp *bool
 
 	/* Remarks.
 
@@ -165,14 +220,63 @@ type GetJourneysParams struct {
 	*/
 	Stopovers *bool
 
+	/* SubStops.
+
+	   Parse & return sub-stops of stations?
+
+	   Default: true
+	*/
+	SubStops *bool
+
+	// Suburban.
+	//
+	// Default: true
+	Suburban *bool
+
+	// Subway.
+	//
+	// Default: true
+	Subway *bool
+
+	// Taxi.
+	//
+	// Default: true
+	Taxi *bool
+
 	/* Tickets.
 
 	   Return information about available tickets?
 	*/
 	Tickets *bool
 
-	// To.
+	/* To.
+
+	   "to" as stop/station ID
+	*/
 	To *string
+
+	/* ToAddress.
+
+	   "to" as an address
+	*/
+	ToAddress *string
+
+	/* ToID.
+
+	   "to" as POI
+	*/
+	ToID *string
+
+	// ToLatitude.
+	ToLatitude *float64
+
+	// ToLongitude.
+	ToLongitude *float64
+
+	// Tram.
+	//
+	// Default: true
+	Tram *bool
 
 	/* TransferTime.
 
@@ -214,6 +318,12 @@ func (o *GetJourneysParams) SetDefaults() {
 	var (
 		bikeDefault = bool(false)
 
+		busDefault = bool(true)
+
+		entrancesDefault = bool(true)
+
+		ferryDefault = bool(true)
+
 		languageDefault = string("en")
 
 		nationalDefault = bool(true)
@@ -221,6 +331,10 @@ func (o *GetJourneysParams) SetDefaults() {
 		nationalExpressDefault = bool(true)
 
 		polylinesDefault = bool(false)
+
+		regionalDefault = bool(true)
+
+		regionalExpDefault = bool(true)
 
 		remarksDefault = bool(true)
 
@@ -232,7 +346,17 @@ func (o *GetJourneysParams) SetDefaults() {
 
 		stopoversDefault = bool(false)
 
+		subStopsDefault = bool(true)
+
+		suburbanDefault = bool(true)
+
+		subwayDefault = bool(true)
+
+		taxiDefault = bool(true)
+
 		ticketsDefault = bool(false)
+
+		tramDefault = bool(true)
 
 		transferTimeDefault = int64(0)
 
@@ -241,16 +365,26 @@ func (o *GetJourneysParams) SetDefaults() {
 
 	val := GetJourneysParams{
 		Bike:             &bikeDefault,
+		Bus:              &busDefault,
+		Entrances:        &entrancesDefault,
+		Ferry:            &ferryDefault,
 		Language:         &languageDefault,
 		National:         &nationalDefault,
 		NationalExpress:  &nationalExpressDefault,
 		Polylines:        &polylinesDefault,
+		Regional:         &regionalDefault,
+		RegionalExp:      &regionalExpDefault,
 		Remarks:          &remarksDefault,
 		Results:          &resultsDefault,
 		ScheduledDays:    &scheduledDaysDefault,
 		StartWithWalking: &startWithWalkingDefault,
 		Stopovers:        &stopoversDefault,
+		SubStops:         &subStopsDefault,
+		Suburban:         &suburbanDefault,
+		Subway:           &subwayDefault,
+		Taxi:             &taxiDefault,
 		Tickets:          &ticketsDefault,
+		Tram:             &tramDefault,
 		TransferTime:     &transferTimeDefault,
 		WalkingSpeed:     &walkingSpeedDefault,
 	}
@@ -327,6 +461,17 @@ func (o *GetJourneysParams) SetBike(bike *bool) {
 	o.Bike = bike
 }
 
+// WithBus adds the bus to the get journeys params
+func (o *GetJourneysParams) WithBus(bus *bool) *GetJourneysParams {
+	o.SetBus(bus)
+	return o
+}
+
+// SetBus adds the bus to the get journeys params
+func (o *GetJourneysParams) SetBus(bus *bool) {
+	o.Bus = bus
+}
+
 // WithDeparture adds the departure to the get journeys params
 func (o *GetJourneysParams) WithDeparture(departure *strfmt.DateTime) *GetJourneysParams {
 	o.SetDeparture(departure)
@@ -349,6 +494,28 @@ func (o *GetJourneysParams) SetEarlierThan(earlierThan *string) {
 	o.EarlierThan = earlierThan
 }
 
+// WithEntrances adds the entrances to the get journeys params
+func (o *GetJourneysParams) WithEntrances(entrances *bool) *GetJourneysParams {
+	o.SetEntrances(entrances)
+	return o
+}
+
+// SetEntrances adds the entrances to the get journeys params
+func (o *GetJourneysParams) SetEntrances(entrances *bool) {
+	o.Entrances = entrances
+}
+
+// WithFerry adds the ferry to the get journeys params
+func (o *GetJourneysParams) WithFerry(ferry *bool) *GetJourneysParams {
+	o.SetFerry(ferry)
+	return o
+}
+
+// SetFerry adds the ferry to the get journeys params
+func (o *GetJourneysParams) SetFerry(ferry *bool) {
+	o.Ferry = ferry
+}
+
 // WithFrom adds the from to the get journeys params
 func (o *GetJourneysParams) WithFrom(from *string) *GetJourneysParams {
 	o.SetFrom(from)
@@ -358,6 +525,50 @@ func (o *GetJourneysParams) WithFrom(from *string) *GetJourneysParams {
 // SetFrom adds the from to the get journeys params
 func (o *GetJourneysParams) SetFrom(from *string) {
 	o.From = from
+}
+
+// WithFromAddress adds the fromAddress to the get journeys params
+func (o *GetJourneysParams) WithFromAddress(fromAddress *string) *GetJourneysParams {
+	o.SetFromAddress(fromAddress)
+	return o
+}
+
+// SetFromAddress adds the fromAddress to the get journeys params
+func (o *GetJourneysParams) SetFromAddress(fromAddress *string) {
+	o.FromAddress = fromAddress
+}
+
+// WithFromID adds the fromID to the get journeys params
+func (o *GetJourneysParams) WithFromID(fromID *string) *GetJourneysParams {
+	o.SetFromID(fromID)
+	return o
+}
+
+// SetFromID adds the fromId to the get journeys params
+func (o *GetJourneysParams) SetFromID(fromID *string) {
+	o.FromID = fromID
+}
+
+// WithFromLatitude adds the fromLatitude to the get journeys params
+func (o *GetJourneysParams) WithFromLatitude(fromLatitude *float64) *GetJourneysParams {
+	o.SetFromLatitude(fromLatitude)
+	return o
+}
+
+// SetFromLatitude adds the fromLatitude to the get journeys params
+func (o *GetJourneysParams) SetFromLatitude(fromLatitude *float64) {
+	o.FromLatitude = fromLatitude
+}
+
+// WithFromLongitude adds the fromLongitude to the get journeys params
+func (o *GetJourneysParams) WithFromLongitude(fromLongitude *float64) *GetJourneysParams {
+	o.SetFromLongitude(fromLongitude)
+	return o
+}
+
+// SetFromLongitude adds the fromLongitude to the get journeys params
+func (o *GetJourneysParams) SetFromLongitude(fromLongitude *float64) {
+	o.FromLongitude = fromLongitude
 }
 
 // WithLanguage adds the language to the get journeys params
@@ -415,6 +626,39 @@ func (o *GetJourneysParams) SetPolylines(polylines *bool) {
 	o.Polylines = polylines
 }
 
+// WithPretty adds the pretty to the get journeys params
+func (o *GetJourneysParams) WithPretty(pretty *bool) *GetJourneysParams {
+	o.SetPretty(pretty)
+	return o
+}
+
+// SetPretty adds the pretty to the get journeys params
+func (o *GetJourneysParams) SetPretty(pretty *bool) {
+	o.Pretty = pretty
+}
+
+// WithRegional adds the regional to the get journeys params
+func (o *GetJourneysParams) WithRegional(regional *bool) *GetJourneysParams {
+	o.SetRegional(regional)
+	return o
+}
+
+// SetRegional adds the regional to the get journeys params
+func (o *GetJourneysParams) SetRegional(regional *bool) {
+	o.Regional = regional
+}
+
+// WithRegionalExp adds the regionalExp to the get journeys params
+func (o *GetJourneysParams) WithRegionalExp(regionalExp *bool) *GetJourneysParams {
+	o.SetRegionalExp(regionalExp)
+	return o
+}
+
+// SetRegionalExp adds the regionalExp to the get journeys params
+func (o *GetJourneysParams) SetRegionalExp(regionalExp *bool) {
+	o.RegionalExp = regionalExp
+}
+
 // WithRemarks adds the remarks to the get journeys params
 func (o *GetJourneysParams) WithRemarks(remarks *bool) *GetJourneysParams {
 	o.SetRemarks(remarks)
@@ -470,6 +714,50 @@ func (o *GetJourneysParams) SetStopovers(stopovers *bool) {
 	o.Stopovers = stopovers
 }
 
+// WithSubStops adds the subStops to the get journeys params
+func (o *GetJourneysParams) WithSubStops(subStops *bool) *GetJourneysParams {
+	o.SetSubStops(subStops)
+	return o
+}
+
+// SetSubStops adds the subStops to the get journeys params
+func (o *GetJourneysParams) SetSubStops(subStops *bool) {
+	o.SubStops = subStops
+}
+
+// WithSuburban adds the suburban to the get journeys params
+func (o *GetJourneysParams) WithSuburban(suburban *bool) *GetJourneysParams {
+	o.SetSuburban(suburban)
+	return o
+}
+
+// SetSuburban adds the suburban to the get journeys params
+func (o *GetJourneysParams) SetSuburban(suburban *bool) {
+	o.Suburban = suburban
+}
+
+// WithSubway adds the subway to the get journeys params
+func (o *GetJourneysParams) WithSubway(subway *bool) *GetJourneysParams {
+	o.SetSubway(subway)
+	return o
+}
+
+// SetSubway adds the subway to the get journeys params
+func (o *GetJourneysParams) SetSubway(subway *bool) {
+	o.Subway = subway
+}
+
+// WithTaxi adds the taxi to the get journeys params
+func (o *GetJourneysParams) WithTaxi(taxi *bool) *GetJourneysParams {
+	o.SetTaxi(taxi)
+	return o
+}
+
+// SetTaxi adds the taxi to the get journeys params
+func (o *GetJourneysParams) SetTaxi(taxi *bool) {
+	o.Taxi = taxi
+}
+
 // WithTickets adds the tickets to the get journeys params
 func (o *GetJourneysParams) WithTickets(tickets *bool) *GetJourneysParams {
 	o.SetTickets(tickets)
@@ -490,6 +778,61 @@ func (o *GetJourneysParams) WithTo(to *string) *GetJourneysParams {
 // SetTo adds the to to the get journeys params
 func (o *GetJourneysParams) SetTo(to *string) {
 	o.To = to
+}
+
+// WithToAddress adds the toAddress to the get journeys params
+func (o *GetJourneysParams) WithToAddress(toAddress *string) *GetJourneysParams {
+	o.SetToAddress(toAddress)
+	return o
+}
+
+// SetToAddress adds the toAddress to the get journeys params
+func (o *GetJourneysParams) SetToAddress(toAddress *string) {
+	o.ToAddress = toAddress
+}
+
+// WithToID adds the toID to the get journeys params
+func (o *GetJourneysParams) WithToID(toID *string) *GetJourneysParams {
+	o.SetToID(toID)
+	return o
+}
+
+// SetToID adds the toId to the get journeys params
+func (o *GetJourneysParams) SetToID(toID *string) {
+	o.ToID = toID
+}
+
+// WithToLatitude adds the toLatitude to the get journeys params
+func (o *GetJourneysParams) WithToLatitude(toLatitude *float64) *GetJourneysParams {
+	o.SetToLatitude(toLatitude)
+	return o
+}
+
+// SetToLatitude adds the toLatitude to the get journeys params
+func (o *GetJourneysParams) SetToLatitude(toLatitude *float64) {
+	o.ToLatitude = toLatitude
+}
+
+// WithToLongitude adds the toLongitude to the get journeys params
+func (o *GetJourneysParams) WithToLongitude(toLongitude *float64) *GetJourneysParams {
+	o.SetToLongitude(toLongitude)
+	return o
+}
+
+// SetToLongitude adds the toLongitude to the get journeys params
+func (o *GetJourneysParams) SetToLongitude(toLongitude *float64) {
+	o.ToLongitude = toLongitude
+}
+
+// WithTram adds the tram to the get journeys params
+func (o *GetJourneysParams) WithTram(tram *bool) *GetJourneysParams {
+	o.SetTram(tram)
+	return o
+}
+
+// SetTram adds the tram to the get journeys params
+func (o *GetJourneysParams) SetTram(tram *bool) {
+	o.Tram = tram
 }
 
 // WithTransferTime adds the transferTime to the get journeys params
@@ -584,6 +927,23 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		}
 	}
 
+	if o.Bus != nil {
+
+		// query param bus
+		var qrBus bool
+
+		if o.Bus != nil {
+			qrBus = *o.Bus
+		}
+		qBus := swag.FormatBool(qrBus)
+		if qBus != "" {
+
+			if err := r.SetQueryParam("bus", qBus); err != nil {
+				return err
+			}
+		}
+	}
+
 	if o.Departure != nil {
 
 		// query param departure
@@ -618,6 +978,40 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		}
 	}
 
+	if o.Entrances != nil {
+
+		// query param entrances
+		var qrEntrances bool
+
+		if o.Entrances != nil {
+			qrEntrances = *o.Entrances
+		}
+		qEntrances := swag.FormatBool(qrEntrances)
+		if qEntrances != "" {
+
+			if err := r.SetQueryParam("entrances", qEntrances); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Ferry != nil {
+
+		// query param ferry
+		var qrFerry bool
+
+		if o.Ferry != nil {
+			qrFerry = *o.Ferry
+		}
+		qFerry := swag.FormatBool(qrFerry)
+		if qFerry != "" {
+
+			if err := r.SetQueryParam("ferry", qFerry); err != nil {
+				return err
+			}
+		}
+	}
+
 	if o.From != nil {
 
 		// query param from
@@ -630,6 +1024,74 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		if qFrom != "" {
 
 			if err := r.SetQueryParam("from", qFrom); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.FromAddress != nil {
+
+		// query param from.address
+		var qrFromAddress string
+
+		if o.FromAddress != nil {
+			qrFromAddress = *o.FromAddress
+		}
+		qFromAddress := qrFromAddress
+		if qFromAddress != "" {
+
+			if err := r.SetQueryParam("from.address", qFromAddress); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.FromID != nil {
+
+		// query param from.id
+		var qrFromID string
+
+		if o.FromID != nil {
+			qrFromID = *o.FromID
+		}
+		qFromID := qrFromID
+		if qFromID != "" {
+
+			if err := r.SetQueryParam("from.id", qFromID); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.FromLatitude != nil {
+
+		// query param from.latitude
+		var qrFromLatitude float64
+
+		if o.FromLatitude != nil {
+			qrFromLatitude = *o.FromLatitude
+		}
+		qFromLatitude := swag.FormatFloat64(qrFromLatitude)
+		if qFromLatitude != "" {
+
+			if err := r.SetQueryParam("from.latitude", qFromLatitude); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.FromLongitude != nil {
+
+		// query param from.longitude
+		var qrFromLongitude float64
+
+		if o.FromLongitude != nil {
+			qrFromLongitude = *o.FromLongitude
+		}
+		qFromLongitude := swag.FormatFloat64(qrFromLongitude)
+		if qFromLongitude != "" {
+
+			if err := r.SetQueryParam("from.longitude", qFromLongitude); err != nil {
 				return err
 			}
 		}
@@ -720,6 +1182,57 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		}
 	}
 
+	if o.Pretty != nil {
+
+		// query param pretty
+		var qrPretty bool
+
+		if o.Pretty != nil {
+			qrPretty = *o.Pretty
+		}
+		qPretty := swag.FormatBool(qrPretty)
+		if qPretty != "" {
+
+			if err := r.SetQueryParam("pretty", qPretty); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Regional != nil {
+
+		// query param regional
+		var qrRegional bool
+
+		if o.Regional != nil {
+			qrRegional = *o.Regional
+		}
+		qRegional := swag.FormatBool(qrRegional)
+		if qRegional != "" {
+
+			if err := r.SetQueryParam("regional", qRegional); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.RegionalExp != nil {
+
+		// query param regionalExp
+		var qrRegionalExp bool
+
+		if o.RegionalExp != nil {
+			qrRegionalExp = *o.RegionalExp
+		}
+		qRegionalExp := swag.FormatBool(qrRegionalExp)
+		if qRegionalExp != "" {
+
+			if err := r.SetQueryParam("regionalExp", qRegionalExp); err != nil {
+				return err
+			}
+		}
+	}
+
 	if o.Remarks != nil {
 
 		// query param remarks
@@ -805,6 +1318,74 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		}
 	}
 
+	if o.SubStops != nil {
+
+		// query param subStops
+		var qrSubStops bool
+
+		if o.SubStops != nil {
+			qrSubStops = *o.SubStops
+		}
+		qSubStops := swag.FormatBool(qrSubStops)
+		if qSubStops != "" {
+
+			if err := r.SetQueryParam("subStops", qSubStops); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Suburban != nil {
+
+		// query param suburban
+		var qrSuburban bool
+
+		if o.Suburban != nil {
+			qrSuburban = *o.Suburban
+		}
+		qSuburban := swag.FormatBool(qrSuburban)
+		if qSuburban != "" {
+
+			if err := r.SetQueryParam("suburban", qSuburban); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Subway != nil {
+
+		// query param subway
+		var qrSubway bool
+
+		if o.Subway != nil {
+			qrSubway = *o.Subway
+		}
+		qSubway := swag.FormatBool(qrSubway)
+		if qSubway != "" {
+
+			if err := r.SetQueryParam("subway", qSubway); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Taxi != nil {
+
+		// query param taxi
+		var qrTaxi bool
+
+		if o.Taxi != nil {
+			qrTaxi = *o.Taxi
+		}
+		qTaxi := swag.FormatBool(qrTaxi)
+		if qTaxi != "" {
+
+			if err := r.SetQueryParam("taxi", qTaxi); err != nil {
+				return err
+			}
+		}
+	}
+
 	if o.Tickets != nil {
 
 		// query param tickets
@@ -834,6 +1415,91 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		if qTo != "" {
 
 			if err := r.SetQueryParam("to", qTo); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.ToAddress != nil {
+
+		// query param to.address
+		var qrToAddress string
+
+		if o.ToAddress != nil {
+			qrToAddress = *o.ToAddress
+		}
+		qToAddress := qrToAddress
+		if qToAddress != "" {
+
+			if err := r.SetQueryParam("to.address", qToAddress); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.ToID != nil {
+
+		// query param to.id
+		var qrToID string
+
+		if o.ToID != nil {
+			qrToID = *o.ToID
+		}
+		qToID := qrToID
+		if qToID != "" {
+
+			if err := r.SetQueryParam("to.id", qToID); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.ToLatitude != nil {
+
+		// query param to.latitude
+		var qrToLatitude float64
+
+		if o.ToLatitude != nil {
+			qrToLatitude = *o.ToLatitude
+		}
+		qToLatitude := swag.FormatFloat64(qrToLatitude)
+		if qToLatitude != "" {
+
+			if err := r.SetQueryParam("to.latitude", qToLatitude); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.ToLongitude != nil {
+
+		// query param to.longitude
+		var qrToLongitude float64
+
+		if o.ToLongitude != nil {
+			qrToLongitude = *o.ToLongitude
+		}
+		qToLongitude := swag.FormatFloat64(qrToLongitude)
+		if qToLongitude != "" {
+
+			if err := r.SetQueryParam("to.longitude", qToLongitude); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Tram != nil {
+
+		// query param tram
+		var qrTram bool
+
+		if o.Tram != nil {
+			qrTram = *o.Tram
+		}
+		qTram := swag.FormatBool(qrTram)
+		if qTram != "" {
+
+			if err := r.SetQueryParam("tram", qTram); err != nil {
 				return err
 			}
 		}
