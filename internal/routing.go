@@ -69,7 +69,7 @@ func shortestPathsToTarget(stations map[string]*Station, edgeToTarget dijkstraVe
 }
 
 func isNotEligible(e *Edge, regionly bool) bool {
-	return e.Cancelled || regionly && (e.Line.Type == "national" || e.Line.Type == "nationalExpress")
+	return e.Cancelled || regionly && (e.Line.Type == "national" || e.Line.Type == "nationalExpress" || e.Line.Type == "regionalExpress")
 }
 
 func buildVertexSetByTarget(edgeToTarget dijkstraVertex, regionly bool) map[*Edge]*dijkstra {

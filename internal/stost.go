@@ -76,7 +76,7 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 		if l.Type == "Foot" && len(l.Route) > 0 && l.Route[0].Discarded {
 			continue
 		}
-		if regionly && (l.Type == "national" || l.Type == "nationalExpress") {
+		if regionly && (l.Type == "national" || l.Type == "nationalExpress" || l.Type == "regionalExpress") {
 			continue
 		}
 		if val, ok := productTypes[l.Type]; ok {
