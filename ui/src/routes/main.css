@@ -118,6 +118,7 @@ noscript {
   padding: 20px;
   box-sizing: border-box;
   border-radius: 30px 30px 0 0;
+  overflow: hidden;
 }
 
 #details .train h4 {
@@ -513,7 +514,7 @@ a text {
   height: 12px;
 }
 
-.refresh {
+#details .refresh {
   float: right;
   margin: -10px -10px 0 0;
 }
@@ -535,6 +536,7 @@ a text {
   animation-name: rotate;
   animation-duration: 2s;
   animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(.4,.2,.6,.8);
 }
 @keyframes rotate {
   0% {

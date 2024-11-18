@@ -36,6 +36,7 @@
     "error_http_500": "Unerwarteter Serverfehler.",
     "error_http_502": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise dauerte das Abrufen der Daten zu lang. Bitte erneut versuchen.",
     "error_http_503": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise zu viele Anfragen. Bitte später erneut versuchen.",
+    "error_http_504": "Abrufen von Fahrplandaten fehlgeschlagen. Möglicherweise dauerte das Abrufen der Daten zu lang. Bitte erneut versuchen.",
     "error_http_unknown": "Unbekannter Serverfehler.",
     "error_unknown": "Verbindung zum Server fehlgeschlagen. Sind Sie offline?",
     "show_tsd": "Raum-Zeit-Diagramm anzeigen",

@@ -36,6 +36,7 @@
     "error_http_500": "Erreur de serveur inattendu.",
     "error_http_502": "Échec de la requête des données d'horaire. Peut-être la requête a pris trop de temps. Veuillez ressayer.",
     "error_http_503": "Échec de la requête des données d'horaire. Peut-être trop de requêtes. Veuillez ressayer plus tard.",
+    "error_http_504": "Échec de la requête des données d'horaire. Peut-être la requête a pris trop de temps. Veuillez ressayer.",
     "error_http_unknown": "Erreur de serveur inconnu.",
     "error_unknown": "Connection au serveur echouée. Êtes-vous hors ligne ?",
     "show_tsd": "Afficher diagramme temps-espace",

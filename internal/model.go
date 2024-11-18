@@ -63,4 +63,5 @@ type Distribution struct {
 	Start               time.Time
 	Mean                time.Time
 	FeasibleProbability float32
+	Relevance           float32
 }

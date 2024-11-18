@@ -156,6 +156,7 @@ func convertDistribution(distr *stost.Distribution) Distribution {
 		Histogram:           distr.Histogram,
 		Start:               time.Unix(distr.Start, 0),
 		FeasibleProbability: distr.FeasibleProbability,
+		Relevance:           distr.Relevance,
 	}
 	if len(distr.Histogram) > 0 {
 		d.Mean = time.Unix(distr.Mean, 0)
@@ -163,13 +164,20 @@ func convertDistribution(distr *stost.Distribution) Distribution {
 	return d
 }
 
-func enrichWithDistributions(responseMessage *stost.Message, lines map[string]*Line) {
+func enrichWithDistributions(responseMessage *stost.Message, lines map[string]*Line, stations map[string]*Station) {
+	productTypesReverse := reverseMap(productTypes)
+	i := 0
 	for _, r := range responseMessage.Timetable.Routes {
 		for _, t := range r.Trips {
+			if _, ok := lines[r.Id]; ok {
 			for i, c := range t.Connections {
 				lines[r.Id].Route[i].DestinationArrival = convertDistribution(c.DestinationArrival)
+				}
+			} else {
+				createLine(i, r, t, productTypesReverse, lines, stations)
 			}
 		}
+		i++
 	}
 }
 
@@ -199,6 +207,13 @@ func produce(responseMessage *stost.Message, lines map[string]*Line, stations ma
 	i := 0
 	for _, r := range responseMessage.Timetable.Routes {
 		for _, t := range r.Trips {
+			createLine(i, r, t, productTypesReverse, lines, stations)
+			i++
+		}
+	}
+}
+
+func createLine(i int, r *stost.Route, t *stost.Trip, productTypesReverse map[int32]string, lines map[string]*Line, stations map[string]*Station) {
 			line := Line{
 				ID:        strconv.Itoa(i),
 				Name:      r.Name,
@@ -241,20 +256,18 @@ func produce(responseMessage *stost.Message, lines map[string]*Line, stations ma
 				line.Route = append(line.Route, edge)
 				from.Departures = append(from.Departures, edge)
 				to.Arrivals = append(to.Arrivals, edge)
-			}
-			i++
-		}
 	}
 }
 
 func StostEnrich(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time, regionly bool) {
+	log.Println("Calling stost...")
 	requestMessage := createRequestMessage("de_db", from, to, startTime, now)
 	prepareForEnrichment(requestMessage, lines, stations, regionly)
 	responseMessage := queryStost(requestMessage)
 	if responseMessage == nil {
 		return
 	}
-	enrichWithDistributions(responseMessage, lines)
+	enrichWithDistributions(responseMessage, lines, stations)
 }
 
 func StostProduce(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time) {

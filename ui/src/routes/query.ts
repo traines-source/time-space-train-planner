@@ -1,4 +1,4 @@
-const knownErrors = [400, 500, 502, 503];
+const knownErrors = [400, 500, 502, 503, 504];
 
 function handleHttpErrors(response: Response) {
     if (!response.ok) {

@@ -98,8 +98,12 @@ function delay(current: string, planned: string, e: Edge) {
     return ''
 }
 
+function redundant(edge: Edge): boolean {
+    return edge.DestinationArrival?.Relevance < 0.5;
+}
+
 export {
     parseTime,
     simpleTime,
-    label, type, departure, arrival
+    label, type, departure, arrival, redundant
 }

@@ -4,11 +4,12 @@
     import { store } from "../store"
     import { optionsQueryString } from "../query"
     import Footer from '../footer.svelte'; 
-    import {label, type, departure, arrival, parseTime, simpleTime} from './labels';
+    import {label, type, departure, arrival, parseTime, simpleTime, redundant} from './labels';
     import type { Edge, Station, Response } from './types';
 
     export let selection: Edge;
     export let loading: boolean;
+    export let tsdShown: boolean;
     export let doRefresh: () => void;
     export let selectEdge: (id: string) => void;
     export let selectStation: (id: string) => void;
@@ -69,7 +70,7 @@
             if (selectedEdgeHistory.length > 0) {
                 n = parseTime(selectedEdgeHistory[selectedEdgeHistory.length-1].Actual.Departure);
             } else if (n < new Date(data.MinTime).getTime() || n > new Date(data.MaxTime).getTime()) {
-                n = new Date(data.MinTime).getTime();
+                n = new Date(data.MinTime).getTime()+negativeTransferMinutes*60*1000;
             }            
             selection.from = new Date(n);
         }
@@ -112,7 +113,8 @@
         return relevantStations;
     }
 
-    function updateNextBestDepartures(station: Station, time: Date) {        
+    function updateNextBestDepartures(station: Station, time: Date) {      
+        console.log(selection.from.getTime()-negativeTransferMinutes*60*1000, new Date(data.MinTime).getTime());  
         const candidates = [];
         
         let lowerBound = undefined;
@@ -497,7 +499,7 @@
             <tr><td colspan="3" class="no-conns">{$t('c.no_earlier_connections')}</td></tr>
         {/if}
         {#each nextBestDepartures as d}
-            <tr class="{isShortestPath(d) ? 'shortest' : (d.Redundant ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
+            <tr class="{isShortestPath(d) ? 'shortest' : (redundant(d) ? 'redundant' : '')}" on:click={() => pushHistory(d)}>
                 <td>{@html departure(d)}</td>
                 <td class="forcewrap">
                     <span class="stay-on">{d.Line?.ID == selection.edge?.Line?.ID && selection.edge?.To.SpaceAxis == d.From.SpaceAxis ? $t('c.stay_on') : ''}</span>
@@ -550,7 +552,7 @@
     <a href="?{optionsQueryString(store)}&form" class="submit">
         {$t('c.modify_query')}
     </a>
-    {#if $page.url.searchParams.get('tsd') != 'no'}
+    {#if $page.url.searchParams.get('tsd') != 'no' && tsdShown}
     <div class="legend">
         <h4>{$t('c.legend')}</h4>
         <svg viewBox="125 1430 500 160" style="width: 100%">

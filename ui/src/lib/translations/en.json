@@ -36,6 +36,7 @@
     "error_http_500": "Unexpected server error.",
     "error_http_502": "Failed requesting timetable data. Retrieving the data might have taken too long. Try again.",
     "error_http_503": "Failed requesting timetable data. Possibly too many requests. Try again later.",
+    "error_http_504": "Failed requesting timetable data. Retrieving the data might have taken too long. Try again.",
     "error_http_unknown": "Unknown server error.",
     "error_unknown": "Connection to server failed. Are you offline?",
     "show_tsd": "Show time-space diagram",

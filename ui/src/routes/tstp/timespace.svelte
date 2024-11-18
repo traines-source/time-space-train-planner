@@ -4,7 +4,7 @@
     import { onMount, tick } from "svelte";
     import { defaultDatetime, setFromApi, store } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
-    import {parseTime, simpleTime, label, type, departure, arrival} from './labels';
+    import {parseTime, simpleTime, label, type, departure, arrival, redundant} from './labels';
     import {type Response, type Edge, type Coord, Selection} from './types';
     import panzoom from 'panzoom'
     import Details from './details.svelte'
@@ -180,7 +180,9 @@
 </script>
 
 <div class="loading-screen" style="display: {!data ? 'block' : 'none'};">
-    <span class="indicator {loading ? 'loading' :''}"><span class="micon">autorenew</span></span>
+    <span class="refresh"><a href="javascript:void(0)" on:click={refresh}>
+        <span class="indicator {loading ? 'loading' :''}"><span class="micon">autorenew</span></span>
+    </a></span>
     <p>{$t('c.data_retrieval_waiting')}</p>
     <p><span class="micon">tips_and_updates</span> {$t('c.tip')+': '+$t('c.'+randomTipId())}</p>
 </div>
@@ -220,7 +222,7 @@
 {#each data.SortedEdges.map(id => data.Edges[id]) as e (e.ID)}
 {#if !e.Discarded}
 <path id="{e.ID}" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
-    class="edge type-{type(e)} redundant-{e.Redundant} cancelled-{e.Cancelled} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
+    class="edge type-{type(e)} redundant-{redundant(e)} cancelled-{e.Cancelled} {e.ProviderShortestPath ? 'provider-shortest-path' : ''}"
     />
 <path id="{e.ID}-toucharea" d="M {x(e.From)},{y(e.From)} L{x(e.To)},{y(e.To)}"
     class="edge-toucharea" on:click={selectListener}
@@ -260,4 +262,4 @@
     </div>
 {/if}
 </div>
-<Details bind:selection={selection} loading={loading} doRefresh={refresh} selectEdge={selectEdge} selectStation={selectStation} data={data} error={error}/>
+<Details bind:selection={selection} loading={loading} tsdShown={displayTsd} doRefresh={refresh} selectEdge={selectEdge} selectStation={selectStation} data={data} error={error}/>

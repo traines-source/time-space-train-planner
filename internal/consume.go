@@ -332,6 +332,7 @@ func prepare(from string, to string, vias []string, dateTime string, regionly bo
 	c := &consumer{}
 
 	c.parseDate(dateTime)
+	c.dateTime = c.dateTime.Add(-time.Minute * 5)
 	c.regionalOnly = regionly
 
 	var stationIDs []string
@@ -356,7 +357,7 @@ func (c *consumer) parseDate(dateTime string) {
 	}
 }
 
-func (c *consumer) apiFlow(system string, from string, to string, vias []string, dateTime string, regionly bool) *ErrorCode {
+func (c *consumer) apiFlow(system string, from string, to string, vias []string, regionly bool) *ErrorCode {
 	if err := c.callProviders(callDeparturesArrivals); err != nil {
 		return err
 	}
@@ -382,11 +383,11 @@ func ObtainVias(from string, to string, vias []string, dateTime string, regionly
 func ObtainData(system string, from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
 	c := prepare(from, to, vias, dateTime, regionly)
 	if system == "" {
-		if err := c.apiFlow(system, from, to, vias, dateTime, regionly); err != nil {
+		if err := c.apiFlow(system, from, to, vias, regionly); err != nil {
 			return nil, nil, err
 		}
 	} else {
-		StostProduce(system, c.lines, c.stations, from, to, c.dateTime, time.Now());
+		StostProduce(system, c.lines, c.stations, from, to, c.dateTime, time.Now())
 	}
 	c.rankStations(c.stations[from], c.stations[to])
 	return c.stations, c.lines, nil

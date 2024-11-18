@@ -5,6 +5,7 @@ message Distribution {
     int64 start = 2;
     int64 mean = 3;
     float feasible_probability = 4;
+    float relevance = 5;
 }
 
 message StopInfo {
