@@ -243,10 +243,9 @@
             selectedEdgeHistory.pop();
             selectEdge(selectedEdgeHistory[selectedEdgeHistory.length-1].ID);
             selectedEdgeHistory = selectedEdgeHistory;
-        } else if (selection.edge?.ReverseShortestPath.length > 0 && data.Edges[selection.edge.ReverseShortestPath[0].EdgeID]) {
-            selectEdge(selection.edge.ReverseShortestPath[0].EdgeID);
         } else {
             selectStation(selection.edge?.From.SpaceAxis);
+            selectedEdgeHistory.pop();
         }
     }
 
@@ -370,12 +369,21 @@
                     <span class="micon">east</span> {selection.edge.Line.Direction}
                     {/if}
                 </span>
+                {#if selection.edge.Line && selection.edge.Line.Type.includes('national')}
+                <a
+                    target="_blank"
+                    class="unstyled-link blue-link"
+                    href="https://bahnapp.online/journey/coaches/?trainId={selection.edge.Line.Name.replace(' ', '+')}&stationId={selection.edge.From.SpaceAxis}&departureTime={new Date(parseTime(selection.edge.Actual.Departure)).toISOString()}&initialDepartureTime={new Date(parseTime(selection.edge.Planned.Departure)).toISOString()}"
+                    title="{$t('c.coach_sequence')}" aria-label="{$t('c.coach_sequence')}">
+                        <span class="micon" aria-label="{$t('c.coach_sequence')}">airline_seat_recline_normal</span>
+                </a>
+                {/if}
             </h4>
         </div>
     
         <div class="arrdep">
             <span class="left">
-                {#if selectedEdgeHistory.length > 1 || selection.edge?.ReverseShortestPath.length > 0 || selection.edge?.From.SpaceAxis == data.From.ID}
+                {#if selectedEdgeHistory.length > 0}
                     <a href="javascript:void(0)" on:click={() => popHistory()} class="back"><span class="micon">arrow_back_ios_new</span></a>
                 {/if}
             </span>

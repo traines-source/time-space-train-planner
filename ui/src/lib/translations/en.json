@@ -55,5 +55,6 @@
     "walking_to": "to",
     "walking_from": "from",
     "earlier_departures": "Earlier",
-    "later_departures": "Later"
+    "later_departures": "Later",
+    "coach_sequence": "Coach sequence"
 }
