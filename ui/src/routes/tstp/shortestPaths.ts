@@ -50,6 +50,7 @@ function calcNextDepartureIndex(station: Station, relevantStations: Station[], i
 }
 
 function walkingDistance(fromId: string, toId: string, stationResolver: (id: string) => Station): number {
+    if (fromId == toId) return 0;
     const from = stationResolver(fromId);
     const to = stationResolver(toId);
     const φ1 = from.Lat * Math.PI/180, φ2 = to.Lat * Math.PI/180, Δλ = (to.Lon-from.Lon) * Math.PI/180, R = 6371e3;
@@ -57,7 +58,9 @@ function walkingDistance(fromId: string, toId: string, stationResolver: (id: str
 }
 
 function walkingDurationMs(fromId: string, toId: string, stationResolver: (id: string) => Station): number {
-    return walkingDistance(fromId, toId, stationResolver)/5*3600;
+    const d = walkingDistance(fromId, toId, stationResolver);
+    if (isNaN(d)) return 0;
+    return d/5*3600;
 }
 
 export {
