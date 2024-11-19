@@ -99,7 +99,7 @@ function delay(current: string, planned: string, e: Edge) {
 }
 
 function redundant(edge: Edge): boolean {
-    return edge.DestinationArrival?.Relevance < 0.5;
+    return edge.Redundant;
 }
 
 export {

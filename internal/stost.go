@@ -15,6 +15,8 @@ import (
 	"traines.eu/time-space-train-planner/internal/stost"
 )
 
+const redundantThresh = 0.01
+
 var productTypes = map[string]int32{
 	"bus":             10,
 	"subway":          7,
@@ -170,8 +172,11 @@ func enrichWithDistributions(responseMessage *stost.Message, lines map[string]*L
 	for _, r := range responseMessage.Timetable.Routes {
 		for _, t := range r.Trips {
 			if _, ok := lines[r.Id]; ok {
-			for i, c := range t.Connections {
-				lines[r.Id].Route[i].DestinationArrival = convertDistribution(c.DestinationArrival)
+				for i, c := range t.Connections {
+					e := lines[r.Id].Route[i]
+					e.DestinationArrival = convertDistribution(c.DestinationArrival)
+					e.EarliestDestinationArrival = e.DestinationArrival.Mean
+					e.Redundant = e.DestinationArrival.Relevance < redundantThresh
 				}
 			} else {
 				createLine(i, r, t, productTypesReverse, lines, stations)
@@ -214,48 +219,52 @@ func produce(responseMessage *stost.Message, lines map[string]*Line, stations ma
 }
 
 func createLine(i int, r *stost.Route, t *stost.Trip, productTypesReverse map[int32]string, lines map[string]*Line, stations map[string]*Station) {
-			line := Line{
-				ID:        strconv.Itoa(i),
-				Name:      r.Name,
-				Type:      productTypesReverse[r.ProductType],
-				Direction: r.GetDirection(),
-				Message:   r.GetMessage(),
-			}
-			lines[line.ID] = &line
-			for _, c := range t.Connections {
-				from := stations[c.FromId]
-				to := stations[c.ToId]
-				distr := convertDistribution(c.DestinationArrival)
-				edge := &Edge{
-					Line:    &line,
-					From:    from,
-					To:      to,
-					Message: c.GetMessage(),
-					Planned: StopInfo{
-						Departure:      time.Unix(c.Departure.Scheduled, 0),
-						DepartureTrack: c.Departure.GetScheduledTrack(),
-						Arrival:        time.Unix(c.Arrival.Scheduled, 0),
-						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
-					},
-					Current: StopInfo{
-						Departure:      toCurrent(c.Departure, false),
-						DepartureTrack: c.Departure.GetScheduledTrack(),
-						Arrival:        toCurrent(c.Arrival, false),
-						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
-					},
-					Actual: StopInfo{
-						Departure:      toCurrent(c.Departure, true),
-						DepartureTrack: c.Departure.GetScheduledTrack(),
-						Arrival:        toCurrent(c.Arrival, true),
-						ArrivalTrack:   c.Arrival.GetScheduledTrack(),
-					},
-					Cancelled:                  c.Cancelled,
-					DestinationArrival:         distr,
-					EarliestDestinationArrival: distr.Mean,
-				}
-				line.Route = append(line.Route, edge)
-				from.Departures = append(from.Departures, edge)
-				to.Arrivals = append(to.Arrivals, edge)
+	line := Line{
+		ID:        "stost_" + strconv.Itoa(i),
+		Name:      r.Name,
+		Type:      productTypesReverse[r.ProductType],
+		Direction: r.GetDirection(),
+		Message:   r.GetMessage(),
+	}
+	lines[line.ID] = &line
+	for _, c := range t.Connections {
+		from := stations[c.FromId]
+		to := stations[c.ToId]
+		distr := convertDistribution(c.DestinationArrival)
+		edge := &Edge{
+			Line:    &line,
+			From:    from,
+			To:      to,
+			Message: c.GetMessage(),
+			Planned: StopInfo{
+				Departure:      time.Unix(c.Departure.Scheduled, 0),
+				DepartureTrack: c.Departure.GetScheduledTrack(),
+				Arrival:        time.Unix(c.Arrival.Scheduled, 0),
+				ArrivalTrack:   c.Arrival.GetScheduledTrack(),
+			},
+			Current: StopInfo{
+				Departure:      toCurrent(c.Departure, false),
+				DepartureTrack: c.Departure.GetScheduledTrack(),
+				Arrival:        toCurrent(c.Arrival, false),
+				ArrivalTrack:   c.Arrival.GetScheduledTrack(),
+			},
+			Actual: StopInfo{
+				Departure:      toCurrent(c.Departure, true),
+				DepartureTrack: c.Departure.GetScheduledTrack(),
+				Arrival:        toCurrent(c.Arrival, true),
+				ArrivalTrack:   c.Arrival.GetScheduledTrack(),
+			},
+			Cancelled:                  c.Cancelled,
+			DestinationArrival:         distr,
+			EarliestDestinationArrival: distr.Mean,
+			Redundant:                  distr.Relevance < redundantThresh,
+		}
+		if edge.Redundant && edge.Line.Type == "Foot" {
+			continue
+		}
+		line.Route = append(line.Route, edge)
+		from.Departures = append(from.Departures, edge)
+		to.Arrivals = append(to.Arrivals, edge)
 	}
 }
 

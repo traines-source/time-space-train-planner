@@ -127,8 +127,6 @@
         let shortestPathFound = false;
         let relevantStations = getStationsInGroup(station);
         let indices = new Array(relevantStations.length).fill(0);
-        let latestDeparture = 0
-        let p95ArrOfLatestDeparture = 0
         while (true) {
             let nextDepartureIndex = undefined;
             if (candidates.length >= numDepartures && shortestPathFound || candidates.length >= numDepartures*numDepartures) {
@@ -181,15 +179,6 @@
             }
             if (upperBound == undefined || bounds[1] > upperBound) {
                 upperBound = bounds[1];
-            }
-            if (departure >= latestDeparture) {
-				e.Redundant = false;
-				latestDeparture = departure;
-				p95ArrOfLatestDeparture = bounds[1];
-			} else if (p95ArrOfLatestDeparture > bounds[1]) {
-				e.Redundant = false;
-			} else {
-				e.Redundant = true;
 			}
         }
         candidates.sort((a, b) => {

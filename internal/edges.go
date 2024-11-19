@@ -182,7 +182,7 @@ func (c *consumer) generateEdges(from *Station, to *Station) *ErrorCode {
 	}
 	c.generateTimetableEdges()
 	c.sortEdges()
-	c.generateOnFootEdges(from, to)
-	c.sortEdges()
+	//c.generateOnFootEdges(from, to)
+	//c.sortEdges()
 	return nil
 }
