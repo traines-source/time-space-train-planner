@@ -51,7 +51,6 @@ func TimeSpace(stations map[string]*internal.Station, lines map[string]*internal
 	}
 	c.setupStations(stations)
 	c.setupEdges(lines)
-	c.setupShortestPathFors(lines)
 	c.setupPreviousAndNext(stations)
 	c.gravitate()
 	c.render(wr)
@@ -133,52 +132,6 @@ func (c *container) setupEdges(lines map[string]*internal.Line) {
 			b := c.Edges[s.BestDepartures[j]].DestinationArrival.Mean
 			return !a.IsZero() && a.Before(b)
 		})
-		/*var latestDeparture time.Time
-		var p95ArrOfLatestDeparture time.Time
-		for _, d := range s.BestDepartures {
-			e := c.Edges[d]
-			if !e.Actual.Departure.Before(latestDeparture) {
-				e.Redundant = false
-				latestDeparture = e.Actual.Departure
-				p95ArrOfLatestDeparture = p95(e)
-			} else if !p95ArrOfLatestDeparture.Before(p95(e)) {
-				e.Redundant = false
-			} else {
-				e.Redundant = true
-			}
-		}*/
-	}
-}
-
-/*func p95(e *EdgePath) time.Time {
-	var accum float32 = 0.0
-	for i := len(e.DestinationArrival.Histogram) - 1; i >= 0; i-- {
-		accum += e.DestinationArrival.Histogram[i]
-		if accum >= 0.05 {
-			return e.DestinationArrival.Start.Add(time.Minute * time.Duration(i))
-		}
-	}
-	return e.DestinationArrival.Start
-}*/
-
-func (c *container) setupShortestPathFors(lines map[string]*internal.Line) {
-	for _, l := range lines {
-		for i := 0; i < len(l.Route); i++ {
-			origin := l.Route[i]
-			if originEdgePath, ok := c.Edges[c.generateEdgeID(origin)]; ok {
-				var lastEdge *internal.Edge
-				for e := origin; e != nil; e = e.ShortestPath {
-					c.setShortestPathFor(originEdgePath, e, lastEdge, e)
-					lastEdge = e
-				}
-				for e := origin; e != nil; e = e.ReverseShortestPath {
-					c.setShortestPathFor(originEdgePath, e, e, lastEdge)
-					lastEdge = e
-				}
-			} else {
-				log.Print("Referenced non-existing edge. (sp)")
-			}
-		}
 	}
 }
 
@@ -190,7 +143,6 @@ func (c *container) setupPreviousAndNext(stations map[string]*internal.Station) 
 	sort.Slice(stationsSlice, func(i, j int) bool {
 		return stationsSlice[i].Rank < stationsSlice[j].Rank
 	})
-	c.preselectShortestPath(stationsSlice[0], stationsSlice[len(stationsSlice)-1])
 	var arrivals []*internal.Edge
 	var departures []*internal.Edge
 	var lastGroup *string
@@ -266,36 +218,8 @@ func (c *container) flushStationGroup(departures []*internal.Edge, arrivals []*i
 	}
 }
 
-func (c *container) preselectShortestPath(origin *internal.Station, destination *internal.Station) {
-	for _, s := range destination.Arrivals {
-		if s.ReverseShortestPath != nil || s.From.ID == origin.ID && !s.Redundant {
-			start := s
-			for start.ReverseShortestPath != nil {
-				start = start.ReverseShortestPath
-			}
-			if e, ok := c.Edges[c.generateEdgeID(start)]; ok {
-				c.DefaultShortestPathID = e.ID
-			} else {
-				log.Print("Referenced non-existing edge. (default)")
-			}
-			break
-		}
-	}
-}
-
 func (c *container) isEdgeInsideGroup(e *EdgePath) bool {
 	return c.Stations[e.From.SpaceAxis].GroupID != nil && c.Stations[e.To.SpaceAxis].GroupID != nil && *c.Stations[e.From.SpaceAxis].GroupID == *c.Stations[e.To.SpaceAxis].GroupID
-}
-
-func (c *container) setShortestPathFor(originEdgePath *EdgePath, e *internal.Edge, start *internal.Edge, end *internal.Edge) {
-	if edgePath, ok := c.Edges[c.generateEdgeID(e)]; ok {
-		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
-	} else {
-		log.Print("Referenced non-existing edge. (spf)")
-	}
-	if edgePath, ok := c.Edges[c.generateStationEdgeID(start, end)]; ok {
-		edgePath.ShortestPathFor = append(edgePath.ShortestPathFor, originEdgePath.ID)
-	}
 }
 
 func (c *container) insertEdge(e *internal.Edge) *EdgePath {

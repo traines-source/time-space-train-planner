@@ -231,6 +231,7 @@ func (c *consumer) callProviders(call func(providers.Provider, *consumer) error)
 			return HandleError(err)
 		}
 	}
+	log.Println("Provider requests completed.")
 	return nil
 }
 
@@ -364,7 +365,6 @@ func (c *consumer) apiFlow(system string, from string, to string, vias []string,
 	if err := c.generateEdges(c.stations[from], c.stations[to]); err != nil {
 		return err
 	}
-	shortestPaths(c.stations, c.stations[from], c.stations[to], regionly)
 	if err := c.callProviders(callEnrich); err != nil {
 		return err
 	}

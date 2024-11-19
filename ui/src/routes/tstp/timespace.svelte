@@ -5,9 +5,10 @@
     import { defaultDatetime, setFromApi, store } from "../store"
     import { handleHttpErrors, optionsQueryString } from "../query"
     import {parseTime, simpleTime, label, type, departure, arrival, redundant} from './labels';
-    import {type Response, type Edge, type Coord, Selection} from './types';
+    import {type Response, type Edge, type Coord, Selection, type Station} from './types';
     import panzoom from 'panzoom'
     import Details from './details.svelte'
+    import { calcNextDepartureIndex, getStationsInGroup, walkingDurationMs } from './shortestPaths';
 
     let loading = true;
     let query = store;
@@ -77,6 +78,30 @@
         }
     }
 
+    function edgeResolver(id: string): Edge {
+        if (!id) return undefined;
+        return data.Edges[id];
+    }
+
+    function stationResolver(id: string): Station {
+        if (!id) return undefined;
+        return data.Stations[id];
+    }
+    
+    function getShortestPathDeparture(station: Station, time: Date): Edge | undefined {
+        if (station.ID == data.To.ID || station.GroupID == stationResolver(data.To.ID).GroupID) {
+            return;
+        }
+        let relevantStations = getStationsInGroup(data, station);
+        let indices = new Array(relevantStations.length).fill(0);
+        let nextDepartureIndex = calcNextDepartureIndex(station, relevantStations, indices, (e) => time.getTime()+walkingDurationMs(station.ID, e.From.SpaceAxis, stationResolver), edgeResolver, stationResolver);
+        if (nextDepartureIndex == undefined) {
+            return;
+        }
+        const e = edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]);
+        return e;
+    }
+
     function setSelectedForDependents(selected: boolean): Edge[] {
         if (!selection.edge) {
             return [];
@@ -89,19 +114,9 @@
             setSelectedForEdge(next, selected);
             setSelectedForStationEdge(previous, next, selected);
             all.push(next);
-            if (next.ShortestPath.length == 0) break;
             previous = next;
-            next = data.Edges[next.ShortestPath[0].EdgeID];
+            next = getShortestPathDeparture(stationResolver(next.To.SpaceAxis), new Date(parseTime(next.Actual.Arrival)));
             if (!next) break;
-        }
-        next = selection.edge;
-        while(next.ReverseShortestPath.length > 0) {
-            previous = next;
-            next = data.Edges[next.ReverseShortestPath[0].EdgeID];
-            if (!next) break;
-            setSelectedForEdge(next, selected);
-            setSelectedForStationEdge(previous, next, selected);
-            all.push(next);
         }
         return all;
     }

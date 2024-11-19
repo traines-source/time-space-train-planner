@@ -1,16 +1,11 @@
 package internal
 
 import (
-	"crypto/md5"
-	"fmt"
 	"log"
 	"math"
 	"sort"
 	"time"
 )
-
-const maxFootDistMeters = 5000
-const footKmh = 5
 
 func relevantDeparture(stop *LineStop) time.Time {
 	return stop.Planned.Departure
@@ -46,6 +41,7 @@ func (c *consumer) generateTimetableEdge(a *LineStop, b *LineStop, line *Line) {
 		To:        b.Station,
 		Message:   a.Message, // TODO both msgs?
 		Cancelled: a.Cancelled || b.Cancelled,
+		Redundant: true, // set by stost
 	}
 	copyStopInfo(&a.Planned, &b.Planned, &edge.Planned)
 	copyStopInfo(&a.Current, &b.Current, &edge.Current)
@@ -57,84 +53,6 @@ func (c *consumer) generateTimetableEdge(a *LineStop, b *LineStop, line *Line) {
 	edge.Current.Departure = a.Current.Departure
 	edge.Current.Arrival = b.Current.Arrival
 
-	line.Route = append(line.Route, edge)
-	edge.From.Departures = append(edge.From.Departures, edge)
-	edge.To.Arrivals = append(edge.To.Arrivals, edge)
-}
-
-func (c *consumer) generateOnFootEdges(origin *Station, destination *Station) {
-	for _, s1 := range c.stations {
-		for _, s2 := range c.stations {
-			if s1 == s2 {
-				continue
-			}
-			var dist = geoDistStations(s1, s2)
-			if dist > maxFootDistMeters {
-				continue
-			}
-			c.generateOnFootEdgesBetweenTwoStationsInDirection(s1, s2, dist, origin, destination)
-		}
-	}
-}
-
-func (c *consumer) generateOnFootEdgesBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, origin *Station, destination *Station) {
-	if from == destination || to == origin {
-		return
-	}
-	correspondances := from.Arrivals
-	if from == origin {
-		correspondances = to.Departures
-	}
-	var duration = time.Minute * time.Duration(math.Ceil(dist/1000/footKmh*60))
-	for _, correspondance := range correspondances {
-		if correspondance.Line.Type == "Foot" {
-			continue
-		}
-		var departure time.Time
-		var arrival time.Time
-		if to == destination {
-			departure = correspondance.Actual.Arrival
-			arrival = correspondance.Actual.Arrival.Add(duration)
-		} else {
-			departure = correspondance.Actual.Departure.Add(-duration)
-			arrival = correspondance.Actual.Departure
-			if departure.Before(c.dateTime) || from != origin && (len(from.Arrivals) == 0 || departure.Before(from.Arrivals[0].Actual.Arrival)) {
-				continue
-			}
-		}
-		c.generateOnFootEdgeBetweenTwoStationsInDirection(from, to, dist, departure, arrival)
-	}
-}
-
-func (c *consumer) generateOnFootEdgeBetweenTwoStationsInDirection(from *Station, to *Station, dist float64, departure time.Time, arrival time.Time) {
-
-	var lineID = fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%s_%s_%d", from.ID, to.ID, departure.Unix()))))[:10]
-	for {
-		_, ok := c.lines[lineID]
-		if !ok {
-			break
-		}
-		lineID += "C"
-	}
-	var line = &Line{
-		ID:   lineID,
-		Name: fmt.Sprintf("%.0fm", math.Round(dist)),
-		Type: "Foot",
-	}
-	c.lines[lineID] = line
-	edge := &Edge{
-		Line: line,
-		From: from,
-		To:   to,
-		Planned: StopInfo{
-			Departure: departure,
-			Arrival:   arrival,
-		},
-		Actual: StopInfo{
-			Departure: departure,
-			Arrival:   arrival,
-		},
-	}
 	line.Route = append(line.Route, edge)
 	edge.From.Departures = append(edge.From.Departures, edge)
 	edge.To.Arrivals = append(edge.To.Arrivals, edge)
@@ -182,7 +100,5 @@ func (c *consumer) generateEdges(from *Station, to *Station) *ErrorCode {
 	}
 	c.generateTimetableEdges()
 	c.sortEdges()
-	//c.generateOnFootEdges(from, to)
-	//c.sortEdges()
 	return nil
 }

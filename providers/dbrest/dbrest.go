@@ -129,7 +129,7 @@ func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID stri
 	for _, stop := range stops {
 		lineID, err := strconv.Atoi(stop.Line.FahrtNr)
 		if err != nil {
-			log.Printf("Failed to convert Line ID %d", stop.Line.FahrtNr)
+			log.Printf("Failed to convert Line ID %s", stop.Line.FahrtNr)
 			continue
 		}
 		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr, stop.Line.ProductName)
@@ -151,6 +151,10 @@ func getNormalizedTripID(tripID string, lineID string, fahrtNr string, productNa
 }
 
 func (p *DbRest) parseStation(stop *models.Alternative, stationID string, groupID string) {
+	/*group := stationID
+	if stop.Stop.Station != nil {
+		group = stop.Stop.Station.ID
+	}*/
 	p.consumer.UpsertStation(providers.ProviderStation{
 		ID:      stationID,
 		GroupID: &groupID,

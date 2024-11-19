@@ -6,6 +6,7 @@
     import Footer from '../footer.svelte'; 
     import {label, type, departure, arrival, parseTime, simpleTime, redundant} from './labels';
     import type { Edge, Station, Response } from './types';
+    import { calcNextDepartureIndex, getStationsInGroup, hasDistribution, walkingDistance, walkingDurationMs } from './shortestPaths';
 
     export let selection: Edge;
     export let loading: boolean;
@@ -45,9 +46,11 @@
 
     function nextBestDepartureForSelection(selection: Edge) {
         if (selection.edge) {
+            console.log(selection.edge);
             nextBestDeparturesForEdge();
             rectifyEdgeHistory();
         } else if (selection.station) {
+            console.log(selection.station);
             nextBestDeparturesForStation();
         }
     }
@@ -103,16 +106,6 @@
         return [start, start];
     }
 
-    function getStationsInGroup(station: Station): Station[] {
-        const relevantStations = [];
-        for (let s of Object.values(data.Stations)) {
-            if (s.ID == station.ID || s.GroupID == station.GroupID) {
-                relevantStations.push(s);
-            }
-        }
-        return relevantStations;
-    }
-
     function updateNextBestDepartures(station: Station, time: Date) {      
         console.log(selection.from.getTime()-negativeTransferMinutes*60*1000, new Date(data.MinTime).getTime());  
         const candidates = [];
@@ -125,42 +118,13 @@
             upperBound = b[1];
         }
         let shortestPathFound = false;
-        let relevantStations = getStationsInGroup(station);
+        let relevantStations = getStationsInGroup(data, station);
         let indices = new Array(relevantStations.length).fill(0);
         while (true) {
-            let nextDepartureIndex = undefined;
             if (candidates.length >= numDepartures && shortestPathFound || candidates.length >= numDepartures*numDepartures) {
                 break;
             }
-            for (let s=0; s<relevantStations.length; s++) {
-                let e;
-                while(true) {
-                    if (indices[s] >= relevantStations[s].BestDepartures.length) {
-                        e = undefined;
-                        break;
-                    }
-                    e = edgeResolver(relevantStations[s].BestDepartures[indices[s]]);
-                    let departure = parseTime(e.Actual.Departure);
-                    if (departure >= time.getTime()-negativeTransferMinutes*60*1000
-                    && !(hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1)
-                    && !(e.Line?.Type == "Foot" && station.ID != relevantStations[s].ID)
-                    && !(stationResolver(e.To.SpaceAxis).GroupID == station.GroupID)) {
-                        break;
-                    }
-                    indices[s]++;
-                }
-                if (!e) {
-                    continue;
-                }
-                if (nextDepartureIndex == undefined) {
-                    nextDepartureIndex = s;    
-                } else {
-                    const nextDeparture = edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]);
-                    if ((nextDeparture.DestinationArrival?.Mean || nextDeparture.EarliestDestinationArrival) > (e.DestinationArrival?.Mean || e.EarliestDestinationArrival)) {
-                        nextDepartureIndex = s;
-                    }
-                }
-            }
+            let nextDepartureIndex = calcNextDepartureIndex(station, relevantStations, indices, (_) => time.getTime()-negativeTransferMinutes*60*1000, edgeResolver, stationResolver);
             if (nextDepartureIndex == undefined) {
                 break;
             }
@@ -169,7 +133,7 @@
             candidates.push(e);
             indices[nextDepartureIndex]++;
             if (!hasDistribution(e)) continue;
-            if (departure >= time.getTime()+walkingDistance(station.ID, e.From.SpaceAxis)/5*3600 && (!shortestPathFound || nextBestDeparture.DestinationArrival?.Mean > e.DestinationArrival?.Mean)) {
+            if (departure >= time.getTime()+walkingDurationMs(station.ID, e.From.SpaceAxis, stationResolver) && (!shortestPathFound || nextBestDeparture.DestinationArrival?.Mean > e.DestinationArrival?.Mean)) {
                 shortestPathFound = true;
                 nextBestDeparture = e;
             }
@@ -179,7 +143,7 @@
             }
             if (upperBound == undefined || bounds[1] > upperBound) {
                 upperBound = bounds[1];
-			}
+            }
         }
         candidates.sort((a, b) => {
             return parseTime(a.Actual.Departure)-parseTime(b.Actual.Departure);
@@ -206,10 +170,6 @@
     function stationResolver(id: string): Station {
         if (!id) return undefined;
         return data.Stations[id];
-    }
-
-    function hasDistribution(e: Edge) {
-        return e.DestinationArrival && e.DestinationArrival.Histogram && e.DestinationArrival.Histogram.length;
     }
 
     function getDrawXRatio() {
@@ -271,7 +231,6 @@
 
     function isShortestPath(d: Edge) {
         return d == nextBestDeparture;
-        //return selection.edge?.ShortestPath.length > 0 && d.ID == selection.edge?.ShortestPath[0].EdgeID;
     }
 
     function pushHistory(edge: Edge) {
@@ -332,15 +291,8 @@
         selection.from = candidate;
     }
 
-    function walkingDistance(fromId: string, toId: string): number {
-        const from = stationResolver(fromId);
-        const to = stationResolver(toId);
-        const φ1 = from.Lat * Math.PI/180, φ2 = to.Lat * Math.PI/180, Δλ = (to.Lon-from.Lon) * Math.PI/180, R = 6371e3;
-        return Math.acos( Math.sin(φ1)*Math.sin(φ2) + Math.cos(φ1)*Math.cos(φ2) * Math.cos(Δλ) )*R;
-    }
-
     function walkingDistanceRounded(fromId: string, toId: string): number {
-        return Math.max(Math.round(walkingDistance(fromId, toId)/100)*100, 100);
+        return Math.max(Math.round(walkingDistance(fromId, toId, stationResolver)/100)*100, 100);
     }
 
     function shareDestArr() {
