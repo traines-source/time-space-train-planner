@@ -40,7 +40,7 @@ function setFromApi(data: any): void {
 }
 
 function viasSet(): boolean {
-    return store.vias.filter(v => v.id).length > 0;
+    return store.vias.filter(v => v?.id).length > 0;
 }
 
 function requiredFieldsSet(): boolean {

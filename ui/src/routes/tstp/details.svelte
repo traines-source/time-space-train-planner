@@ -107,7 +107,6 @@
     }
 
     function updateNextBestDepartures(station: Station, time: Date) {      
-        console.log(selection.from.getTime()-negativeTransferMinutes*60*1000, new Date(data.MinTime).getTime());  
         const candidates = [];
         
         let lowerBound = undefined;

@@ -53,7 +53,7 @@
 </script>
 
 <div id="header"><div>
-    <a href="/tstp"><h1>TeSpace<sup>BETA</sup></h1></a>
+    <a data-sveltekit-reload href="/tstp"><h1>TeSpace<sup>BETA</sup></h1></a>
 </div></div>
 <div id="container">
     <p>
@@ -72,10 +72,10 @@
     
         <div id="fromto">
         <div>
-            <StationInput placeholder="{$t('c.from')}" bind:selectedStation={query.from} />
+            <StationInput placeholder="{$t('c.from')}" bind:selectedStation={query.from} clearButton={false} />
         </div>
         <div>
-            <StationInput placeholder="{$t('c.to')}" bind:selectedStation={query.to} />
+            <StationInput placeholder="{$t('c.to')}" bind:selectedStation={query.to} clearButton={false} />
         </div>
         <a href="javascript:void(0)" id="swap" class="indicator" on:click={swap}><span class="micon">swap_vert</span></a>
     </div>

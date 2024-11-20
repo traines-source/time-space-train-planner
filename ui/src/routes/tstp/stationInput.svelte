@@ -5,6 +5,7 @@
 
     export let selectedStation: StationLabel;
     export let placeholder: string;
+    export let clearButton: boolean = true;
 
     function getItems(input: string) {
         return fetch(import.meta.env.VITE_STATIONS_API + "?addresses=false&poi=false&pretty=false&query="+input)
@@ -38,6 +39,7 @@
     className="station"
     inputClassName="station"
     dropdownClassName="station"
+    showClear={clearButton && selectedStation?.id}
     bind:selectedItem={selectedStation}
     />
 

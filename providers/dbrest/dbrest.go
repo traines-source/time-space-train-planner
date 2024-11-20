@@ -262,7 +262,6 @@ func (p *DbRest) parseStationsFromJourneys() {
 	var end time.Time
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
-			log.Println(leg.Arrival)
 			from := providers.ProviderStation{
 				ID:   leg.Origin.ID,
 				Name: leg.Origin.Name,
@@ -284,7 +283,6 @@ func (p *DbRest) parseStationsFromJourneys() {
 		}
 	}
 	start, _ := p.consumer.RequestStationDataBetween(&p.consumer.Stations()[0])
-	log.Print("expdur", start, end)
 	p.consumer.SetExpectedTravelDuration(end.Sub(start))
 }
 
@@ -309,7 +307,9 @@ func (p *DbRest) parseEdgesFromJourneys() {
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
 			if leg.Line == nil {
-				log.Print("Error while trying to read edges from journeys ", leg.Line)
+				if !leg.Walking {
+					log.Print("Error while trying to read edges from journeys ", leg.Line)
+				}
 				continue
 			}
 			hafas := true

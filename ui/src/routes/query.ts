@@ -24,7 +24,7 @@ function optionsQueryString(query: any, datetime?: string): any {
     const q = {
         from: query.from.id,
         to: query.to.id,
-        vias: query.vias.map((v: any) => v.id),
+        vias: query.vias.map((v: any) => v?.id),
         datetime: query.datetime || datetime,
         regionly: query.regionly,
         system: query.system

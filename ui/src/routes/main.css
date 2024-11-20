@@ -397,6 +397,9 @@ a.blue-link, a.blue-link * {
   border:1px solid #707070;
 }
 
+#query .autocomplete-clear-button {
+  font-size: 10px;
+}
 
 #query .station.autocomplete {
   display: block !important;
