@@ -1,11 +1,12 @@
 package dbrest
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	httptransport "github.com/go-openapi/runtime/client"
@@ -23,6 +24,7 @@ type DbRest struct {
 	consumer       providers.Consumer
 	client         *apiclient.Dbrest
 	cachedJourneys *operations.GetJourneysOKBody
+	locations      map[string][]float64
 }
 
 func (p *DbRest) Vias(c providers.Consumer) error {
@@ -60,7 +62,23 @@ func (p *DbRest) prepareClient(c providers.Consumer) {
 	if p.client == nil {
 		r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("HAFAS_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
 		p.client = apiclient.New(r, strfmt.Default)
+		p.loadLocationsLookup()
 	}
+}
+
+func (p *DbRest) loadLocationsLookup() {
+	jsonFile, err := os.Open("data/location-lookup.ign.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Successfully opened location lookup file")
+	defer jsonFile.Close()
+
+	byteValue, _ := io.ReadAll(jsonFile)
+
+	json.Unmarshal([]byte(byteValue), &p.locations)
+
+	fmt.Println(p.locations["8000105"][0], p.locations["8000105"][1])
 }
 
 func (p *DbRest) requestAndParseDeparturesArrivals() error {
@@ -139,15 +157,25 @@ func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID stri
 	}
 }
 func getNormalizedTripID(tripID string, lineID string, fahrtNr string, productName string) string {
-	if len(lineID) >= 4 && len(fahrtNr) >= 3 && productName != "Bus" {
+	/*if len(lineID) >= 4 && len(fahrtNr) >= 3 && productName != "Bus" {
 		parts := strings.Split(tripID, "#")
 		if matched, _ := regexp.MatchString("[0-9]", lineID); matched && len(parts) == 42 {
 			date := parts[12]
 			id := lineID + "###" + fahrtNr + "###" + date
 			return id
 		}
-	}
+	}*/
 	return tripID
+}
+
+func (p *DbRest) enrichWithLocation(ps providers.ProviderStation) providers.ProviderStation {
+	if val, ok := p.locations[ps.ID]; ok {
+		ps.Lon = val[0]
+		ps.Lat = val[1]
+	} else {
+		log.Println("LOCATION NOT FOUND", ps.ID)
+	}
+	return ps
 }
 
 func (p *DbRest) parseStation(stop *models.Alternative, stationID string, groupID string) {
@@ -155,13 +183,11 @@ func (p *DbRest) parseStation(stop *models.Alternative, stationID string, groupI
 	if stop.Stop.Station != nil {
 		group = stop.Stop.Station.ID
 	}*/
-	p.consumer.UpsertStation(providers.ProviderStation{
+	p.consumer.UpsertStation(p.enrichWithLocation(providers.ProviderStation{
 		ID:      stationID,
 		GroupID: &groupID,
 		Name:    stop.Stop.Name,
-		Lat:     stop.Stop.Location.Latitude,
-		Lon:     stop.Stop.Location.Longitude,
-	})
+	}))
 }
 
 func (p *DbRest) parseLine(stop *models.Alternative, tripID string, lineID int) {
@@ -262,18 +288,14 @@ func (p *DbRest) parseStationsFromJourneys() {
 	var end time.Time
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
-			from := providers.ProviderStation{
+			from := p.enrichWithLocation(providers.ProviderStation{
 				ID:   leg.Origin.ID,
 				Name: leg.Origin.Name,
-				Lat:  leg.Origin.Location.Latitude,
-				Lon:  leg.Origin.Location.Longitude,
-			}
-			to := providers.ProviderStation{
+			})
+			to := p.enrichWithLocation(providers.ProviderStation{
 				ID:   leg.Destination.ID,
 				Name: leg.Destination.Name,
-				Lat:  leg.Destination.Location.Latitude,
-				Lon:  leg.Destination.Location.Longitude,
-			}
+			})
 			p.fallbackStations(from, to)
 			p.consumer.UpsertStation(from)
 			p.consumer.UpsertStation(to)

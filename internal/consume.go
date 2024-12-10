@@ -25,7 +25,7 @@ var loc, _ = time.LoadLocation("Europe/Berlin")
 func (c *consumer) RequestStationDataBetween(station *providers.ProviderStation) (from time.Time, to time.Time) {
 	defaultDuration, _ := time.ParseDuration("1h")
 	longDuration, _ := time.ParseDuration("8h")
-	maxDuration, _ := time.ParseDuration("14h")
+	maxDuration, _ := time.ParseDuration("10h")
 
 	var travelDuration time.Duration
 	if c.expectedTravelDuration > maxDuration {
