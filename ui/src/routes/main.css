@@ -416,6 +416,7 @@ a.blue-link, a.blue-link * {
   border:1px solid #c5c5c5;
   box-shadow: 0 1px 2px rgba(0,0,0,0.5);
   cursor: pointer;
+  top: 0px !important;
 }
 
 #query .station.autocomplete-list-item {
