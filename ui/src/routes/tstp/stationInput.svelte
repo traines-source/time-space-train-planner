@@ -6,9 +6,10 @@
     export let selectedStation: StationLabel;
     export let placeholder: string;
     export let clearButton: boolean = true;
+    export let system: string | null;
 
     function getItems(input: string) {
-        return fetch(import.meta.env.VITE_STATIONS_API + "?addresses=false&poi=false&pretty=false&query="+input)
+        return fetch(import.meta.env.VITE_STATIONS_API + system + "/v6/locations?addresses=false&poi=false&pretty=false&query="+input)
         .then(response => response.json())
         .then(data => {
             var list = data

@@ -43,7 +43,7 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(err.ErrorCode())
 			}
 		}
-		stations, err := internal.ObtainVias(from[0], to[0], vias, datetime, regionly)
+		stations, err := internal.ObtainVias("de_db", from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}
@@ -54,6 +54,7 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiVias(w http.ResponseWriter, r *http.Request) {
+	var system = r.URL.Query().Get("system")
 	var from = queryStationList(r.URL.Query()["from"])
 	var to = queryStationList(r.URL.Query()["to"])
 	var vias = queryStationList(r.URL.Query()["vias"])
@@ -63,7 +64,7 @@ func apiVias(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 {
-		stations, err := internal.ObtainVias(from[0], to[0], vias, datetime, regionly)
+		stations, err := internal.ObtainVias(system, from[0], to[0], vias, datetime, regionly)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}

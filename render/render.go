@@ -342,7 +342,7 @@ func (c *container) layoutStations() {
 	x := -1
 	y := 0
 	var lastGroup *string
-	for _, s := range stationsSlice {
+	for i, s := range stationsSlice {
 		if s.GroupID == nil || lastGroup == nil || *lastGroup != *s.GroupID {
 			x++
 			y = 0
@@ -352,7 +352,9 @@ func (c *container) layoutStations() {
 		if s.GroupID == nil || s.GroupID != nil && *s.GroupID == s.ID {
 			s.SpaceAxisHeap = 0
 		} else {
-			y++
+			if i == 0 || stationsSlice[i-1].Name != s.Name {
+				y++
+			}
 			s.SpaceAxisHeap = y
 		}
 	}

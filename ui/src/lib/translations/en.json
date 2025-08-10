@@ -56,5 +56,8 @@
     "walking_from": "from",
     "earlier_departures": "Earlier",
     "later_departures": "Later",
-    "coach_sequence": "Coach sequence"
+    "source": "Data source",
+    "coach_sequence": "Coach sequence",
+    "dbrest": "Deutsche Bahn",
+    "transitous": "Transitous"
 }

@@ -56,5 +56,9 @@
     "walking_from": "départ de",
     "earlier_departures": "Plus tôt",
     "later_departures": "Plus tard",
-    "coach_sequence": "Composition du train"
+    "source": "Source des données",
+    "coach_sequence": "Composition du train",
+    "dbrest": "Deutsche Bahn",
+    "transitous": "Transitous"
+
 }

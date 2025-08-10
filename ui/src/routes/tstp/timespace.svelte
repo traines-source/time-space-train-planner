@@ -219,7 +219,7 @@
     </filter>
 </defs>
 {#if data && displayTsd}
-{#each Object.values(data.Stations) as s (s.ID)}
+{#each Object.values(data.Stations).filter((item, pos, self) => pos == 0 || self[pos-1].Name != item.Name) as s (s.ID)}
 <text x="{x(s.Coord)}" y="{y(s.Coord)}" class="station-label" on:click={() => selectStation(s.GroupID || s.ID)}>
     {s.Name}
     <title>{s.ID}</title>

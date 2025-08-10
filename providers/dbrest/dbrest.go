@@ -1,9 +1,6 @@
 package dbrest
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
 	"log"
 	"os"
 	"strconv"
@@ -24,7 +21,11 @@ type DbRest struct {
 	consumer       providers.Consumer
 	client         *apiclient.Dbrest
 	cachedJourneys *operations.GetJourneysOKBody
-	locations      map[string][]float64
+	backend        string
+}
+
+func (p *DbRest) SetBackend(backend string) {
+	p.backend = backend
 }
 
 func (p *DbRest) Vias(c providers.Consumer) error {
@@ -60,48 +61,44 @@ func (p *DbRest) Enrich(c providers.Consumer) error {
 func (p *DbRest) prepareClient(c providers.Consumer) {
 	p.consumer = c
 	if p.client == nil {
-		r := httptransport.New(os.Getenv("API_CACHE_HOST"), os.Getenv("HAFAS_API_CACHE_PREFIX"), []string{os.Getenv("API_CACHE_SCHEME")})
+		prefix := os.Getenv("HAFAS_API_CACHE_PREFIX")
+		if p.backend == "transitous" {
+			prefix = os.Getenv("TRANSITOUS_API_CACHE_PREFIX")
+		}
+		log.Println(os.Getenv("API_CACHE_HOST"))
+		r := httptransport.New(os.Getenv("API_CACHE_HOST"), prefix, []string{os.Getenv("API_CACHE_SCHEME")})
 		p.client = apiclient.New(r, strfmt.Default)
-		p.loadLocationsLookup()
 	}
-}
-
-func (p *DbRest) loadLocationsLookup() {
-	jsonFile, err := os.Open("data/location-lookup.ign.json")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Successfully opened location lookup file")
-	defer jsonFile.Close()
-
-	byteValue, _ := io.ReadAll(jsonFile)
-
-	json.Unmarshal([]byte(byteValue), &p.locations)
-
-	fmt.Println(p.locations["8000105"][0], p.locations["8000105"][1])
 }
 
 func (p *DbRest) requestAndParseDeparturesArrivals() error {
 	stations := p.consumer.Stations()
-	for i, station := range stations {
-		if i > 20 {
+	seen := map[string]bool{}
+	i := 0
+	for _, station := range stations {
+		if seen[station.ID] {
+			log.Print("Skipping already seen ", station.ID)
+			continue
+		}
+		if i > 30 {
 			log.Print("Aborting station retrieval, maximum station count exceeded.")
 			break
 		}
+		i++
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
 		log.Print("Requesting for ", station.ID, " at ", from, " with duration ", duration)
-		if err := p.requestAndParseArrival(station, from, int64(duration)); err != nil {
+		if err := p.requestAndParseArrival(station, from, int64(duration), seen); err != nil {
 			return err
 		}
-		if err := p.requestAndParseDeparture(station, from, int64(duration)); err != nil {
+		if err := p.requestAndParseDeparture(station, from, int64(duration), seen); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when time.Time, duration int64) error {
+func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when time.Time, duration int64, seen map[string]bool) error {
 	var params = operations.NewGetStopsIDArrivalsParams()
 	params.ID = station.ID
 	params.Duration = &duration
@@ -113,11 +110,11 @@ func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when 
 	if err != nil {
 		return err
 	}
-	p.parseDepartureArrival(res.Payload.Arrivals, station.ID, true)
+	p.parseDepartureArrival(res.Payload.Arrivals, station.ID, true, seen)
 	return nil
 }
 
-func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, when time.Time, duration int64) error {
+func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, when time.Time, duration int64, seen map[string]bool) error {
 	var params = operations.NewGetStopsIDDeparturesParams()
 	params.ID = station.ID
 	params.Duration = &duration
@@ -136,22 +133,23 @@ func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, whe
 	if err != nil {
 		return err
 	}
-	p.parseDepartureArrival(res.Payload.Departures, station.ID, false)
+	p.parseDepartureArrival(res.Payload.Departures, station.ID, false, seen)
 	return nil
 }
 
-func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID string, arrival bool) {
+func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID string, arrival bool, seen map[string]bool) {
 	if len(stops) >= results {
 		log.Printf("Warning: Potentially missing arrivals/departures (max. results of %d exceeded)", len(stops))
 	}
 	for _, stop := range stops {
 		lineID, err := strconv.Atoi(stop.Line.FahrtNr)
 		if err != nil {
-			log.Printf("Failed to convert Line ID %s", stop.Line.FahrtNr)
-			continue
+			//log.Printf("Failed to convert Line ID %s", stop.Line.FahrtNr)
+			lineID = 0
 		}
 		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr, stop.Line.ProductName)
-		p.parseStation(stop, stop.Stop.ID, groupID)
+		p.parseStation(stop.Stop, stop.Stop.ID, groupID)
+		seen[stop.Stop.ID] = true
 		p.parseLine(stop, tripID, lineID)
 		p.parseLineStop(stop, arrival, stop.Stop.ID, tripID)
 	}
@@ -168,26 +166,17 @@ func getNormalizedTripID(tripID string, lineID string, fahrtNr string, productNa
 	return tripID
 }
 
-func (p *DbRest) enrichWithLocation(ps providers.ProviderStation) providers.ProviderStation {
-	if val, ok := p.locations[ps.ID]; ok {
-		ps.Lon = val[0]
-		ps.Lat = val[1]
-	} else {
-		log.Println("LOCATION NOT FOUND", ps.ID)
-	}
-	return ps
-}
-
-func (p *DbRest) parseStation(stop *models.Alternative, stationID string, groupID string) {
-	/*group := stationID
-	if stop.Stop.Station != nil {
-		group = stop.Stop.Station.ID
-	}*/
-	p.consumer.UpsertStation(p.enrichWithLocation(providers.ProviderStation{
+func (p *DbRest) parseStation(stop *models.Stop, stationID string, groupID string) {
+	s := providers.ProviderStation{
 		ID:      stationID,
 		GroupID: &groupID,
-		Name:    stop.Stop.Name,
-	}))
+		Name:    stop.Name,
+	}
+	if stop.Location != nil {
+		s.Lat = stop.Location.Latitude
+		s.Lon = stop.Location.Longitude
+	}
+	p.consumer.UpsertStation(s)
 }
 
 func (p *DbRest) parseLine(stop *models.Alternative, tripID string, lineID int) {
@@ -288,40 +277,25 @@ func (p *DbRest) parseStationsFromJourneys() {
 	var end time.Time
 	for _, journey := range p.cachedJourneys.Journeys {
 		for _, leg := range journey.Legs {
-			from := p.enrichWithLocation(providers.ProviderStation{
-				ID:   leg.Origin.ID,
-				Name: leg.Origin.Name,
-			})
-			to := p.enrichWithLocation(providers.ProviderStation{
-				ID:   leg.Destination.ID,
-				Name: leg.Destination.Name,
-			})
-			p.fallbackStations(from, to)
-			p.consumer.UpsertStation(from)
-			p.consumer.UpsertStation(to)
+			p.parseStation(leg.Origin, leg.Origin.ID, leg.Origin.ID)
+			p.parseStation(leg.Destination, leg.Destination.ID, leg.Destination.ID)
 			if !leg.Arrival.IsZero() && end.Before(time.Time(leg.Arrival)) {
 				end = time.Time(leg.Arrival)
 			}
 		}
+		p.fallbackStations(journey)
 	}
 	start, _ := p.consumer.RequestStationDataBetween(&p.consumer.Stations()[0])
 	p.consumer.SetExpectedTravelDuration(end.Sub(start))
 }
 
-func (p *DbRest) fallbackStations(from providers.ProviderStation, to providers.ProviderStation) {
+func (p *DbRest) fallbackStations(j *models.Journey) {
 	stations := p.consumer.Stations()
-	p.consumer.UpsertStation(providers.ProviderStation{
-		ID:      stations[0].ID,
-		GroupID: &stations[0].ID,
-		Lat:     from.Lat,
-		Lon:     from.Lon,
-	})
-	p.consumer.UpsertStation(providers.ProviderStation{
-		ID:      stations[len(stations)-1].ID,
-		GroupID: &stations[len(stations)-1].ID,
-		Lat:     to.Lat,
-		Lon:     to.Lon,
-	})
+	if len(j.Legs) == 0 {
+		return
+	}
+	p.parseStation(j.Legs[0].Origin, stations[0].ID, stations[0].ID)
+	p.parseStation(j.Legs[len(j.Legs)-1].Destination, stations[len(stations)-1].ID, stations[len(stations)-1].ID)
 }
 
 func (p *DbRest) parseEdgesFromJourneys() {

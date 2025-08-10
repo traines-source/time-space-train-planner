@@ -201,14 +201,14 @@ func (c *consumer) SetExpectedTravelDuration(duration time.Duration) {
 }
 
 func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
-	if to.Departure.IsZero() || to.Departure == to.Arrival {
+	if to.Departure.IsZero() || to.Departure.Equal(to.Arrival) {
 		to.Departure = from.Departure
 		if from.Departure.IsZero() && !from.Arrival.IsZero() {
 			to.Departure = from.Arrival
 		}
 		to.DepartureTrack = from.DepartureTrack
 	}
-	if to.Arrival.IsZero() || to.Departure == to.Arrival {
+	if to.Arrival.IsZero() || to.Departure.Equal(to.Arrival) {
 		to.Arrival = from.Arrival
 		if from.Arrival.IsZero() && !from.Departure.IsZero() {
 			to.Arrival = from.Departure
@@ -217,11 +217,13 @@ func copyProviderStopInfo(from *providers.ProviderLineStopInfo, to *StopInfo) {
 	}
 }
 
-func (c *consumer) initializeProviders(stationIDs []string) {
+func (c *consumer) initializeProviders(stationIDs []string, backend string) {
 	c.stations = map[string]*Station{}
 	c.lines = map[string]*Line{}
 
-	c.providers = []providers.Provider{&dbrest.DbRest{}}
+	p := dbrest.DbRest{}
+	p.SetBackend(backend)
+	c.providers = []providers.Provider{&p}
 	c.providerStations = c.defaultStations(stationIDs)
 }
 
@@ -329,7 +331,7 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func prepare(from string, to string, vias []string, dateTime string, regionly bool) *consumer {
+func prepare(from string, to string, vias []string, dateTime string, regionly bool, backend string) *consumer {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
@@ -342,7 +344,7 @@ func prepare(from string, to string, vias []string, dateTime string, regionly bo
 	stationIDs = append(stationIDs, to)
 
 	log.Print(stationIDs)
-	c.initializeProviders(stationIDs)
+	c.initializeProviders(stationIDs, backend)
 	return c
 }
 
@@ -372,8 +374,8 @@ func (c *consumer) apiFlow(system string, from string, to string, vias []string,
 	return nil
 }
 
-func ObtainVias(from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, *ErrorCode) {
-	c := prepare(from, to, vias, dateTime, regionly)
+func ObtainVias(system string, from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly, system)
 	if err := c.callProviders(callVias); err != nil {
 		return nil, err
 	}
@@ -381,8 +383,8 @@ func ObtainVias(from string, to string, vias []string, dateTime string, regionly
 }
 
 func ObtainData(system string, from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
-	c := prepare(from, to, vias, dateTime, regionly)
-	if system == "" {
+	c := prepare(from, to, vias, dateTime, regionly, system)
+	if system != "de_stost" {
 		if err := c.apiFlow(system, from, to, vias, regionly); err != nil {
 			return nil, nil, err
 		}

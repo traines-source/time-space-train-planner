@@ -21,6 +21,9 @@
     $: {
         showForm = !browser || $page.url.searchParams.has('form') || !$page.url.searchParams.has('vias') || !requiredFieldsSet();
         showTimespace = !showForm;
+        if (showForm && !store.system) {
+            store.system = 'transitous';
+        }
     }
 </script>
 

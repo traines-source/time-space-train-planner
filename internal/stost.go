@@ -74,7 +74,7 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 		})
 	}
 	for _, l := range lines {
-		var p int32 = -1
+		var p int32 = 10 // TODO
 		if l.Type == "Foot" && len(l.Route) > 0 && l.Route[0].Discarded {
 			continue
 		}

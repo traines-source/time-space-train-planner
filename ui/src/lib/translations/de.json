@@ -56,5 +56,8 @@
     "walking_from": "ab",
     "earlier_departures": "Früher",
     "later_departures": "Später",
-    "coach_sequence": "Wagenreihung"
+    "coach_sequence": "Wagenreihung",
+    "source": "Datenquelle",
+    "dbrest": "DB",
+    "transitous": "Transitous"
 }
