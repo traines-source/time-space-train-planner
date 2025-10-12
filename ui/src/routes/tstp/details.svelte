@@ -20,6 +20,7 @@
     let selectedEdgeHistory: Edge[] = [];
 
     let nextBestDepartures: Edge[] | undefined = undefined;
+    let commonNameFragment: string = '';
     let nextBestDeparture: Edge | undefined = undefined;
     let nextBestDeparturesBoundsMinutes: number[] = [0,0];
     const defaultNextBestDepartures = 5;
@@ -119,6 +120,8 @@
         let shortestPathFound = false;
         let relevantStations = getStationsInGroup(data, station);
         let indices = new Array(relevantStations.length).fill(0);
+        let name_fragments: { [key:string]:number; }  = {'': 1};
+        commonNameFragment = '';
         while (true) {
             if (candidates.length >= numDepartures && shortestPathFound || candidates.length >= numDepartures*numDepartures) {
                 break;
@@ -130,6 +133,16 @@
             const e = edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]);
             let departure = parseTime(e.Actual.Departure);
             candidates.push(e);
+            const fragments = stationResolver(e.From.SpaceAxis).Name.split(',');
+            if (fragments.length > 1 && e.From.SpaceAxis != selectedStationId(selection)) {
+                fragments.forEach((e: string) => {
+                    if (name_fragments[e]) {
+                        name_fragments[e]++;
+                    } else {
+                        name_fragments[e] = 1;
+                    }
+                });
+            }
             indices[nextDepartureIndex]++;
             if (!hasDistribution(e)) continue;
             if (departure >= time.getTime()+walkingDurationMs(station.ID, e.From.SpaceAxis, stationResolver) && (!shortestPathFound || nextBestDeparture.DestinationArrival?.Mean > e.DestinationArrival?.Mean)) {
@@ -147,6 +160,12 @@
         candidates.sort((a, b) => {
             return parseTime(a.Actual.Departure)-parseTime(b.Actual.Departure);
         });
+
+        for (let e in name_fragments) {
+            if (name_fragments[e] > name_fragments[commonNameFragment]) {
+                commonNameFragment = e;
+            }
+        }
         
         const drawWidth = 100;
         const padding = (upperBound-lowerBound)/(drawWidth/20-1);
@@ -460,7 +479,7 @@
                         {#if d.Line?.Type == 'Foot'}{$t('c.walking_to')} {stationResolver(d.To.SpaceAxis).Name}{/if}
                     </span>
                     {#if d.From.SpaceAxis != selectedStationId(selection)}
-                    <span class="walking-from">{$t('c.walking_from')} {stationResolver(d.From.SpaceAxis).Name.split(',')[0]}, <span class="micon">directions_walk</span>{walkingDistanceRounded(selectedStationId(selection), d.From.SpaceAxis)}m</span>
+                    <span class="walking-from">{$t('c.walking_from')} {stationResolver(d.From.SpaceAxis).Name.replace(commonNameFragment+',', '').replace(','+commonNameFragment, '')}, <span class="micon">directions_walk</span>{walkingDistanceRounded(selectedStationId(selection), d.From.SpaceAxis)}m</span>
                     {/if}
                 </td>
                 <td class="nowrap">
