@@ -14,14 +14,21 @@ import (
 	"traines.eu/time-space-train-planner/providers/dbrest/models"
 )
 
-// TODO some stations, e.g. Hamburg Hbf, yield more than 1000 results within 4 hours. Maybe filter out local transport (buses, trams etc.) in request if no vias station is specified that is nearby (reasonably reachable by local transport)?
-const results = 3000
+const defaultResults = 3000
 
 type DbRest struct {
 	consumer       providers.Consumer
 	client         *apiclient.Dbrest
 	cachedJourneys *operations.GetJourneysOKBody
 	backend        string
+}
+
+// TODO some stations, e.g. Hamburg Hbf, yield more than 1000 defaultResults within 4 hours. Maybe filter out local transport (buses, trams etc.) in request if no vias station is specified that is nearby (reasonably reachable by local transport)?
+func (p *DbRest) results(seen int) int {
+	if p.backend == "transitous" && seen >= defaultResults {
+		return defaultResults * 3
+	}
+	return defaultResults
 }
 
 func (p *DbRest) SetBackend(backend string) {
@@ -73,11 +80,11 @@ func (p *DbRest) prepareClient(c providers.Consumer) {
 
 func (p *DbRest) requestAndParseDeparturesArrivals() error {
 	stations := p.consumer.Stations()
-	seen := map[string]bool{}
+	seen := map[string]int{}
 	i := 0
 	for _, station := range stations {
-		if seen[station.ID] {
-			log.Print("Skipping already seen ", station.ID)
+		if seen[station.ID] != 0 {
+			log.Print("Skipping already seen ", station.ID, " with ", seen[station.ID])
 			continue
 		}
 		if i > 30 {
@@ -87,7 +94,7 @@ func (p *DbRest) requestAndParseDeparturesArrivals() error {
 		i++
 		from, to := p.consumer.RequestStationDataBetween(&station)
 		duration := to.Sub(from).Minutes()
-		log.Print("Requesting for ", station.ID, " at ", from, " with duration ", duration)
+		log.Print("Requesting for ", station.ID, " at ", from, " with duration ", duration, " numResults ", p.results(seen[station.ID]))
 		if err := p.requestAndParseArrival(station, from, int64(duration), seen); err != nil {
 			return err
 		}
@@ -98,27 +105,35 @@ func (p *DbRest) requestAndParseDeparturesArrivals() error {
 	return nil
 }
 
-func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when time.Time, duration int64, seen map[string]bool) error {
+func (p *DbRest) requestAndParseArrival(station providers.ProviderStation, when time.Time, duration int64, seen map[string]int) error {
 	var params = operations.NewGetStopsIDArrivalsParams()
 	params.ID = station.ID
 	params.Duration = &duration
-	r := int64(results)
+	r := int64(p.results(seen[station.ID]))
 	params.Results = &r
 	params.When = (*strfmt.DateTime)(&when)
 
-	res, err := p.client.Operations.GetStopsIDArrivals(params)
-	if err != nil {
-		return err
+	for {
+		res, err := p.client.Operations.GetStopsIDArrivals(params)
+		if err != nil {
+			return err
+		}
+		r := int64(p.results(len(res.Payload.Arrivals)))
+		if len(res.Payload.Arrivals) < defaultResults || *params.Results >= r {
+			p.parseDepartureArrival(res.Payload.Arrivals, station.ID, true, seen)
+			break
+		}
+		params.Results = &r
+		log.Print("Requesting again for ", station.ID, " with duration ", duration, " numResults ", r, " ", len(res.Payload.Arrivals))
 	}
-	p.parseDepartureArrival(res.Payload.Arrivals, station.ID, true, seen)
 	return nil
 }
 
-func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, when time.Time, duration int64, seen map[string]bool) error {
+func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, when time.Time, duration int64, seen map[string]int) error {
 	var params = operations.NewGetStopsIDDeparturesParams()
 	params.ID = station.ID
 	params.Duration = &duration
-	r := int64(results)
+	r := int64(p.results(seen[station.ID]))
 	params.Results = &r
 	params.When = (*strfmt.DateTime)(&when)
 	if station.NoLocalTransport {
@@ -129,17 +144,25 @@ func (p *DbRest) requestAndParseDeparture(station providers.ProviderStation, whe
 		params.Taxi = &f
 	}
 
-	res, err := p.client.Operations.GetStopsIDDepartures(params)
-	if err != nil {
-		return err
+	for {
+		res, err := p.client.Operations.GetStopsIDDepartures(params)
+		if err != nil {
+			return err
+		}
+		r := int64(p.results(len(res.Payload.Departures)))
+		if len(res.Payload.Departures) < defaultResults || *params.Results >= r {
+			p.parseDepartureArrival(res.Payload.Departures, station.ID, false, seen)
+			break
+		}
+		params.Results = &r
+		log.Print("Requesting again for ", station.ID, " with duration ", duration, " numResults ", r, " ", len(res.Payload.Departures))
 	}
-	p.parseDepartureArrival(res.Payload.Departures, station.ID, false, seen)
 	return nil
 }
 
-func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID string, arrival bool, seen map[string]bool) {
-	if len(stops) >= results {
-		log.Printf("Warning: Potentially missing arrivals/departures (max. results of %d exceeded)", len(stops))
+func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID string, arrival bool, seen map[string]int) {
+	if len(stops) >= defaultResults {
+		log.Printf("Warning: Potentially missing arrivals/departures (max. results of %d exceeded for %s)", len(stops), groupID)
 	}
 	for _, stop := range stops {
 		lineID, err := strconv.Atoi(stop.Line.FahrtNr)
@@ -149,7 +172,7 @@ func (p *DbRest) parseDepartureArrival(stops []*models.Alternative, groupID stri
 		}
 		tripID := getNormalizedTripID(stop.TripID, stop.Line.ID, stop.Line.FahrtNr, stop.Line.ProductName)
 		p.parseStation(stop.Stop, stop.Stop.ID, groupID)
-		seen[stop.Stop.ID] = true
+		seen[stop.Stop.ID] = len(stops)
 		p.parseLine(stop, tripID, lineID)
 		p.parseLineStop(stop, arrival, stop.Stop.ID, tripID)
 	}
