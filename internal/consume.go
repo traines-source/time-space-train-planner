@@ -314,6 +314,9 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		c.stations[s.ID].Rank = i
 		i++
 	}
+	if destination.Rank == 0 {
+		destination.Rank = i-1;
+	}
 }
 
 func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
@@ -391,6 +394,7 @@ func ObtainData(system string, from string, to string, vias []string, dateTime s
 	} else {
 		StostProduce(system, c.lines, c.stations, from, to, c.dateTime, time.Now())
 	}
+	log.Printf("weird %+v %+v", c.stations[from], c.stations[to])
 	c.rankStations(c.stations[from], c.stations[to])
 	return c.stations, c.lines, nil
 }

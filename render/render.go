@@ -75,27 +75,25 @@ func (c *container) setupStations(stations map[string]*internal.Station) {
 	var from string
 	var to string
 	for _, s := range stations {
-		if len(s.Arrivals) > 0 || len(s.Departures) > 0 {
-			station := &StationLabel{
-				ID:             s.ID,
-				Name:           s.Name,
-				Rank:           s.Rank,
-				BestDepartures: []string{},
-				Lon:            s.Lon,
-				Lat:            s.Lat,
-			}
-			station.GroupID = s.GroupID
-			if s.Rank == 0 {
-				from = s.ID
-				c.From = *station
-			}
-			if s.Rank+1 == len(stations) {
-				to = s.ID
-				c.To = *station
-			}
-			station.Coord.SpaceAxis = station.ID
-			c.Stations[station.ID] = station
+		station := &StationLabel{
+			ID:             s.ID,
+			Name:           s.Name,
+			Rank:           s.Rank,
+			BestDepartures: []string{},
+			Lon:            s.Lon,
+			Lat:            s.Lat,
 		}
+		station.GroupID = s.GroupID
+		if s.Rank == 0 {
+			from = s.ID
+			c.From = *station
+		}
+		if s.Rank+1 == len(stations) {
+			to = s.ID
+			c.To = *station
+		}
+		station.Coord.SpaceAxis = station.ID
+		c.Stations[station.ID] = station
 	}
 	c.Vias = makeVias(stations, from, to)
 }
