@@ -1,20 +1,24 @@
 # Time-Space Train Planner
 
-A browser-based tool to visualize public transport journeys from A to B, in order to see all possible connections and possibly find faster connections. See it in action in this video: https://youtu.be/rD5iATcC9Mo
+Instead of planning a fixed public transport journey from origin to destination upfront, this tool shows the next best alternatives for the current transfer situation with their destination arrival time distribution including average arrival time, most likely arrival time and the 95th percentile of arrival time. It works like a car navigation system but for public transport: You will see later how to continue further, and the itinerary down the line will be continuously adapted to the real-time situation. By clicking/tapping on a connection, you basically board it, and the next best connections to your destination from the next relevant stop of that connection are shown.
 
 Use it online at https://tespace.traines.eu
 
-![Example Diagram](res/screenshot.png?raw=true)
+<img src="res/screenshot0.png?raw=true" width="500">
 
-Often, the HAFAS routing system will not show the fastest routes, because it deems the transfer times too short or because there are just too many possibilities. This tool will display all direct connections between a given set of stations and will help you find the fastest connection and any backup connections that might be good to know about. You can click on individual connections to show the shortest route to the destination from that connection (with a minimum transfer time of zero minutes).
+The goal of probabilistic routing taking into account transfer reliability and alternative continuations was inspired by the original time-space diagram showing all possible connections between a set of transfer stations. This diagram can still be shown in the UI on demand, but is usually not needed anymore, thanks to the probabilities. You can see that part of TSTP in action in this video: https://youtu.be/rD5iATcC9Mo
+
+![Example Diagram](res/screenshot.png?raw=true)
 
 TSTP is currently in development, but you can already use it productively (I know I do).
 
 ## Running TSTP
 
-The server-side part is written in Go. It is recommended to use to hosted version at https://tespace.traines.eu, but you can of course host your own instance.
+It is recommended to use to hosted version at https://tespace.traines.eu, but you can of course host your own instance.
 
-TSTP relies on an adapted HAFAS API provided by [hafas-client](https://github.com/public-transport/hafas-client), more specifically, [db-rest](https://github.com/derhuerst/db-rest). You need to run your own instance of this API adapter separately from TSTP, or use a publicly available one (e.g. https://v5.db.transport.rest/).
+TSTP itself provides the UI and middleware to connect to data providers. The probabilistic routing happens in the [stochastic-journey-strategies](https://github.com/traines-source/stochastic-journey-strategies) project. 
+
+TSTP relies on [Friendly Public Transport Format](https://github.com/public-transport/friendly-public-transport-format) APIs to obtain timetable data, provided by [motis-fptf-client](https://github.com/motis-project/motis-fptf-client) for global coverage from [Transitous](http://transitous.org/) and alternatively [hafas-client](https://github.com/public-transport/hafas-client)/[db-vendo-client](https://github.com/public-transport/db-vendo-client) for Deutsche Bahn data. You need to run your own instance of these API adapters separately from TSTP, or use a publicly available one.
 
 In addition, you should run an aggressive HTTP cache in between TSTP and this API, because TSTP itself is stateless and will repeatedly issue identical requests for the same resources while gathering data. In `deployments/nginx-cache.conf`, you find an example of how to configure Nginx as an HTTP cache. Please note that this configuration will cache for a very long time. You will not be able to get updated live information for a particular request. If you use the provided `docker-compose.yaml` as is, an Nginx reverse proxy using this configuration will be started alongside TSTP.
 
