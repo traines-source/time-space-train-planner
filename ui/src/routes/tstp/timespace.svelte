@@ -94,7 +94,7 @@
         }
         let relevantStations = getStationsInGroup(data, station);
         let indices = new Array(relevantStations.length).fill(0);
-        let nextDepartureIndex = calcNextDepartureIndex(station, relevantStations, indices, (e) => time.getTime()+walkingDurationMs(station.ID, e.From.SpaceAxis, stationResolver), edgeResolver, stationResolver);
+        let nextDepartureIndex = calcNextDepartureIndex(station, selection.edge?.Line?.ID, relevantStations, indices, (e) => time.getTime()+walkingDurationMs(station.ID, e.From.SpaceAxis, stationResolver), edgeResolver, stationResolver);
         if (nextDepartureIndex == undefined) {
             return;
         }

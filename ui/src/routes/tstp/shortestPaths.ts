@@ -15,7 +15,7 @@ function hasDistribution(e: Edge) {
     return e.DestinationArrival && e.DestinationArrival.Histogram && e.DestinationArrival.Histogram.length;
 }
 
-function calcNextDepartureIndex(station: Station, relevantStations: Station[], indices: number[], earliestDepartureTime: (e: Edge) => number, edgeResolver: (id: string) => Edge, stationResolver: (id: string) => Station): number | undefined {
+function calcNextDepartureIndex(station: Station, currentLineID: string, relevantStations: Station[], indices: number[], earliestDepartureTime: (e: Edge) => number, edgeResolver: (id: string) => Edge, stationResolver: (id: string) => Station): number | undefined {
     let nextDepartureIndex = undefined;
     for (let s=0; s<relevantStations.length; s++) {
         let e;
@@ -29,7 +29,7 @@ function calcNextDepartureIndex(station: Station, relevantStations: Station[], i
             if (departure >= earliestDepartureTime(e)
             && !(hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1)
             && !(e.Line?.Type == "Foot" && station.ID != relevantStations[s].ID)
-            && !(stationResolver(e.To.SpaceAxis).GroupID == station.GroupID)) {
+            && !(stationResolver(e.To.SpaceAxis).GroupID == station.GroupID && (e.Line?.ID != currentLineID || station.ID != relevantStations[s].ID))) {
                 break;
             }
             indices[s]++;

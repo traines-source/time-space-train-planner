@@ -126,7 +126,7 @@
             if (candidates.length >= numDepartures && shortestPathFound || candidates.length >= numDepartures*numDepartures) {
                 break;
             }
-            let nextDepartureIndex = calcNextDepartureIndex(station, relevantStations, indices, (_) => time.getTime()-negativeTransferMinutes*60*1000, edgeResolver, stationResolver);
+            let nextDepartureIndex = calcNextDepartureIndex(station, selection.edge?.Line?.ID, relevantStations, indices, (_) => time.getTime()-negativeTransferMinutes*60*1000, edgeResolver, stationResolver);
             if (nextDepartureIndex == undefined) {
                 break;
             }
