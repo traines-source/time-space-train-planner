@@ -84,6 +84,7 @@ func (c *container) setupStations(stations map[string]*internal.Station) {
 			Lat:            s.Lat,
 		}
 		station.GroupID = s.GroupID
+		station.AltID = s.AltID
 		if s.Rank == 0 {
 			from = s.ID
 			c.From = *station

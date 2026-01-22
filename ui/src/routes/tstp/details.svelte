@@ -391,7 +391,7 @@
                 <a
                     target="_blank"
                     class="unstyled-link blue-link"
-                    href="https://bahnapp.online/journey/coaches/?trainId={selection.edge.Line.Name.replace(' ', '+')}&stationId={selection.edge.From.SpaceAxis}&departureTime={new Date(parseTime(selection.edge.Actual.Departure)).toISOString()}&initialDepartureTime={new Date(parseTime(selection.edge.Planned.Departure)).toISOString()}"
+                    href="https://bahnapp.online/journey/coaches/?trainId={selection.edge.Line.Name.replace(' ', '+')}&stationId={stationResolver(selection.edge.From.SpaceAxis).AltID}&departureTime={new Date(parseTime(selection.edge.Actual.Departure)).toISOString()}&initialDepartureTime={new Date(parseTime(selection.edge.Planned.Departure)).toISOString()}"
                     title="{$t('c.coach_sequence')}" aria-label="{$t('c.coach_sequence')}">
                         <span class="micon" aria-label="{$t('c.coach_sequence')}">airline_seat_recline_normal</span>
                 </a>

@@ -110,6 +110,9 @@ func (c *consumer) UpsertStation(e providers.ProviderStation) {
 	if e.GroupID != nil {
 		val.GroupID = e.GroupID
 	}
+	if e.AltID != nil {
+		val.AltID = e.AltID
+	}
 }
 
 func (c *consumer) UpsertLine(e providers.ProviderLine) {
@@ -315,7 +318,7 @@ func (c *consumer) rankStations(origin *Station, destination *Station) {
 		i++
 	}
 	if destination.Rank == 0 {
-		destination.Rank = i-1;
+		destination.Rank = i - 1
 	}
 }
 

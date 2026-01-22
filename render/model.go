@@ -14,6 +14,7 @@ type StationLabel struct {
 	SpaceAxis      int
 	SpaceAxisHeap  int
 	GroupID        *string
+	AltID          *string
 	Rank           int
 	BestDepartures []string
 	Lon            float64

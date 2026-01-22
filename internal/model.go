@@ -11,6 +11,7 @@ type Station struct {
 	Lon        float64
 	Rank       int
 	GroupID    *string
+	AltID      *string
 }
 
 type Edge struct {

@@ -199,6 +199,9 @@ func (p *DbRest) parseStation(stop *models.Stop, stationID string, groupID strin
 		s.Lat = stop.Location.Latitude
 		s.Lon = stop.Location.Longitude
 	}
+	if stop.Station != nil {
+		s.AltID = &stop.Station.ID
+	}
 	p.consumer.UpsertStation(s)
 }
 

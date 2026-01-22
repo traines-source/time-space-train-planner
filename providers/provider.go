@@ -25,6 +25,7 @@ type ProviderStation struct {
 	ID               string
 	Code100          string
 	GroupID          *string
+	AltID            *string
 	Name             string
 	Lat              float64
 	Lon              float64
