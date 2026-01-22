@@ -175,7 +175,13 @@
 
     function rectifyEdgeHistory() {
         if (selectedEdgeHistory[selectedEdgeHistory.length-1] != selection) {
-            selectedEdgeHistory = [selection];
+            if (selection.edge) {
+                const s = Selection.fromStation(stationResolver(selection.edge.From.SpaceAxis));
+                s.from = new Date(parseTime(selection.edge.Actual.Departure));
+                selectedEdgeHistory = [s, selection];
+            } else {
+                selectedEdgeHistory = [selection];
+            }         
             console.log("history reset");
         }
     }
