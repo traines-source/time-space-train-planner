@@ -1,3 +1,5 @@
+import { parseTime } from "./labels";
+
 export type Edge = any;
 export type Coord = any;
 export type Station = any;
@@ -23,7 +25,7 @@ export class Selection {
         const t = new Selection();
         t.edge = edge;
         t.station = undefined;
-        t.from = undefined;
+        t.from = new Date(parseTime(edge.Actual.Arrival));
         t.to = undefined;
         return t;
     }

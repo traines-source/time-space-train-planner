@@ -30,6 +30,8 @@
             tick().then(() => {
                 if (selection.edge && data.Edges[selection.edge.ID]) {
                     selectEdge(selection.edge.ID);
+                } else if (selection.edge) {
+                    selectStation(selection.edge.From.SpaceAxis);
                 } else if (selection.station && data.Stations[selection.station.ID]) {
                     selectStation(selection.station.ID);
                 } else {
@@ -51,13 +53,13 @@
         fetchTimespace();
     }
 
-    function selectEdge(edgeId: string | undefined): void {
+    function selectEdge(edgeId: string | undefined, s?: Selection): void {
         setSelectedForDependents(false);
         if (!edgeId) {
             selectedShortestPath = [];
             return;
         }
-        selection = Selection.fromEdge(data.Edges[edgeId]);
+        selection = s || Selection.fromEdge(data.Edges[edgeId]);      
         console.log('cur', selection.edge, edgeId);
         selectedShortestPath = setSelectedForDependents(true);
     }

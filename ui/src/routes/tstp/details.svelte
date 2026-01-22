@@ -5,19 +5,19 @@
     import { optionsQueryString } from "../query"
     import Footer from '../footer.svelte'; 
     import {label, type, departure, arrival, parseTime, simpleTime, redundant} from './labels';
-    import type { Edge, Station, Response } from './types';
+    import { type Edge, type Station, Selection, type Response } from './types';
     import { calcNextDepartureIndex, getStationsInGroup, hasDistribution, walkingDistance, walkingDurationMs } from './shortestPaths';
 
-    export let selection: Edge;
+    export let selection: Selection;
     export let loading: boolean;
     export let tsdShown: boolean;
     export let doRefresh: () => void;
-    export let selectEdge: (id: string) => void;
+    export let selectEdge: (id: string, s?: Selection) => void;
     export let selectStation: (id: string) => void;
     export let data: Response;
     export let error: string | undefined;
 
-    let selectedEdgeHistory: Edge[] = [];
+    let selectedEdgeHistory: Selection[] = [];
 
     let nextBestDepartures: Edge[] | undefined = undefined;
     let commonNameFragment: string = '';
@@ -36,7 +36,7 @@
     }
 
     function displayEarlierDepartures() {
-        negativeTransferMinutes += 30;
+        selection.from = new Date((selection.from?.getTime()||Date.now())-30*60*1000);
         nextBestDepartureForSelection(selection);
     }
 
@@ -71,14 +71,14 @@
     function nextBestDeparturesForStation() {
         if (!selection.from) {
             let n = new Date().getTime();
-            if (selectedEdgeHistory.length > 0) {
-                n = parseTime(selectedEdgeHistory[selectedEdgeHistory.length-1].Actual.Departure);
+            if (selectedEdgeHistory.length > 0 && selectedEdgeHistory[selectedEdgeHistory.length-1].edge) {
+                n = parseTime(selectedEdgeHistory[selectedEdgeHistory.length-1].edge?.Actual.Departure);
             } else if (n < new Date(data.MinTime).getTime() || n > new Date(data.MaxTime).getTime()) {
                 n = new Date(data.MinTime).getTime()+negativeTransferMinutes*60*1000;
             }            
             selection.from = new Date(n);
         }
-        selectedEdgeHistory = [];
+        selectedEdgeHistory = [selection];
         updateNextBestDepartures(selection.station, selection.from);
     }
 
@@ -174,8 +174,8 @@
     }
 
     function rectifyEdgeHistory() {
-        if (selectedEdgeHistory[selectedEdgeHistory.length-1] != selection.edge) {
-            selectedEdgeHistory = [selection.edge];
+        if (selectedEdgeHistory[selectedEdgeHistory.length-1] != selection) {
+            selectedEdgeHistory = [selection];
             console.log("history reset");
         }
     }
@@ -252,20 +252,34 @@
     }
 
     function pushHistory(edge: Edge) {
-        selectedEdgeHistory = [...selectedEdgeHistory, edge];
-        selectEdge(edge.ID);
+        const s = Selection.fromEdge(edge);
+        selectedEdgeHistory = [...selectedEdgeHistory, s];
+        selectEdge(edge.ID, s);
+        history.pushState({}, '');
     }
 
     function popHistory() {
         if (selectedEdgeHistory.length > 1) {
             selectedEdgeHistory.pop();
-            selectEdge(selectedEdgeHistory[selectedEdgeHistory.length-1].ID);
+            const s = selectedEdgeHistory[selectedEdgeHistory.length-1];
+            selectEdge(s.edge?.ID, s);
+            if (!s.edge && s.station) {
+                selection = s;
+            }
             selectedEdgeHistory = selectedEdgeHistory;
         } else {
             selectStation(selection.edge?.From.SpaceAxis);
             selectedEdgeHistory.pop();
         }
     }
+
+    window.addEventListener("popstate", (event) => {
+        // TODO refactor to Svelte 5 pushState
+        console.log(
+            `location: ${document.location}, state: ${JSON.stringify(event.state)}`,
+        );
+        popHistory();
+    });
 
     function selectedStationName(s: Selection) {
         return selection.edge
@@ -290,7 +304,7 @@
     }
 
     function updateTime(e: any) {
-        const old: Date = selection.from;
+        const old: Date = selection.from || new Date();
         const n: Date = e.target.valueAsDate;
         if (!n) return;
         const minTime = new Date(data.MinTime);
