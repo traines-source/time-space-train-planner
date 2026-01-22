@@ -452,7 +452,11 @@
     {/if}
 
     {#if nextBestDepartures}
-        <h3><span class="small">{$t('c.next_best_departures')}</span><br /><span class="highlight">{selectedStationName(selection)}</span>, <input type="time" value={simpleTime(selection.from)} on:change={updateTime}></h3>
+        <h3>
+            <span class="small">{$t('c.next_best_departures')} {stationResolver(data.To.ID).Name} {$t('c.next_best_departures_from')}</span><br />
+            <span class="highlight">{selectedStationName(selection)}</span>,
+            <input type="time" value={simpleTime(selection.from)} on:change={updateTime}>
+        </h3>
         <table class="next-best-departures">
             <tr><td class="nosep right" colspan="3"><a href="javascript:void(0)" on:click={displayEarlierDepartures} class="submit small">
                 {$t('c.earlier_departures')}

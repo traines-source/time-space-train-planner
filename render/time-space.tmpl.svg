@@ -68,7 +68,7 @@
     </text>
     <path d="M 400,1460 L600,1460" class="edge provider-shortest-path redundant-false" />
     <text x="400" y="1450">
-        Route recommended by DB/HAFAS
+        Classically recommended route
     </text>
     <path d="M 650,1460 L850,1460" class="edge redundant-true" />
     <text x="650" y="1450">
