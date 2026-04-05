@@ -1,7 +1,7 @@
 {
     "report": "Report an issue",
     "imprint": "Imprint/Privacy",
-    "introduction": "Instead of planning a fixed public transport journey from origin to destination upfront, this tool shows the next best alternatives for the current transfer situation with their destination arrival distribution (currently Germany only).",
+    "introduction": "Instead of planning a fixed public transport journey from origin to destination upfront, this tool shows the next best alternatives for the current transfer situation with their destination arrival distribution.",
     "from": "From",
     "to": "To",
     "interchanges_explanation": "You need to enter all potential interchange stations (up to 10). Only direct connections between these stations will be found.",

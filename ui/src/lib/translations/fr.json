@@ -1,7 +1,7 @@
 {
     "report": "Signaler un problème",
     "imprint": "Mentions légales/Protection des données",
-    "introduction": "Au lieu de planifier un itinéraire fixe en transports en commun du lieu de départ à la destination, cet outil montre les meilleures correspondances pour la situation actuelle et leur distribution du temps d'arrivée (actuellement surtout pour l'Allemagne).",
+    "introduction": "Au lieu de planifier un itinéraire fixe en transports en commun du lieu de départ à la destination, cet outil montre les meilleures correspondances pour la situation actuelle et leur distribution du temps d'arrivée.",
     "from": "Station de départ",
     "to": "Station d'arrivée",
     "interchanges_explanation": "Vous devez entrer toutes les stations de correspondance potentielles (jusqu'à 10). Seulement des connexions directes entre ces stations seront trouvées.",

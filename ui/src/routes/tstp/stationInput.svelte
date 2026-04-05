@@ -27,20 +27,21 @@
 
 </script>
 
-<AutoComplete searchFunction={getItems}
-    delay="200"
-    placeholder={placeholder}
-    noResultsText="{$t('c.no_results')}"
-    hideArrow={true}
-    localFiltering={false}
-    labelFieldName="name"
-    valueFieldName="id"
-    cleanUserText={false}
-    minCharactersToSearch="2"
-    className="station"
-    inputClassName="station"
-    dropdownClassName="station"
-    showClear={clearButton && selectedStation?.id}
-    bind:selectedItem={selectedStation}
-    />
-
+{#key system}
+    <AutoComplete searchFunction={getItems}
+        delay="200"
+        placeholder={placeholder}
+        noResultsText="{$t('c.no_results')}"
+        hideArrow={true}
+        localFiltering={false}
+        labelFieldName="name"
+        valueFieldName="id"
+        cleanUserText={false}
+        minCharactersToSearch="2"
+        className="station"
+        inputClassName="station"
+        dropdownClassName="station"
+        showClear={clearButton && selectedStation?.id}
+        bind:selectedItem={selectedStation}
+        />
+{/key}
