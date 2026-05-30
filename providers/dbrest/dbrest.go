@@ -25,8 +25,8 @@ type DbRest struct {
 
 // TODO some stations, e.g. Hamburg Hbf, yield more than 1000 defaultResults within 4 hours. Maybe filter out local transport (buses, trams etc.) in request if no vias station is specified that is nearby (reasonably reachable by local transport)?
 func (p *DbRest) results(seen int) int {
-	if p.backend == "transitous" && seen >= defaultResults {
-		return defaultResults * 3
+	if p.backend == "transitous" {
+		return defaultResults * 5
 	}
 	return defaultResults
 }
