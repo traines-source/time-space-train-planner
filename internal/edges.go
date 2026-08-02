@@ -36,12 +36,13 @@ func (c *consumer) generateTimetableEdges() {
 
 func (c *consumer) generateTimetableEdge(a *LineStop, b *LineStop, line *Line) {
 	edge := &Edge{
-		Line:      line,
-		From:      a.Station,
-		To:        b.Station,
-		Message:   a.Message, // TODO both msgs?
-		Cancelled: a.Cancelled || b.Cancelled,
-		Redundant: true, // set by stost
+		Line:                  line,
+		From:                  a.Station,
+		To:                    b.Station,
+		Message:               a.Message, // TODO both msgs?
+		Cancelled:             a.Cancelled || b.Cancelled,
+		CompulsoryReservation: a.CompulsoryReservation,
+		Redundant:             true, // set by stost
 	}
 	copyStopInfo(&a.Planned, &b.Planned, &edge.Planned)
 	copyStopInfo(&a.Current, &b.Current, &edge.Current)

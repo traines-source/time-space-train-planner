@@ -32,6 +32,7 @@ type Edge struct {
 	Redundant                  bool
 	Discarded                  bool
 	Cancelled                  bool
+	CompulsoryReservation      bool
 }
 
 type StopInfo struct {
@@ -52,11 +53,12 @@ type Line struct {
 }
 
 type LineStop struct {
-	Station   *Station
-	Planned   StopInfo
-	Current   StopInfo
-	Message   string
-	Cancelled bool
+	Station               *Station
+	Planned               StopInfo
+	Current               StopInfo
+	Message               string
+	Cancelled             bool
+	CompulsoryReservation bool
 }
 
 type Distribution struct {

@@ -45,6 +45,9 @@ type JourneysOptionsCommon struct {
 	// laterThan, use {@link Journeys#laterRef}, laterThan and departure/arrival are mutually exclusive.
 	LaterThan *string `json:"laterThan,omitempty"`
 
+	// only trips where no reservation is required
+	NoCompulsoryReservation *bool `json:"noCompulsoryReservation,omitempty"`
+
 	// return a shape for each leg?
 	Polylines *bool `json:"polylines,omitempty"`
 

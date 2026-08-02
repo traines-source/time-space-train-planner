@@ -8,6 +8,8 @@
     "via": "Umsteigestation",
     "default_now": "ansonsten Jetzt",
     "regionly": "Nur Regionalverkehr",
+    "nocompulsoryreservation": "Ohne Reservierungspflicht",
+    "compulsory_reservation": "reservierungspflichtig",
     "submit": "Abfragen",
     "data_retrieval_waiting": "Datenabruf kann bis zu einer Minute dauern.",
     "no_results": "Keine Ergebnisse.",

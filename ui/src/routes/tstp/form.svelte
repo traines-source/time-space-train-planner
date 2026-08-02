@@ -149,6 +149,12 @@
                 id="regionly"
                 bind:checked={query.regionly}
             /><label for="regionly"> {$t("c.regionly")}</label>
+
+            <input
+                type="checkbox"
+                id="nocompulsoryreservation"
+                bind:checked={query.nocompulsoryreservation}
+            /><label for="nocompulsoryreservation"> {$t("c.nocompulsoryreservation")}</label>
         </div>
 
         <div id="submit-container">

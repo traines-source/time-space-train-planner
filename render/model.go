@@ -28,6 +28,7 @@ type EdgePath struct {
 	Redundant                  bool
 	Discarded                  bool
 	Cancelled                  bool
+	CompulsoryReservation      bool
 	Line                       *LineLabel
 	Message                    string
 	Planned                    internal.StopInfo

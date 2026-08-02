@@ -23,6 +23,9 @@ type Alternative struct {
 	// cancelled
 	Cancelled bool `json:"cancelled,omitempty"`
 
+	// compulsory reservation
+	CompulsoryReservation bool `json:"compulsoryReservation,omitempty"`
+
 	// current trip position
 	CurrentTripPosition *Location `json:"currentTripPosition,omitempty"`
 

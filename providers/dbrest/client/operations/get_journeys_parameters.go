@@ -162,8 +162,10 @@ type GetJourneysParams struct {
 	// Default: true
 	NationalExpress *bool
 
-	/* Polylines.
+	// NoCompulsoryReservation.
+	NoCompulsoryReservation *bool
 
+	/*
 	   Fetch & parse a shape for each journey leg?
 	*/
 	Polylines *bool
@@ -330,6 +332,8 @@ func (o *GetJourneysParams) SetDefaults() {
 
 		nationalExpressDefault = bool(true)
 
+		noCompulsoryReservationDefault = bool(false)
+
 		polylinesDefault = bool(false)
 
 		regionalDefault = bool(true)
@@ -364,29 +368,30 @@ func (o *GetJourneysParams) SetDefaults() {
 	)
 
 	val := GetJourneysParams{
-		Bike:             &bikeDefault,
-		Bus:              &busDefault,
-		Entrances:        &entrancesDefault,
-		Ferry:            &ferryDefault,
-		Language:         &languageDefault,
-		National:         &nationalDefault,
-		NationalExpress:  &nationalExpressDefault,
-		Polylines:        &polylinesDefault,
-		Regional:         &regionalDefault,
-		RegionalExp:      &regionalExpDefault,
-		Remarks:          &remarksDefault,
-		Results:          &resultsDefault,
-		ScheduledDays:    &scheduledDaysDefault,
-		StartWithWalking: &startWithWalkingDefault,
-		Stopovers:        &stopoversDefault,
-		SubStops:         &subStopsDefault,
-		Suburban:         &suburbanDefault,
-		Subway:           &subwayDefault,
-		Taxi:             &taxiDefault,
-		Tickets:          &ticketsDefault,
-		Tram:             &tramDefault,
-		TransferTime:     &transferTimeDefault,
-		WalkingSpeed:     &walkingSpeedDefault,
+		Bike:                    &bikeDefault,
+		Bus:                     &busDefault,
+		Entrances:               &entrancesDefault,
+		Ferry:                   &ferryDefault,
+		Language:                &languageDefault,
+		National:                &nationalDefault,
+		NationalExpress:         &nationalExpressDefault,
+		NoCompulsoryReservation: &noCompulsoryReservationDefault,
+		Polylines:               &polylinesDefault,
+		Regional:                &regionalDefault,
+		RegionalExp:             &regionalExpDefault,
+		Remarks:                 &remarksDefault,
+		Results:                 &resultsDefault,
+		ScheduledDays:           &scheduledDaysDefault,
+		StartWithWalking:        &startWithWalkingDefault,
+		Stopovers:               &stopoversDefault,
+		SubStops:                &subStopsDefault,
+		Suburban:                &suburbanDefault,
+		Subway:                  &subwayDefault,
+		Taxi:                    &taxiDefault,
+		Tickets:                 &ticketsDefault,
+		Tram:                    &tramDefault,
+		TransferTime:            &transferTimeDefault,
+		WalkingSpeed:            &walkingSpeedDefault,
 	}
 
 	val.timeout = o.timeout
@@ -615,7 +620,17 @@ func (o *GetJourneysParams) SetNationalExpress(nationalExpress *bool) {
 	o.NationalExpress = nationalExpress
 }
 
-// WithPolylines adds the polylines to the get journeys params
+// WithNoCompulsoryReservation adds the noCompulsoryReservation to the get journeys params.
+func (o *GetJourneysParams) WithNoCompulsoryReservation(noCompulsoryReservation *bool) *GetJourneysParams {
+	o.SetNoCompulsoryReservation(noCompulsoryReservation)
+	return o
+}
+
+// SetNoCompulsoryReservation adds the noCompulsoryReservation to the get journeys params.
+func (o *GetJourneysParams) SetNoCompulsoryReservation(noCompulsoryReservation *bool) {
+	o.NoCompulsoryReservation = noCompulsoryReservation
+}
+
 func (o *GetJourneysParams) WithPolylines(polylines *bool) *GetJourneysParams {
 	o.SetPolylines(polylines)
 	return o
@@ -1160,6 +1175,23 @@ func (o *GetJourneysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		if qNationalExpress != "" {
 
 			if err := r.SetQueryParam("nationalExpress", qNationalExpress); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.NoCompulsoryReservation != nil {
+
+		// query param noCompulsoryReservation
+		var qrNoCompulsoryReservation bool
+
+		if o.NoCompulsoryReservation != nil {
+			qrNoCompulsoryReservation = *o.NoCompulsoryReservation
+		}
+		qNoCompulsoryReservation := swag.FormatBool(qrNoCompulsoryReservation)
+		if qNoCompulsoryReservation != "" {
+
+			if err := r.SetQueryParam("noCompulsoryReservation", qNoCompulsoryReservation); err != nil {
 				return err
 			}
 		}

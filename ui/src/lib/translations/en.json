@@ -8,6 +8,8 @@
     "via": "Interchange",
     "default_now": "Default is Now",
     "regionly": "Regional transport only",
+    "nocompulsoryreservation": "Without compulsory reservation",
+    "compulsory_reservation": "compulsory reservation",
     "submit": "Submit",
     "data_retrieval_waiting": "Data retrieval can take up to one minute.",
     "no_results": "No results.",

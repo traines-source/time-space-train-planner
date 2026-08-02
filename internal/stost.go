@@ -64,7 +64,7 @@ func createRequestMessage(system string, from string, to string, startTime time.
 	}
 }
 
-func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line, stations map[string]*Station, regionly bool) {
+func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line, stations map[string]*Station, regionly bool, nocompulsoryreservation bool) {
 	for _, s := range stations {
 		requestMessage.Timetable.Stations = append(requestMessage.Timetable.Stations, &stost.Station{
 			Id:   s.ID,
@@ -98,7 +98,7 @@ func prepareForEnrichment(requestMessage *stost.Message, lines map[string]*Line,
 			route.Trips[0].Connections = append(route.Trips[0].Connections, &stost.Connection{
 				FromId:    c.From.ID,
 				ToId:      c.To.ID,
-				Cancelled: c.Cancelled,
+				Cancelled: c.Cancelled || nocompulsoryreservation && c.CompulsoryReservation,
 				Message:   &c.Message,
 				Departure: &stost.StopInfo{
 					Scheduled:    c.Planned.Departure.Unix(),
@@ -268,10 +268,10 @@ func createLine(i int, r *stost.Route, t *stost.Trip, productTypesReverse map[in
 	}
 }
 
-func StostEnrich(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time, regionly bool) {
+func StostEnrich(system string, lines map[string]*Line, stations map[string]*Station, from string, to string, startTime time.Time, now time.Time, regionly bool, nocompulsoryreservation bool) {
 	log.Println("Calling stost...")
 	requestMessage := createRequestMessage("de_db", from, to, startTime, now)
-	prepareForEnrichment(requestMessage, lines, stations, regionly)
+	prepareForEnrichment(requestMessage, lines, stations, regionly, nocompulsoryreservation)
 	responseMessage := queryStost(requestMessage)
 	if responseMessage == nil {
 		return

@@ -631,6 +631,12 @@
             "in": "query",
             "type": "boolean",
             "default": true
+          },
+          {
+            "name": "noCompulsoryReservation",
+            "in": "query",
+            "type": "boolean",
+            "default": false
           }
         ],
         "responses": {
@@ -1831,6 +1837,9 @@
         },
         "prognosisType": {
           "$ref": "#/definitions/PrognosisType"
+        },
+        "compulsoryReservation": {
+          "type": "boolean"
         }
       },
       "required": ["delay"]
@@ -1994,6 +2003,9 @@
           "$ref": "#/definitions/PrognosisType"
         },
         "checkin": {
+          "type": "boolean"
+        },
+        "compulsoryReservation": {
           "type": "boolean"
         }
       },
@@ -2289,6 +2301,11 @@
         "when": {
           "type": "string",
           "format": "date-time"
+        },
+        "noCompulsoryReservation": {
+          "description": "only trips where no reservation is required",
+          "default": false,
+          "type": "boolean"
         }
       }
     },

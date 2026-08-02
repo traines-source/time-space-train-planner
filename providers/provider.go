@@ -14,6 +14,7 @@ type Consumer interface {
 	StationByName(name string) (ProviderStation, error)
 	StationByID(id string) (ProviderStation, error)
 	RegionalOnly() bool
+	NoCompulsoryReservation() bool
 	UpsertStation(station ProviderStation)
 	UpsertLine(line ProviderLine)
 	UpsertLineStop(lineStop ProviderLineStop)
@@ -33,12 +34,13 @@ type ProviderStation struct {
 }
 
 type ProviderLineStop struct {
-	ID        string
-	LineID    string
-	Planned   *ProviderLineStopInfo
-	Current   *ProviderLineStopInfo
-	Message   string
-	Cancelled bool
+	ID                    string
+	LineID                string
+	Planned               *ProviderLineStopInfo
+	Current               *ProviderLineStopInfo
+	Message               string
+	Cancelled             bool
+	CompulsoryReservation bool
 }
 
 type ProviderLineStopInfo struct {

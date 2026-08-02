@@ -43,6 +43,9 @@ type Leg struct {
 	// checkin
 	Checkin bool `json:"checkin,omitempty"`
 
+	// compulsory reservation
+	CompulsoryReservation bool `json:"compulsoryReservation,omitempty"`
+
 	// current location
 	CurrentLocation *Location `json:"currentLocation,omitempty"`
 

@@ -11,13 +11,14 @@ import (
 )
 
 type consumer struct {
-	providers              []providers.Provider
-	providerStations       []providers.ProviderStation
-	stations               map[string]*Station
-	lines                  map[string]*Line
-	dateTime               time.Time
-	regionalOnly           bool
-	expectedTravelDuration time.Duration
+	providers               []providers.Provider
+	providerStations        []providers.ProviderStation
+	stations                map[string]*Station
+	lines                   map[string]*Line
+	dateTime                time.Time
+	regionalOnly            bool
+	noCompulsoryReservation bool
+	expectedTravelDuration  time.Duration
 }
 
 var loc, _ = time.LoadLocation("Europe/Berlin")
@@ -67,6 +68,10 @@ func (c *consumer) StationByID(id string) (providers.ProviderStation, error) {
 
 func (c *consumer) RegionalOnly() bool {
 	return c.regionalOnly
+}
+
+func (c *consumer) NoCompulsoryReservation() bool {
+	return c.noCompulsoryReservation
 }
 
 func (c *consumer) UpsertStation(e providers.ProviderStation) {
@@ -165,6 +170,7 @@ func (c *consumer) UpsertLineStop(e providers.ProviderLineStop) {
 	}
 	val.Message = e.Message
 	val.Cancelled = e.Cancelled
+	val.CompulsoryReservation = e.CompulsoryReservation
 }
 
 func (c *consumer) UpsertLineEdge(e providers.ProviderLineEdge) {
@@ -337,12 +343,13 @@ func copyStopInfo(lastFrom *StopInfo, thisFrom *StopInfo, to *StopInfo) {
 	}
 }
 
-func prepare(from string, to string, vias []string, dateTime string, regionly bool, backend string) *consumer {
+func prepare(from string, to string, vias []string, dateTime string, regionly bool, nocompulsoryreservation bool, backend string) *consumer {
 	c := &consumer{}
 
 	c.parseDate(dateTime)
 	c.dateTime = c.dateTime.Add(-time.Minute * 5)
 	c.regionalOnly = regionly
+	c.noCompulsoryReservation = nocompulsoryreservation
 
 	var stationIDs []string
 	stationIDs = append(stationIDs, from)
@@ -366,7 +373,7 @@ func (c *consumer) parseDate(dateTime string) {
 	}
 }
 
-func (c *consumer) apiFlow(system string, from string, to string, vias []string, regionly bool) *ErrorCode {
+func (c *consumer) apiFlow(system string, from string, to string, vias []string, regionly bool, nocompulsoryreservation bool) *ErrorCode {
 	if err := c.callProviders(callDeparturesArrivals); err != nil {
 		return err
 	}
@@ -376,22 +383,22 @@ func (c *consumer) apiFlow(system string, from string, to string, vias []string,
 	if err := c.callProviders(callEnrich); err != nil {
 		return err
 	}
-	StostEnrich(system, c.lines, c.stations, from, to, c.dateTime, time.Now(), regionly)
+	StostEnrich(system, c.lines, c.stations, from, to, c.dateTime, time.Now(), regionly, nocompulsoryreservation)
 	return nil
 }
 
-func ObtainVias(system string, from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, *ErrorCode) {
-	c := prepare(from, to, vias, dateTime, regionly, system)
+func ObtainVias(system string, from string, to string, vias []string, dateTime string, regionly bool, nocompulsoryreservation bool) (map[string]*Station, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly, nocompulsoryreservation, system)
 	if err := c.callProviders(callVias); err != nil {
 		return nil, err
 	}
 	return c.stations, nil
 }
 
-func ObtainData(system string, from string, to string, vias []string, dateTime string, regionly bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
-	c := prepare(from, to, vias, dateTime, regionly, system)
+func ObtainData(system string, from string, to string, vias []string, dateTime string, regionly bool, nocompulsoryreservation bool) (map[string]*Station, map[string]*Line, *ErrorCode) {
+	c := prepare(from, to, vias, dateTime, regionly, nocompulsoryreservation, system)
 	if system != "de_stost" {
-		if err := c.apiFlow(system, from, to, vias, regionly); err != nil {
+		if err := c.apiFlow(system, from, to, vias, regionly, nocompulsoryreservation); err != nil {
 			return nil, nil, err
 		}
 	} else {

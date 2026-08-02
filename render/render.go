@@ -230,6 +230,7 @@ func (c *container) insertEdge(e *internal.Edge) *EdgePath {
 		Redundant:                  e.Redundant,
 		Discarded:                  e.Discarded,
 		Cancelled:                  e.Cancelled,
+		CompulsoryReservation:      e.CompulsoryReservation,
 		Message:                    e.Message,
 		Planned:                    e.Planned,
 		Current:                    e.Current,

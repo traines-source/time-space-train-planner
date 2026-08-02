@@ -27,6 +27,7 @@ function optionsQueryString(query: any, datetime?: string): any {
         vias: query.vias.map((v: any) => v?.id ? encodeURIComponent(v?.id) : undefined),
         datetime: query.datetime || datetime,
         regionly: query.regionly,
+        nocompulsoryreservation: query.nocompulsoryreservation,
         system: query.system
     };
     return queryString(q);

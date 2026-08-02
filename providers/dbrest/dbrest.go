@@ -263,6 +263,9 @@ func (p *DbRest) parseLineStop(stop *models.Alternative, arrival bool, stationID
 			}
 		}
 	}
+	if stop.CompulsoryReservation {
+		pls.CompulsoryReservation = true
+	}
 	p.consumer.UpsertLineStop(pls)
 }
 
@@ -286,10 +289,13 @@ func (p *DbRest) requestJourneysApi() error {
 	params.Departure = (*strfmt.DateTime)(&departure)
 	var resultNum int64 = 10
 	params.Results = &resultNum
+	falsey := false
 	if p.consumer.RegionalOnly() {
-		falsey := false
 		params.National = &falsey
 		params.NationalExpress = &falsey
+	}
+	if p.consumer.NoCompulsoryReservation() {
+		params.NoCompulsoryReservation = &falsey
 	}
 	res, err := p.client.Operations.GetJourneys(params)
 	if err != nil {

@@ -428,6 +428,7 @@
             <span class="dep" title="{stationResolver(selection.edge.From.SpaceAxis).ID}">
                 {@html departure(selection.edge)}
                 {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
+                {#if selection.edge.CompulsoryReservation}<span class="cancelled">({$t('c.compulsory_reservation')})</span>{/if}
                 <br />{stationResolver(selection.edge.From.SpaceAxis).Name}
             </span>
             <svg viewBox="0 0 50 10" class="miniature">
@@ -436,6 +437,7 @@
             <span class="arr" title="{stationResolver(selection.edge.To.SpaceAxis).ID}">
                 {@html arrival(selection.edge)}
                 {#if selection.edge.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
+                {#if selection.edge.CompulsoryReservation}<span class="cancelled">({$t('c.compulsory_reservation')})</span>{/if}
                 <br />{stationResolver(selection.edge.To.SpaceAxis).Name}
             </span>
             <span class="right"></span>
@@ -500,6 +502,7 @@
                         <span class="micon">east</span> {d.Line.Direction}
                         {/if}
                         {#if d.Cancelled}<span class="cancelled">({$t('c.cancelled')})</span>{/if}
+                        {#if d.CompulsoryReservation}<span class="cancelled">({$t('c.compulsory_reservation')})</span>{/if}
                         {#if d.Line?.Type == 'Foot'}{$t('c.walking_to')} {stationResolver(d.To.SpaceAxis).Name}{/if}
                     </span>
                     {#if d.From.SpaceAxis != selectedStationId(selection)}

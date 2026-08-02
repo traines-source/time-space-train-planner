@@ -8,6 +8,8 @@
     "via": "Correspondance",
     "default_now": "Par défaut maintenant",
     "regionly": "Transport régional uniquement",
+    "nocompulsoryreservation": "Sans réservation obligatoire",
+    "compulsory_reservation": "réservation obligatoire",
     "submit": "Recherchez",
     "data_retrieval_waiting": "La récupération des données peut prendre jusqu'à une minute.",
     "no_results": "Pas de résultats.",

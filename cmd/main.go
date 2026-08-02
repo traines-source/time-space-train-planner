@@ -30,10 +30,11 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 	var form = r.URL.Query()["form"]
 	var datetime = r.URL.Query().Get("datetime")
 	var regionly = r.URL.Query().Get("regionly") == "true"
+	var nocompulsoryreservation = r.URL.Query().Get("nocompulsoryreservation") == "true"
 
 	if len(from) > 0 && len(to) > 0 {
 		if len(vias) > 0 && len(form) == 0 {
-			stations, lines, err := internal.ObtainData("de_db", from[0], to[0], vias, datetime, regionly)
+			stations, lines, err := internal.ObtainData("de_db", from[0], to[0], vias, datetime, regionly, nocompulsoryreservation)
 			if err == nil {
 				log.Print("Request:", r.URL.RawQuery)
 				w.Header().Set("Content-Type", "image/svg+xml")
@@ -43,7 +44,7 @@ func renderTimeSpace(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(err.ErrorCode())
 			}
 		}
-		stations, err := internal.ObtainVias("de_db", from[0], to[0], vias, datetime, regionly)
+		stations, err := internal.ObtainVias("de_db", from[0], to[0], vias, datetime, regionly, nocompulsoryreservation)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}
@@ -61,10 +62,11 @@ func apiVias(w http.ResponseWriter, r *http.Request) {
 
 	var datetime = r.URL.Query().Get("datetime")
 	var regionly = r.URL.Query().Get("regionly") == "true"
+	var nocompulsoryreservation = r.URL.Query().Get("nocompulsoryreservation") == "true"
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 {
-		stations, err := internal.ObtainVias(system, from[0], to[0], vias, datetime, regionly)
+		stations, err := internal.ObtainVias(system, from[0], to[0], vias, datetime, regionly, nocompulsoryreservation)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 		}
@@ -83,10 +85,11 @@ func apiTimespace(w http.ResponseWriter, r *http.Request) {
 
 	var datetime = r.URL.Query().Get("datetime")
 	var regionly = r.URL.Query().Get("regionly") == "true"
+	var nocompulsoryreservation = r.URL.Query().Get("nocompulsoryreservation") == "true"
 
 	w.Header().Set("Content-Type", "application/json")
 	if len(from) > 0 && len(to) > 0 && len(vias) > 0 {
-		stations, lines, err := internal.ObtainData(system, from[0], to[0], vias, datetime, regionly)
+		stations, lines, err := internal.ObtainData(system, from[0], to[0], vias, datetime, regionly, nocompulsoryreservation)
 		if err != nil {
 			w.WriteHeader(err.ErrorCode())
 			return
