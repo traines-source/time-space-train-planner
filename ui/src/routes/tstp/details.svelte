@@ -167,7 +167,7 @@
             }
         }
         
-        const drawWidth = 100;
+        const drawWidth = 125;
         const padding = (upperBound-lowerBound)/(drawWidth/20-1);
         nextBestDeparturesBoundsMinutes = [lowerBound-padding, upperBound+padding];
         nextBestDepartures = candidates;
@@ -196,13 +196,12 @@
         return data.Stations[id];
     }
 
-    function getDrawXRatio() {
-        const drawWidth = 100;
+    function getDrawXRatio(drawWidth = 125) {
         return (nextBestDeparturesBoundsMinutes[1]-nextBestDeparturesBoundsMinutes[0])/drawWidth;
     }
 
-    function histogram(e: Edge) {
-        const drawXRatio = getDrawXRatio();
+    function histogram(e: Edge, drawWidth = 125) {
+        const drawXRatio = getDrawXRatio(drawWidth);
         const drawHeight = 50;
         const drawYRatio = 0.25/drawHeight;
         
@@ -239,17 +238,17 @@
         return start+modeX;
     }
 
-    function toPosAndTime(minutes: number) {
-        return {pos: (minutes-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(), time: simpleTime(minutes*60*1000)}
+    function toPosAndTime(minutes: number, drawWidth: number) {
+        return {pos: (minutes-nextBestDeparturesBoundsMinutes[0])/getDrawXRatio(drawWidth), time: simpleTime(minutes*60*1000)}
     }
 
-    function destinationArrivalMetrics(e: Edge) {
+    function destinationArrivalMetrics(e: Edge, drawWidth = 125) {
         const bounds = getBounds(e);
         return {
-            "p5": toPosAndTime(bounds[0]),
-            "p95": toPosAndTime(bounds[1]),
-            "mode": toPosAndTime(getMode(e)),
-            "mean": toPosAndTime(parseTime(e.DestinationArrival.Mean)/60/1000)
+            "p5": toPosAndTime(bounds[0], drawWidth),
+            "p95": toPosAndTime(bounds[1], drawWidth),
+            "mode": toPosAndTime(getMode(e), drawWidth),
+            "mean": toPosAndTime(parseTime(e.DestinationArrival.Mean)/60/1000, drawWidth)
         }
     }
 
@@ -364,7 +363,7 @@
                         return;
                     }
                     const files = [new File([blob], 'destination_arrival.png', { type: blob.type })];
-                    const metrics = destinationArrivalMetrics(selection.edge);
+                    const metrics = destinationArrivalMetrics(selection.edge, 200);
                     const destName = stationResolver(data.To.ID).Name;
                     const shareData = {
                         text: t.get('c.explain_share_mean', {destination: destName, time: metrics.mean.time}) + ' ' +
@@ -391,6 +390,7 @@
 </script>
 
 <div id="details"><div>
+    <div class="header">
     <div class="refresh"><a href="javascript:void(0)" on:click={doRefresh}>
         <span class="indicator {loading ? 'loading' :''}"><span class="micon">autorenew</span></span>
     </a></div>
@@ -455,12 +455,12 @@
                     <rect x="-225" y="0" width="550" height="90" fill="white" />
                     <path d={histogram(selection.edge)} class="histogram" />
                     <path d={'M '+metrics.p5.pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                    <path d={'M '+metrics.p95.pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                    <text x={metrics.p95.pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{metrics.p95.time} <tspan class="explain">&nbsp;({$t('c.explain_95th', {time: metrics.p95.time})})</tspan></text>
+                    <path d={'M '+metrics.p95.pos+' 50 v 5'} class="histogram-pointer p95" />
+                    <text x={metrics.p95.pos} y="67" class="histogram-label label p95" style="text-anchor:start;">{metrics.p95.time} <tspan class="explain">&nbsp;({$t('c.explain_95th', {time: metrics.p95.time})})</tspan></text>
                     <path d={'M '+metrics.p5.pos+' 52.5 H '+metrics.p95.pos+''} class="histogram-pointer twosigma" />
-                    <path d={'M '+metrics.mode.pos+' 19 v 5'} class="histogram-pointer twosigma" />
-                    <text x={metrics.mode.pos} y="7" class="histogram-label label twosigma" style="dominant-baseline:hanging;">{metrics.mode.time}</text>
-                    <text x={metrics.mode.pos+20} y="7" class="histogram-label label twosigma explain" style="dominant-baseline:hanging;text-anchor:start;">({$t('c.explain_mode', {destination: stationResolver(data.To.ID).Name, time: metrics.mode.time})})</text>
+                    <path d={'M '+metrics.mode.pos+' 19 v 5'} class="histogram-pointer mode" />
+                    <text x={metrics.mode.pos} y="7" class="histogram-label label mode" style="dominant-baseline:hanging;">{metrics.mode.time}</text>
+                    <text x={metrics.mode.pos+20} y="7" class="histogram-label label mode explain" style="dominant-baseline:hanging;text-anchor:start;">({$t('c.explain_mode', {destination: stationResolver(data.To.ID).Name, time: metrics.mode.time})})</text>
                     <path d={'M '+metrics.mean.pos+' 50 v 5'} class="histogram-pointer" />
                     <text x={metrics.mean.pos} y="67" class="histogram-label label">{metrics.mean.time}</text>
                     <text x={metrics.mean.pos} y="82" class="histogram-label label explain">({$t('c.explain_mean', {destination: stationResolver(data.To.ID).Name, time: metrics.mean.time})})</text>
@@ -472,9 +472,10 @@
         {/each}
         {/if}
     {/if}
+    </div>
 
     {#if nextBestDepartures}
-        <h3>
+        <h3 class="header">
             <span class="small">{$t('c.next_best_departures')} {stationResolver(data.To.ID).Name} {$t('c.next_best_departures_from')}</span><br />
             <span class="highlight">{selectedStationName(selection)}</span>,
             <input type="time" value={simpleTime(selection.from)} on:change={updateTime}>
@@ -511,16 +512,16 @@
                 </td>
                 <td class="nowrap">
                     {#if hasDistribution(d)}
-                        <svg width="100" height="70" class="histogram-canvas">
+                        <svg width="125" height="70" class="histogram-canvas">
                             <path d={histogram(d)} class="histogram" />
                             {#each [destinationArrivalMetrics(d)] as metrics}
                             <path d={'M '+metrics.p5.pos+' 50 v 5'} class="histogram-pointer twosigma" />
                             <!--<text x={metrics.p5.pos} y="67" class="histogram-label label twosigma" style="text-anchor:end;">{metrics.p5.time}</text>-->
-                            <path d={'M '+metrics.p95.pos+' 50 v 5'} class="histogram-pointer twosigma" />
-                            <text x={metrics.p95.pos} y="67" class="histogram-label label twosigma" style="text-anchor:start;">{metrics.p95.time}</text>
+                            <path d={'M '+metrics.p95.pos+' 50 v 5'} class="histogram-pointer p95" />
+                            <text x={metrics.p95.pos} y="67" class="histogram-label label p95" style="text-anchor:start;">{metrics.p95.time}</text>
                             <path d={'M '+metrics.p5.pos+' 52.5 H '+metrics.p95.pos+''} class="histogram-pointer twosigma" />
-                            <path d={'M '+metrics.mode.pos+' 19 v 5'} class="histogram-pointer twosigma" />
-                            <text x={metrics.mode.pos} y="7" class="histogram-label label twosigma" style="dominant-baseline:hanging;">{metrics.mode.time}</text>
+                            <path d={'M '+metrics.mode.pos+' 19 v 5'} class="histogram-pointer mode" />
+                            <text x={metrics.mode.pos} y="7" class="histogram-label label mode" style="dominant-baseline:hanging;">{metrics.mode.time}</text>
                             <path d={'M '+metrics.mean.pos+' 50 v 5'} class="histogram-pointer" />
                             <text x={metrics.mean.pos} y="67" class="histogram-label label">{metrics.mean.time}</text>
                             {/each}
