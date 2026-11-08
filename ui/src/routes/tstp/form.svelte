@@ -83,8 +83,9 @@
             value="dbrest"
             bind:group={query.system}
             on:input={switchSystem}
+            style="display:none"
         />
-        <label for="dbrest">{$t("c.dbrest")}</label>
+        <label style="display:none" for="dbrest">{$t("c.dbrest")}</label>
         <input
             type="radio"
             id="transitous"
