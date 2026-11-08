@@ -290,12 +290,13 @@ func (p *DbRest) requestJourneysApi() error {
 	var resultNum int64 = 10
 	params.Results = &resultNum
 	falsey := false
+	truey := true
 	if p.consumer.RegionalOnly() {
 		params.National = &falsey
 		params.NationalExpress = &falsey
 	}
 	if p.consumer.NoCompulsoryReservation() {
-		params.NoCompulsoryReservation = &falsey
+		params.NoCompulsoryReservation = &truey
 	}
 	res, err := p.client.Operations.GetJourneys(params)
 	if err != nil {

@@ -8,7 +8,7 @@
     import {type Response, type Edge, type Coord, Selection, type Station} from './types';
     import panzoom from 'panzoom'
     import Details from './details.svelte'
-    import { calcNextDepartureIndex, getStationsInGroup, walkingDurationMs } from './shortestPaths';
+    import { calcNextDepartureIndex, getStationsInGroup, sameGroup, walkingDurationMs } from './shortestPaths';
 
     let loading = true;
     let query = store;
@@ -91,7 +91,7 @@
     }
     
     function getShortestPathDeparture(station: Station, time: Date): Edge | undefined {
-        if (station.ID == data.To.ID || station.GroupID == stationResolver(data.To.ID).GroupID) {
+        if (sameGroup(station, stationResolver(data.To.ID))) {
             return;
         }
         let relevantStations = getStationsInGroup(data, station);

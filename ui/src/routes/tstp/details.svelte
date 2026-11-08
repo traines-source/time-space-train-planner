@@ -6,7 +6,7 @@
     import Footer from '../footer.svelte'; 
     import {label, type, departure, arrival, parseTime, simpleTime, redundant} from './labels';
     import { type Edge, type Station, Selection, type Response } from './types';
-    import { calcNextDepartureIndex, getStationsInGroup, hasDistribution, walkingDistance, walkingDurationMs } from './shortestPaths';
+    import { calcNextDepartureIndex, getStationsInGroup, hasDistribution, sameGroup, walkingDistance, walkingDurationMs } from './shortestPaths';
 
     export let selection: Selection;
     export let loading: boolean;
@@ -58,7 +58,7 @@
 
     function nextBestDeparturesForEdge() {
         const station = stationResolver(selection.edge.To.SpaceAxis);
-        if (selection.edge.To.SpaceAxis == data.To.ID || station.GroupID == stationResolver(data.To.ID).GroupID) {
+        if (sameGroup(station, stationResolver(data.To.ID))) {
             nextBestDepartures = undefined;
             return;
         }
@@ -131,6 +131,10 @@
                 break;
             }
             const e = edgeResolver(relevantStations[nextDepartureIndex].BestDepartures[indices[nextDepartureIndex]]);
+            if (redundant(e) && returnsToStation(e, station)) {
+                indices[nextDepartureIndex]++;
+                continue;
+            }
             let departure = parseTime(e.Actual.Departure);
             candidates.push(e);
             const fragments = stationResolver(e.From.SpaceAxis).Name.split(',');
@@ -171,6 +175,22 @@
         const padding = (upperBound-lowerBound)/(drawWidth/20-1);
         nextBestDeparturesBoundsMinutes = [lowerBound-padding, upperBound+padding];
         nextBestDepartures = candidates;
+    }
+
+    function returnsToStation(e: Edge, station: Station): boolean {
+        const next = stationResolver(e.To.SpaceAxis);
+        if (!next) return false;
+        const nextStations = getStationsInGroup(data, next);
+        const nextIndices = new Array(nextStations.length).fill(0);
+        let returning = 0;
+        for (; returning < 3; returning++) {
+            const i = calcNextDepartureIndex(next, e.Line?.ID, nextStations, nextIndices, (_) => parseTime(e.Actual.Arrival), edgeResolver, stationResolver);
+            if (i == undefined) break;
+            const onward = edgeResolver(nextStations[i].BestDepartures[nextIndices[i]]);
+            if (!sameGroup(stationResolver(onward.To.SpaceAxis), station)) return false;
+            nextIndices[i]++;
+        }
+        return returning > 0;
     }
 
     function rectifyEdgeHistory() {

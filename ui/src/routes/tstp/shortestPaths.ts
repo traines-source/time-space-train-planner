@@ -1,10 +1,14 @@
 import { parseTime } from "./labels";
 import type { Edge, Station, Response } from "./types";
 
+function sameGroup(a: Station, b: Station): boolean {
+    return (a.GroupID || a.ID) == (b.GroupID || b.ID);
+}
+
 function getStationsInGroup(data: Response, station: Station): Station[] {
     const relevantStations = [];
     for (let s of Object.values(data.Stations)) {
-        if (s.ID == station.ID || s.GroupID == station.GroupID) {
+        if (sameGroup(s, station)) {
             relevantStations.push(s);
         }
     }
@@ -29,7 +33,7 @@ function calcNextDepartureIndex(station: Station, currentLineID: string, relevan
             if (departure >= earliestDepartureTime(e)
             && !(hasDistribution(e) && e.DestinationArrival.FeasibleProbability < 0.1)
             && !(e.Line?.Type == "Foot" && station.ID != relevantStations[s].ID)
-            && !(stationResolver(e.To.SpaceAxis).GroupID == station.GroupID && (e.Line?.ID != currentLineID || station.ID != relevantStations[s].ID))) {
+            && !(sameGroup(stationResolver(e.To.SpaceAxis), station) && (e.Line?.ID != currentLineID || station.ID != relevantStations[s].ID))) {
                 break;
             }
             indices[s]++;
@@ -64,5 +68,5 @@ function walkingDurationMs(fromId: string, toId: string, stationResolver: (id: s
 }
 
 export {
-    hasDistribution, calcNextDepartureIndex, walkingDistance, walkingDurationMs, getStationsInGroup
+    hasDistribution, sameGroup, calcNextDepartureIndex, walkingDistance, walkingDurationMs, getStationsInGroup
 }
